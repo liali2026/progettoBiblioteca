@@ -1,14 +1,12 @@
+// gestione dei dati su database
 const getConnection = require('../config/db');
 
-async function findByUsername(username) {
-
+async function findByUsername(email) {
     const conn = await getConnection();
-
     try {
-
         const [utenti] =
             await conn.query(
-                'SELECT * FROM utenti WHERE email = ?', [username]
+                'SELECT * FROM utenti WHERE email = ?', [email]
             );
 
         return utenti[0];
@@ -16,48 +14,44 @@ async function findByUsername(username) {
     } finally {
         await conn.end();
     }
-
 }
 
-async function create(
-    username,
-    password,
-    email
-) {
-
-    const conn =
-        await getConnection();
+async function create( email, password, name, surname, role) 
+{
+    const conn = await getConnection();
 
     try {
-
         const [result] =
             await conn.query(
                 `
                 INSERT INTO utenti
                 (
-                    username,
-                    password,
-                    email
+                    email,
+                    password_hash,
+                    nome,
+                    cognome,
+                    ruolo
                 )
-                VALUES (?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 `,
                 [
-                    username,
+                    email,
                     password,
-                    email
+                    name,
+                    surname,
+                    role
                 ]
             );
 
         return {
-            id: result.insertId,
-            username,
-            email
+            id_utente: result.insertId,
+            email: email,
+            ruolo: role
         };
+        
 
     } finally {
-
         await conn.end();
-
     }
 
 }
