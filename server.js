@@ -1,21 +1,19 @@
 const express = require('express');
 
-const db = require('./config/db');
+const getConnection = require('./config/db');
+const utentiRoutes = require('./routes/utentiRoutes');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 
-app.get('/utenti', async(req, res)=> {
-    try {
-        const conn = await db;
-        const [utenti] = await conn.query('select * from utenti');
-        res.json(utenti);
-    } catch(err) {
-        res.status(500).json({errore: err.message});
-    }
+app.use(express.json()); //da verificare cosa usare effettivamente
 
-});
+app.use('/utenti', utentiRoutes); //per la registrazione sarà "POST /utenti/registrazione"
 
-app.listen(3000, () =>{
+//ultimo da registrare
+app.use(errorHandler);
+
+app.listen(process.env.PORT, () => {
     console.log('server avviato');
 }
 );
