@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - Home</title>
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"> Biblioteca </a>
+            <div class="ms-auto d-flex align-items-center">
+                <span id="utenteLoggato" class="text-light me-3"></span>
+                <button id="logoutButton" class="btn btn-outline-light">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENUTO -->
+    <div class="container mt-4">
+        <h1 class="mb-4">Benvenuto nella Biblioteca</h1>
+
+        <!-- RICERCA -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">Ricerca rapida</h4>
+                <div class="input-group">
+                    <input type="text" id="campoRicerca" class="form-control" placeholder="Titolo o autore">
+                    <button class="btn btn-primary" id="btnRicerca">Cerca</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FUNZIONI COMUNI -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Catalogo</h5>
+                        <p class="card-text">Consulta tutti i libri e i materiali disponibili.</p>
+                        <a href="/pages/catalogo.html" class="btn btn-primary">Apri catalogo</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">I miei prestiti</h5>
+                        <p class="card-text">Visualizza i prestiti attivi e quelli già conclusi.</p>
+                        <a href="/pages/miei-prestiti.html" class="btn btn-primary">Visualizza</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AREA BIBLIOTECARIO -->
+
+        <div id="adminSection" style="display:none;">
+            <hr>
+            <h2 class="mb-4">Area Bibliotecario</h2>
+            
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Gestione catalogo</h5>
+                            <p class="card-text">Inserisci, modifica o elimina libri.</p>
+                            <a href="/pages/admin-libri.html" class="btn btn-success">Gestisci libri</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Prestiti</h5>
+                            <p class="card-text">Consulta tutti i prestiti presenti nel sistema.</p>
+                            <a href="/pages/admin-prestiti.html" class="btn btn-success">Visualizza prestiti</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/home.js"></script>
+
+</body>
+
+</html>

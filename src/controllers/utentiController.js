@@ -6,9 +6,9 @@ async function registrazione(req, res, next) {
     try {
 
         //recupero i dati dal body (registrazione con una POST)
-        const { email, password, name, surname, role } = req.body;
+        const { email, password, nome, cognome } = req.body;
 
-        const utente = await utentiService.registrazione(email, password, name, surname, role);
+        const utente = await utentiService.registrazione(email, password, nome, cognome);
 
         req.session.isAuthenticated = true;
         req.session.user = {
@@ -48,7 +48,38 @@ async function login(req, res, next) {
 
 }
 
+async function me(req, res, next) {
+
+    try {
+        if (!req.session || !req.session.user) {
+            return res.status(401).json({
+                errore: 'Utente non autenticato'
+            });
+        }
+
+        res.json(req.session.user);
+
+    } catch(err) {
+        next(err);
+    }
+}
+
+function logout(req, res, next) {
+
+    req.session.destroy(
+        (err) => {
+            if (err) {
+                return next(err);
+            }
+
+            res.json({messaggio:'Logout effettuato'});
+        }
+    );
+}
+
 module.exports = {
     registrazione,
-    login
+    login,
+    me,
+    logout
 };

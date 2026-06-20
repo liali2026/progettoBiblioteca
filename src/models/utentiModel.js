@@ -16,9 +16,11 @@ async function findByUsername(email) {
     }
 }
 
-async function create( email, password, name, surname, role) 
+async function create( email, password, name, surname) 
 {
     const conn = await getConnection();
+    //il bibliotecaro sarà inserito dall'amministratore del database direttamente sul DB
+    const role = "UTENTE";
 
     try {
         const [result] =
