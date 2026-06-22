@@ -6,10 +6,10 @@ validateEnv();
 const express = require('express');
 const session = require('express-session');
 
-const getConnection = require('./config/db');
-const utentiRoutes = require('./routes/utentiRoutes');
-const materialiRoutes = require('./routes/materialiRoutes');
-const errorHandler = require('./middlewares/errorHandler');
+const getConnection = require('./config/db.js');
+const utentiRoutes = require('./routes/utentiRoutes.js');
+const materialiRoutes = require('./routes/materialiRoutes.js');
+const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
 

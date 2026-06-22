@@ -22,13 +22,9 @@ document.getElementById('loginForm').addEventListener('submit',
                     );
 
                 const data = await response.json();
-
                 if (response.ok) {
-
                     window.location.href = '/pages/home.html';
-
                 } else {
-
                     document.getElementById('messaggio').innerHTML =
                         `<div class="alert alert-danger">
                             ${data.errore}
@@ -36,7 +32,6 @@ document.getElementById('loginForm').addEventListener('submit',
                 }
 
             } catch (err) {
-
                 document.getElementById('messaggio').innerHTML =
                     `<div class="alert alert-danger">
                         Errore di connessione
