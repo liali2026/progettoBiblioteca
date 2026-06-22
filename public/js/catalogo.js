@@ -72,7 +72,7 @@ document.getElementById('logoutButton').addEventListener('click', logout);
  * Avvio pagina
  */
 async function inizializzaPagina() {
-    await caricaUtentePub();
+    await caricaUtente();
     await caricaCatalogo();
 }
 

@@ -1,4 +1,5 @@
-document.getElementById('logoutButton').addEventListener('click', 
+
+/*document.getElementById('logoutButton').addEventListener('click',
     async () => {
         try {
             await fetch('/utenti/logout',{method: 'POST'});
@@ -7,7 +8,9 @@ document.getElementById('logoutButton').addEventListener('click',
         } catch (err) {
             console.error(err);
         }
-    });
+    });*/
+
+//document.getElementById('logoutButton').addEventListener('click', logout);
 
 
-caricaUtentePriv();
+caricaUtente(true);
