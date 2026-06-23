@@ -14,12 +14,23 @@
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="../index.html"><i class="bi bi-house me-2"></i>Biblioteca</a>
+            <a class="navbar-brand" href="../"><i class="bi bi-house me-2"></i>Home</a>
             <div class="ms-auto d-flex align-items-center">
                 <span id="utenteLoggato" class="text-light me-3 d-none"></span>
                 <button id="logoutButton" class="btn btn-outline-light d-none">Logout</button>
             </div>
         </div>
+    </nav>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">Home</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Catalogo
+            </li>
+        </ol>
     </nav>
 
     <!-- CONTENUTO -->
@@ -67,7 +78,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabellaMateriali">
-                             <!--popolata via JavaScript-->
+                            <!--popolata via JavaScript-->
                         </tbody>
                     </table>
                 </div>
