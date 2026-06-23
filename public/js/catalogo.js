@@ -104,8 +104,12 @@ document.getElementById('btnPulisci').addEventListener('click', resetRicerca);
 /**
  * Avvio pagina
  */
-async function inizializzaPagina() {
+/*async function inizializzaPagina() {
     await Auth.initPage();
 }
 
-inizializzaPagina();
+inizializzaPagina();*/
+
+window.addEventListener('DOMContentLoaded',
+    async () => { await Auth.initPage(); }
+);

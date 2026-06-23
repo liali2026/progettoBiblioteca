@@ -71,32 +71,39 @@ window.Auth = {
 
     },
 
-    async aggiornaLayout(user) {
+    aggiornaLayout(user) {
 
         if (!user) {
             return;
         }
 
-        document.getElementById('utenteLoggato').textContent = user.email;
-        document.getElementById('utenteLoggato').classList.remove('d-none');
+        const utenteLoggato = document.getElementById('utenteLoggato');
+        if (utenteLoggato) {
+            utenteLoggato.textContent = user.email;
+            utenteLoggato.classList.remove('d-none');
+        }
 
-        document.getElementById('logoutButton').classList.remove('d-none');
-        document.getElementById('logoutButton').onclick = Auth.logout;
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.classList.remove('d-none');
+            logoutButton.onclick = Auth.logout;
+        }
 
-        if (user.ruolo === 'BIBLIOTECARIO') {
+        const adminSection = document.getElementById('adminSection');
+        if (adminSection && user.ruolo === 'BIBLIOTECARIO') {
             document.getElementById('adminSection').style.display = 'block';
         }
     },
 
     async initPage(requireLogin = false) {
-        const user = this.getCurrentUser();
+        const user = await this.getCurrentUser();
 
         if (!user && requireLogin) {
             window.location.href = '/pages/login.html';
             return null;
         }
 
-        this.aggiornaLayout(requireLogin);
+        this.aggiornaLayout(user);
         return user;
 
     }

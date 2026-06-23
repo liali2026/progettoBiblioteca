@@ -18,11 +18,11 @@ async function verificaSessione() {
 
 }
 
-function ricercaRapida() {
+/*function ricercaRapida() {
     const testo =document.getElementById('ricerca').value.trim();
     window.location.href =`/pages/catalogo.html?search=${encodeURIComponent(testo)}`;
 }
 
-document.getElementById('btnRicerca').addEventListener('click', ricercaRapida);
+document.getElementById('btnRicerca').addEventListener('click', ricercaRapida);*/
 
 verificaSessione();
