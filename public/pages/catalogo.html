@@ -30,17 +30,28 @@
             <div class="card-body">
                 <h5 class="card-title">Ricerca</h5>
                 <div class="row">
-                    <div class="col-md-10">
+                    <!--<div class="col-md-10">
                         <input type="text" id="campoRicerca" class="form-control" placeholder="Titolo o autore">
+                    </div>-->
+                    <div class="col-md-5">
+                        <input type="text" id="titolo" class="form-control" placeholder="Titolo">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-5">
+                        <input type="text" id="autore" class="form-control" placeholder="Autore">
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+
                         <button id="btnRicerca" class="btn btn-primary w-100">Cerca</button>
+
+                        <button id="btnPulisci" class="btn btn-outline-secondary w-100">Reset</button>
+
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- TABELLA RISULTATI -->
+        <div id="messaggioRisultati" class="alert d-none"></div>
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Materiali disponibili</h5>
@@ -57,7 +68,7 @@
                         </thead>
 
                         <tbody id="tabellaMateriali">
-                            <!-- popolata via JavaScript -->
+                             <!--popolata via JavaScript-->
                         </tbody>
                     </table>
                 </div>

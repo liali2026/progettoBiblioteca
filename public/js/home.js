@@ -13,4 +13,4 @@
 //document.getElementById('logoutButton').addEventListener('click', logout);
 
 
-caricaUtente(true);
+await Auth.initPage(true);

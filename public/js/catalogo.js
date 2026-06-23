@@ -1,79 +1,111 @@
 let materiali = [];
 
 /**
- * Carica il catalogo dal backend
+ * Ricerca per titolo e/o autore
  */
-async function caricaCatalogo() {
+
+async function ricerca(titolo, autore) {
     try {
-        const response = await fetch('/materiali');
+        const params = new URLSearchParams();
+        if (titolo) {
+            params.append('titolo', titolo);
+        }
+
+        if (autore) {
+            params.append('autore', autore);
+        }
+
+        const response = await fetch(`/materiali?${params.toString()}`);
         if (!response.ok) {
             throw new Error(
-                'Errore nel caricamento del catalogo'
+                'Errore server'
             );
         }
+
         materiali = await response.json();
-        visualizzaMateriali(materiali);
+        return materiali;
+
     } catch (err) {
+
         console.error(err);
-        alert('Errore nel caricamento del catalogo');
+        return null;
     }
 }
 
-/**
- * Mostra i materiali nella tabella
- */
-function visualizzaMateriali(listaMateriali) {
+function mostraMessaggio(testo, tipo = 'info') {
+
+    document.getElementById('tabellaMateriali').innerHTML = '';
+
+    const box = document.getElementById('messaggioRisultati');
+    box.textContent = testo;
+    box.className = `alert alert-${tipo}`;
+    box.classList.remove('d-none');
+}
+
+function renderCatalogo(materiali) {
+
     const tbody = document.getElementById('tabellaMateriali');
-    tbody.innerHTML = '';
-    listaMateriali.forEach(materiale => {
-        tbody.innerHTML += `
+    const box = document.getElementById('messaggioRisultati');
+
+    // nessun risultato
+    if (!materiali || materiali.length === 0) {
+        mostraMessaggio('Nessun materiale trovato con i criteri di ricerca.', 'warning');
+        return;
+    }
+
+    //risultati trovati
+    box.classList.add('d-none');
+    tbody.innerHTML =
+        materiali.map(m => `
             <tr>
-                <td>${materiale.titolo}</td>
-                <td>${materiale.autore}</td>
-                <td>${materiale.genere}</td>
-                <td>${materiale.copie_disponibili}</td>
-                <td><a href="/pages/dettaglio-materiale.html?id=${materiale.id_materiale}" class="btn btn-sm btn-primary">Dettaglio</a>
+                <td>${m.titolo}</td>
+                <td>${m.autore}</td>
+                <td>${m.genere ?? '-'}</td>
+                <td>${m.copie_disponibili}</td>
+                <td>
+                    <button class="btn btn-sm btn-primary">Dettagli</button>
                 </td>
             </tr>
-        `;
-    });
-
+        `).join('');
 }
 
-/**
- * Ricerca per titolo o autore
- */
-function ricercaMateriali() {
 
-    const testoRicerca =
-        document.getElementById('campoRicerca').value.toLowerCase().trim();
+async function ricercaMateriali() {
 
-    const risultati =
-        materiali.filter(materiale =>
-            materiale.titolo
-                .toLowerCase()
-                .includes(testoRicerca)
-            ||
-            materiale.autore
-                .toLowerCase()
-                .includes(testoRicerca)
-        );
-    visualizzaMateriali(risultati);
+    const titolo = document.getElementById('titolo').value.toLowerCase().trim();
+    const autore = document.getElementById('autore').value.toLowerCase().trim();
+
+    const risultati = await ricerca(titolo, autore);
+
+    if (!risultati) {
+        mostraMessaggio('Errore durante il caricamento dei materiali. Riprova più tardi.', 'danger');
+    } else {
+        renderCatalogo(risultati);
+        //renderPaginazione(data.total, page); -- DA FARE
+    }
 }
+
+function resetRicerca() {
+
+    document.getElementById('titolo').value = '';
+    document.getElementById('autore').value = '';
+
+    // reset paginazione + ricerca --DA FARE
+    //cercaMateriali(1);
+}
+
 
 /**
  * Event listeners
  */
 document.getElementById('btnRicerca').addEventListener('click', ricercaMateriali);
-document.getElementById('campoRicerca').addEventListener('keyup', ricercaMateriali);
-document.getElementById('logoutButton').addEventListener('click', logout);
+document.getElementById('btnPulisci').addEventListener('click', resetRicerca);
 
 /**
  * Avvio pagina
  */
 async function inizializzaPagina() {
-    await caricaUtente();
-    await caricaCatalogo();
+    await Auth.initPage();
 }
 
 inizializzaPagina();

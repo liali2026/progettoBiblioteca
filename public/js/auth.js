@@ -2,7 +2,7 @@
  * 
  * caricaUtente (se serve il login viene indicato dal parametro priv, di default a false)
  */
-async function caricaUtente(priv = false) {
+/*async function caricaUtente(priv = false) {
     try {
         const response = await fetch('/utenti/me');
 
@@ -34,21 +34,71 @@ async function caricaUtente(priv = false) {
     } catch (err) {
         console.error(err);
     }
-}
+}*/
 
+window.Auth = {
 
-/**
- * Logout
- */
-async function logout() {
-    try {
-        await fetch('/utenti/logout', { method: 'POST' });
+    async getCurrentUser() {
+        try {
+            const response = await fetch('/utenti/me');
 
-        //window.location.href = '/pages/login.html';
-        window.location.href = '/index.html';
+            if (!response.ok) {
+                return null;
+            }
 
-    } catch (err) {
-        console.error(err);
+            const user = await response.json();
+            return user;
+
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    },
+
+    /**
+     * Logout
+     */
+    async logout() {
+        try {
+            await fetch('/utenti/logout', { method: 'POST' });
+
+            //window.location.href = '/pages/login.html';
+            window.location.href = '/index.html';
+
+        } catch (err) {
+            console.error(err);
+        }
+
+    },
+
+    async aggiornaLayout(user) {
+
+        if (!user) {
+            return;
+        }
+
+        document.getElementById('utenteLoggato').textContent = user.email;
+        document.getElementById('utenteLoggato').classList.remove('d-none');
+
+        document.getElementById('logoutButton').classList.remove('d-none');
+        document.getElementById('logoutButton').onclick = Auth.logout;
+
+        if (user.ruolo === 'BIBLIOTECARIO') {
+            document.getElementById('adminSection').style.display = 'block';
+        }
+    },
+
+    async initPage(requireLogin = false) {
+        const user = this.getCurrentUser();
+
+        if (!user && requireLogin) {
+            window.location.href = '/pages/login.html';
+            return null;
+        }
+
+        this.aggiornaLayout(requireLogin);
+        return user;
+
     }
-
 }
+
