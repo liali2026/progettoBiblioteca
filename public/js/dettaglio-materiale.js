@@ -1,5 +1,4 @@
 async function caricaDettaglioLibro() {
-
     try {
         await Auth.initPage(false);
 
@@ -30,24 +29,34 @@ async function caricaDettaglioLibro() {
         document.getElementById('isbn').textContent = libro.isbn ?? '-';
         document.getElementById('descrizione').textContent = libro.descrizione ?? 'Nessuna descrizione disponibile.';
 
+        //gestione della visualizzazione della disponibilità
         const disponibilita = document.getElementById('disponibilita');
         if (libro.copie_disponibili > 0) {
             disponibilita.innerHTML =
                 `<span class="badge bg-success">Disponibile</span>`;
         } else {
-
             disponibilita.innerHTML =
                 `<span class="badge bg-danger">Non disponibile</span>`;
-
-            document.getElementById('btnPrestito').disabled = true;
+            //document.getElementById('btnPrestito').disabled = true;
         }
 
+        //copertina libro
         const imgCopertina = document.getElementById('copertina');
         if (libro.copertina) {
             imgCopertina.src = `/images/covers/${libro.copertina}`;
         } else {
-            imgCopertina.src ='/images/book-placeholder.png';
+            imgCopertina.src = '/images/book-placeholder.png';
         }
+
+        document.getElementById('prestitoModal').dataset.idLibro = libro.id_libro;
+
+        //aggiunta listener per l'apertua della finestra modale per la richiesta di prenotazione del libro
+        document
+            .getElementById('btnPrestito')
+            .addEventListener(
+                'click',
+                () => apriModalPrestito(libro)
+            );
 
     } catch (err) {
         console.error(err);
@@ -55,7 +64,120 @@ async function caricaDettaglioLibro() {
     }
 }
 
+async function apriModalPrestito(libroCorrente) {
+
+    const user = await Auth.getCurrentUser();
+
+    if (!user) {
+        //window.location.href ='/pages/login.html'; //dopo il login bisogna ritornare qui
+        const returnUrl = encodeURIComponent(window.location.href);
+        window.location.href = `/pages/login.html?returnUrl=${returnUrl}`;
+        return;
+    }
+
+    document.getElementById('modalTitolo').value = libroCorrente.titolo;
+    document.getElementById('modalAutore').value = libroCorrente.autore;
+    document.getElementById('modalUtente').value = user.email;
+
+    aggiornaDatePrestito();
+
+    const modal =
+        new bootstrap.Modal(
+            document.getElementById(
+                'prestitoModal'
+            )
+        );
+
+    modal.show();
+}
+
+function aggiornaDatePrestito() {
+    const mesi = Number(document.getElementById('durataPrestito').value);
+    const oggi = new Date();
+    const fine = new Date();
+    fine.setMonth(fine.getMonth() + mesi);
+
+    document.getElementById('dataInizio').value = oggi.toLocaleDateString('it-IT');
+    document.getElementById('dataFine').value = fine.toLocaleDateString('it-IT');
+}
+
+async function confermaPrestito() {
+
+    try {
+
+        const idLibro =
+            document
+                .getElementById('prestitoModal')
+                .dataset.idLibro;
+
+        const durataMesi =
+            Number(
+                document.getElementById(
+                    'durataPrestito'
+                ).value
+            );
+
+        const response =
+            await fetch(
+                '/prestiti',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'application/json'
+                    },
+                    body: JSON.stringify({
+                        idLibro,
+                        durataMesi
+                    })
+                }
+            );
+
+        if (!response.ok) {
+
+            const errore =
+                await response.json();
+
+            throw new Error(
+                errore.errore
+            );
+        }
+
+        alert(
+            'Prestito inserito correttamente'
+        );
+
+        location.reload();
+
+    } catch (err) {
+
+        console.error(err);
+
+        alert(err.message);
+    }
+}
+
 document.addEventListener(
     'DOMContentLoaded',
-    caricaDettaglioLibro
+    () => {
+
+        caricaDettaglioLibro();
+
+        document
+            .getElementById('durataPrestito')
+            .addEventListener(
+                'change',
+                aggiornaDatePrestito
+            );
+
+        document
+            .getElementById('btnConfermaPrestito')
+            .addEventListener(
+                'click',
+                confermaPrestito
+            );
+
+    }
 );
+
+

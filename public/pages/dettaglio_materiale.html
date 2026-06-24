@@ -107,6 +107,72 @@
         </div>
     </div>
 
+    <div class="modal fade" id="prestitoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Richiesta prestito</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label"> Libro</label>
+                        <input id="modalTitolo" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Autore</label>
+                        <input id="modalAutore"  class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Utente</label>
+                        <input id="modalUtente" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Durata prestito</label>
+                        <select id="durataPrestito" class="form-select">
+                            <option value="1">
+                                1 mese
+                            </option>
+                            <option value="2">
+                                2 mesi
+                            </option>
+                            <option value="3">
+                                3 mesi
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data inizio</label>
+                        <input id="dataInizio" class="form-control" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data fine prevista</label>
+                        <input id="dataFine" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        Annulla
+                    </button>
+
+                    <button
+                        id="btnConfermaPrestito"
+                        type="button"
+                        class="btn btn-success">
+                        Conferma prestito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/dettaglio-materiale.js"></script>
 
