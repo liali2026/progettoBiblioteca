@@ -1,18 +1,16 @@
-const { getConnection } = require('../config/database');
+const getConnection = require('../config/db');
 
 async function creaPrestito(idUtente, idLibro, durataMesi) {
 
-    const conn =
-        await getConnection();
+    const conn = await getConnection();
 
     try {
-
         await conn.beginTransaction();
 
         /*
          * Recupera una copia disponibile
          */
-        const [copie] =
+        /*const [copie] =
             await conn.query(
                 `
                 SELECT id_copia
@@ -30,9 +28,25 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                 'Nessuna copia disponibile'
             );
         }
+            const idCopia =
+            copie[0].id_copia;*/
+ 
+        const [copie] = await conn.query(
+                `SELECT min(id_copia) as id_copia
+                FROM copie 
+                where id_libro = ?
+                and stato ="DISPONIBILE";`,
+                [idLibro]
+        );
+        
+        if (!copie[0].id_copia) {
 
-        const idCopia =
-            copie[0].id_copia;
+            throw new Error(
+                'Nessuna copia disponibile'
+            );
+        }
+
+        const idCopia = copie[0].id_copia;
 
         /*
          * Inserisce il prestito
@@ -52,10 +66,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                     ?,
                     ?,
                     NOW(),
-                    DATE_ADD(
-                        NOW(),
-                        INTERVAL ? MONTH
-                    )
+                    DATE_ADD(NOW(), INTERVAL ? MONTH)
                 )
                 `,
                 [
@@ -71,7 +82,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
         await conn.query(
             `
             UPDATE copie
-            SET disponibile = 0
+            SET stato = "IN_PRESTITO"
             WHERE id_copia = ?
             `,
             [idCopia]
@@ -79,25 +90,19 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
 
         await conn.commit();
 
-        return {
-            idPrestito:
-                result.insertId,
-            idCopia
-        };
+        return {idPrestito: result.insertId,
+                idCopia};
 
     } catch (err) {
 
         await conn.rollback();
-
         throw err;
 
     } finally {
-
         await conn.end();
-
     }
 }
 
-module.exports(
+module.exports = {
     creaPrestito
-)
+}

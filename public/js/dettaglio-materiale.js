@@ -102,45 +102,21 @@ function aggiornaDatePrestito() {
 }
 
 async function confermaPrestito() {
-
     try {
-
-        const idLibro =
-            document
-                .getElementById('prestitoModal')
-                .dataset.idLibro;
-
-        const durataMesi =
-            Number(
-                document.getElementById(
-                    'durataPrestito'
-                ).value
-            );
+        const idLibro = document.getElementById('prestitoModal').dataset.idLibro;
+        const durataMesi = Number(document.getElementById('durataPrestito').value);
 
         const response =
-            await fetch(
-                '/prestiti',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':
-                            'application/json'
-                    },
-                    body: JSON.stringify({
-                        idLibro,
-                        durataMesi
-                    })
+            await fetch('/prestiti',
+                { method: 'POST',
+                  headers: {'Content-Type':'application/json'},
+                  body: JSON.stringify({idLibro, durataMesi})
                 }
             );
 
         if (!response.ok) {
-
-            const errore =
-                await response.json();
-
-            throw new Error(
-                errore.errore
-            );
+            const errore = await response.json();
+            throw new Error(errore.errore);
         }
 
         alert(
@@ -150,9 +126,7 @@ async function confermaPrestito() {
         location.reload();
 
     } catch (err) {
-
         console.error(err);
-
         alert(err.message);
     }
 }

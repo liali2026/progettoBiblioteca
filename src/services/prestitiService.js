@@ -8,13 +8,9 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
         );
     }
 
-    return await prestitiModel.creaPrestito(
-                                            idUtente,
-                                            idLibro,
-                                            durataMesi
-                                        );
+    return await prestitiModel.creaPrestito(idUtente, idLibro, durataMesi);
 }
 
-module.exports(
-    "creaPrestito"
-)
+module.exports = {
+    creaPrestito
+}
