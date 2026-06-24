@@ -63,7 +63,11 @@ function renderCatalogo(materiali) {
                 <td>${m.genere ?? '-'}</td>
                 <td>${m.copie_disponibili}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary">Dettagli</button>
+                    <a 
+                        href="/pages/dettaglio_materiale.html?id=${m.id_libro}"
+                        class="btn btn-sm btn-primary">
+                        Dettagli
+                    </a>
                 </td>
             </tr>
         `).join('');
@@ -74,7 +78,6 @@ async function ricercaMateriali() {
 
     const titolo = document.getElementById('titolo').value.toLowerCase().trim();
     const autore = document.getElementById('autore').value.toLowerCase().trim();
-
     const risultati = await ricerca(titolo, autore);
 
     if (!risultati) {

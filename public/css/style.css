@@ -6,3 +6,9 @@ nav .breadcrumb{
     padding-top: 10px;
     padding-left: 5%;
 }
+
+.copertina-libro{
+    max-width: 180px;
+    max-height: 260px;
+    object-fit: cover;
+}

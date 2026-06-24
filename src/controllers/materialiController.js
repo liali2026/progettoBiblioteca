@@ -1,17 +1,5 @@
 const materialiService = require('../services/materialiService');
 
-/*async function findAll(req, res, next) {
-
-    try {
-        const materiali =await materialiService.findAll();
-        res.json(materiali);
-
-    } catch(err) {
-        next(err);
-    }
-
-}*/
-
 async function search(req, res, next) {
 
     try {
@@ -26,7 +14,19 @@ async function search(req, res, next) {
 
 }
 
+async function findById(req, res, next) {
+
+    try {
+        const materiali = await materialiService.findById(req.params.id);
+        res.json(materiali);
+
+    } catch(err) {
+        next(err);
+    }
+
+}
 
 module.exports = {
-    search
+    search,
+    findById
 };

@@ -1,21 +1,5 @@
 const getConnection = require('../config/db');
 
-/*async function findAll() {
-    const conn = await getConnection();
-    try {
-
-        const [libri] = await conn.query(
-            `SELECT l.*, count(c.id_copia) as copie_disponibili
-             FROM libri l LEFT JOIN  copie c
-             on l.id_libro = c.id_libro
-            group by l.id_libro `)
-        return libri;
-
-    } finally {
-        await conn.end();
-    }
-}*/
-
 async function search(titolo, autore) {
     const conn = await getConnection();
     try {
@@ -50,11 +34,37 @@ async function search(titolo, autore) {
     }
 }
 
-/*findById()
-create()
-update()
-remove()*/
+
+async function findById(id) {
+    const conn = await getConnection();
+    try {
+
+        let sql = `
+            SELECT l.*, COUNT(c.id_copia) AS copie_disponibili
+            FROM libri l
+            LEFT JOIN copie c ON l.id_libro = c.id_libro
+            WHERE 1=1
+        `;
+
+        const params = [];
+
+        if (id) {
+            sql += ` AND l.id_libro = ?`;
+            params.push(`${id}`);
+        }
+
+        sql += ` GROUP BY l.id_libro`;
+
+        const [materiali] = await conn.query(sql, params);
+
+        return materiali[0];
+
+    } finally {
+        await conn.end();
+    }
+}
 
 module.exports = {
-    search
+    search,
+    findById
 }
