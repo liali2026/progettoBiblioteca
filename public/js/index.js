@@ -1,4 +1,4 @@
-async function verificaSessione() {
+/*async function verificaSessione() {
     try {
         const response =
             await fetch('/utenti/me');
@@ -16,7 +16,7 @@ async function verificaSessione() {
 
     }
 
-}
+}*/
 
 /*function ricercaRapida() {
     const testo =document.getElementById('ricerca').value.trim();
@@ -25,4 +25,9 @@ async function verificaSessione() {
 
 document.getElementById('btnRicerca').addEventListener('click', ricercaRapida);*/
 
-verificaSessione();
+//verificaSessione();
+import * as Auth from './auth.js';
+
+window.addEventListener('DOMContentLoaded',
+    async () => { await Auth.initPage(false); }
+);

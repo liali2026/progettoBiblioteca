@@ -1,3 +1,5 @@
+import * as Auth from './auth.js';
+
 async function caricaDettaglioLibro() {
     try {
         await Auth.initPage(false);

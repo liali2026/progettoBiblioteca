@@ -1,3 +1,5 @@
+import * as Auth from './auth.js';
+
 let materiali = [];
 
 /**
