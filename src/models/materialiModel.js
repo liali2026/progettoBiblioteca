@@ -8,7 +8,7 @@ async function search(titolo, autore) {
             SELECT l.*, COUNT(c.id_copia) AS copie_disponibili
             FROM libri l
             LEFT JOIN copie c ON l.id_libro = c.id_libro
-            WHERE 1=1
+            WHERE (c.stato = 'DISPONIBILE' or c.stato is null)
         `;
 
         const params = [];

@@ -1,103 +1,56 @@
-/*window.Auth = {*/
+import * as AuthApi from './api/authApi.js';
+import * as AuthView from './ui/authView.js';
 
-//async getCurrentUser() {
-async function getCurrentUser() {
-    try {
-        const response = await fetch('/utenti/me');
+async function requireLogin() {
 
-        if (!response.ok) {
-            return null;
-        }
+    const user = await AuthApi.getCurrentUser();
 
-        const user = await response.json();
+    if (user) {
         return user;
-
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
-}//,
-
-/**
- * Logout
- */
-//async logout() {
-async function logout() {
-    try {
-        await fetch('/utenti/logout', { method: 'POST' });
-
-        //window.location.href = '/pages/login.html';
-        window.location.href = '/index.html';
-
-    } catch (err) {
-        console.error(err);
     }
 
-}//,
+    const returnUrl = encodeURIComponent(window.location.href);
 
-function aggiornaLayout(user) {
+    window.location.href =
+        `/pages/login.html?returnUrl=${returnUrl}`;
 
-    if (!user) {
-        return;
-    }
+    return null;
+}
 
-    const utenteLoggato = document.getElementById('utenteLoggato');
-    if (utenteLoggato) {
-        utenteLoggato.textContent = user.email;
-        utenteLoggato.classList.remove('d-none');
-    }
 
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        logoutButton.classList.remove('d-none');
-        //logoutButton.onclick = Auth.logout;
-        logoutButton.onclick = logout;
-    }
+async function initPage(requireLogin = false, preserveReturnUrl = false) {
 
-    // se l'utente è loggato rimuovo il bottone di login e di registrazione
-    const loginLink = document.getElementById('loginLink');
-    if (loginLink) {
-        loginLink.classList.add('d-none');
-    }
-    const registerLink = document.getElementById('registerLink');
-    if (registerLink) {
-        registerLink.classList.add('d-none');
-    }
-
-    /*se ritorno alla pagina iniziale index.html con utente già loggato abilito
-      la visualizzazione del bottone 'Area Personale'
-    */
-    const areaPersonaleLink = document.getElementById('areaPersonaleLink');
-    if (areaPersonaleLink) {
-        areaPersonaleLink.classList.remove('d-none');
-    }
-
-    const adminSection = document.getElementById('adminSection');
-    if (adminSection && user.ruolo === 'BIBLIOTECARIO') {
-        document.getElementById('adminSection').style.display = 'block';
-    }
-}//,
-
-//async initPage(requireLogin = false) {
-async function initPage(requireLogin = false) {
-    //const user = await this.getCurrentUser();
-    const user = await getCurrentUser();
+    const user = await AuthApi.getCurrentUser();
 
     if (!user && requireLogin) {
-        window.location.href = '/pages/login.html';
+
+        if (preserveReturnUrl) {
+            const returnUrl =
+                encodeURIComponent(window.location.href);
+
+            window.location.href =
+                `/pages/login.html?returnUrl=${returnUrl}`;
+        } else {
+            window.location.href = '/pages/login.html';
+            
+        }
         return null;
     }
 
-    //this.aggiornaLayout(user);
-    aggiornaLayout(user);
+    AuthView.aggiornaLayout(user);
     return user;
 
 }
-//}
+
+async function logout() {
+
+    await AuthApi.logout();
+
+    window.location.href = '/';
+}
 
 export {
-    getCurrentUser,
-    logout,
-    aggiornaLayout,
-    initPage
+    initPage,
+    requireLogin,
+    logout
 };

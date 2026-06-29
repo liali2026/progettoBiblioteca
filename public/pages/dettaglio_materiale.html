@@ -15,7 +15,7 @@
 
     <!-- NAVBAR -->
     </nav>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="../"><i class="bi bi-house me-2"></i>Home</a>
             <div class="ms-auto d-flex align-items-center">
@@ -27,21 +27,21 @@
 
     <!-- BREADCRUMB -->
     <!--<div class="container mt-3">-->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="/">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="/pages/catalogo.html">
-                        Catalogo
-                    </a>
-                </li>
-                <li class="breadcrumb-item active">
-                    Dettaglio materiale
-                </li>
-            </ol>
-        </nav>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/pages/catalogo.html">
+                    Catalogo
+                </a>
+            </li>
+            <li class="breadcrumb-item active">
+                Dettaglio materiale
+            </li>
+        </ol>
+    </nav>
     <!--</div>-->
 
     <!-- CONTENUTO -->
@@ -51,10 +51,7 @@
                 <div class="row">
                     <!-- COPERTINA -->
                     <div class="col-md-3 text-center">
-                        <img
-                            id="copertina"
-                            src="/images/book-placeholder.png"
-                            class="img-fluid rounded copertina-libro"
+                        <img id="copertina" src="/images/book-placeholder.png" class="img-fluid rounded copertina-libro"
                             alt="Copertina libro">
                     </div>
                     <!-- DATI LIBRO -->
@@ -93,6 +90,9 @@
                         </div>
                     </div>
                 </div>
+                <!-- ESITO DELLA RICHIESTA DEL PRESTITO-->
+                <div id="messaggioPagina" class="alert d-none"></div>
+                <!--<div id="messaggioPrestito" class="alert alert-success d-none"></div>-->
                 <hr>
                 <!-- DESCRIZIONE -->
                 <h5>Descrizione</h5>
@@ -121,7 +121,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Autore</label>
-                        <input id="modalAutore"  class="form-control" readonly>
+                        <input id="modalAutore" class="form-control" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Utente</label>
@@ -154,17 +154,11 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Annulla
                     </button>
 
-                    <button
-                        id="btnConfermaPrestito"
-                        type="button"
-                        class="btn btn-success">
+                    <button id="btnConfermaPrestito" type="button" class="btn btn-success">
                         Conferma prestito
                     </button>
                 </div>
@@ -175,7 +169,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <!--<script src="/js/auth.js"></script>
     <script src="/js/dettaglio-materiale.js"></script>-->
-    <script type= "module" src="/js/dettaglio-materiale.js"></script>
+    <script type="module" src="/js/dettaglio-materiale.js"></script>
 
 </body>
 

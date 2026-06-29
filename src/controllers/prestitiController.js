@@ -6,7 +6,12 @@ async function creaPrestito(req, res, next) {
         const risultato =
             await prestitiService.creaPrestito(req.session.user.id_utente, req.body.idLibro, req.body.durataMesi);
 
-        res.status(201).json(risultato);
+        //res.status(201).json(risultato);
+
+        res.status(201).json({
+            idPrestito: risultato.idPrestito,
+            messaggio: 'Prestito registrato correttamente'
+        });
 
     } catch (err) {
         next(err);
@@ -14,5 +19,5 @@ async function creaPrestito(req, res, next) {
 }
 
 module.exports = {
-   creaPrestito
+    creaPrestito
 };

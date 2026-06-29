@@ -1,149 +1,95 @@
 import * as Auth from './auth.js';
+import * as PrestitiApi from './api/prestitiApi.js';
+import * as ModalPrestito from './ui/prestitiModal.js';
+import * as View from './ui/dettaglioMaterialeView.js';
 
-async function caricaDettaglioLibro() {
+let materiale = null;
+
+async function caricaMateriale() {
     try {
-        await Auth.initPage(false);
+
+        View.nascondiMessaggio();
 
         const params = new URLSearchParams(window.location.search);
-        const idLibro = params.get('id');
+        const idMateriale = params.get('id');
 
-        if (!idLibro) {
-            alert('Identificativo libro non valido');
-            window.location.href = '/pages/catalogo.html';
+        if (!idMateriale) {
+            /*alert('Identificativo libro non valido');
+            window.location.href = '/pages/catalogo.html';*/
+            View.mostraErrore('Identificativo materiale non valido.');
             return;
         }
 
-        const response = await fetch(`/materiali/${idLibro}`);
+        //const libro = await PrestitiApi.ricercaLibro(idLibro);
+        materiale = await PrestitiApi.ricercaMateriale(idMateriale);
 
-        if (!response.ok) {
-            throw new Error(
-                'Materiale non trovato'
-            );
+        View.mostraMateriale(materiale);
+
+    } catch (err) {
+        console.error(err);
+        View.mostraErrore('Errore durante il caricamento del materiale.');
+        //alert('Errore durante il caricamento del materiale');
+    }
+}
+
+async function apriModalPrestito(materiale) {
+
+    try {
+        if (!materiale) {
+            return;
         }
 
-        const libro = await response.json();
+        const user = await Auth.requireLogin();
 
-        document.getElementById('titolo').textContent = libro.titolo;
-        document.getElementById('autore').textContent = libro.autore;
-        document.getElementById('genere').textContent = libro.genere ?? '-';
-        document.getElementById('editore').textContent = libro.casa_editrice ?? '-';
-        document.getElementById('annoPubblicazione').textContent = libro.anno_pubblicazione ?? '-';
-        document.getElementById('isbn').textContent = libro.isbn ?? '-';
-        document.getElementById('descrizione').textContent = libro.descrizione ?? 'Nessuna descrizione disponibile.';
-
-        //gestione della visualizzazione della disponibilità
-        const disponibilita = document.getElementById('disponibilita');
-        if (libro.copie_disponibili > 0) {
-            disponibilita.innerHTML =
-                `<span class="badge bg-success">Disponibile</span>`;
-        } else {
-            disponibilita.innerHTML =
-                `<span class="badge bg-danger">Non disponibile</span>`;
-            //document.getElementById('btnPrestito').disabled = true;
+        if (!user) {
+            return;
         }
 
-        //copertina libro
-        const imgCopertina = document.getElementById('copertina');
-        if (libro.copertina) {
-            imgCopertina.src = `/images/covers/${libro.copertina}`;
-        } else {
-            imgCopertina.src = '/images/book-placeholder.png';
-        }
+        ModalPrestito.apri(materiale, user);
 
-        document.getElementById('prestitoModal').dataset.idLibro = libro.id_libro;
+    } catch (err) {
+        console.log(err.message);
+        View.mostraErrore(err.message);
 
-        //aggiunta listener per l'apertua della finestra modale per la richiesta di prenotazione del libro
+    }
+}
+
+
+async function confermaPrestito() {
+    try {
+
+        const idMateriale = materiale.id_libro; //document.getElementById('prestitoModal').dataset.idLibro;
+        const durata = ModalPrestito.getDurataPrestito();
+
+        const datiPrestito = await PrestitiApi.creaPrestito(idMateriale, durata);
+
+        ModalPrestito.chiudi();
+        await caricaMateriale();
+        View.mostraMessaggioPrestito(datiPrestito);
+
+    } catch (err) {
+        console.error(err);
+        ModalPrestito.chiudi();
+        await caricaMateriale();
+        View.mostraErrore(err.message);
+        //alert(err.message);
+    }
+}
+
+
+document.addEventListener(
+    'DOMContentLoaded',
+    async () => {
+        //() => {
+
+        ModalPrestito.inizializza();
+        await caricaMateriale();
+
         document
             .getElementById('btnPrestito')
             .addEventListener(
                 'click',
-                () => apriModalPrestito(libro)
-            );
-
-    } catch (err) {
-        console.error(err);
-        alert('Errore durante il caricamento del materiale');
-    }
-}
-
-async function apriModalPrestito(libroCorrente) {
-
-    const user = await Auth.getCurrentUser();
-
-    if (!user) {
-        //window.location.href ='/pages/login.html'; //dopo il login bisogna ritornare qui
-        const returnUrl = encodeURIComponent(window.location.href);
-        window.location.href = `/pages/login.html?returnUrl=${returnUrl}`;
-        return;
-    }
-
-    document.getElementById('modalTitolo').value = libroCorrente.titolo;
-    document.getElementById('modalAutore').value = libroCorrente.autore;
-    document.getElementById('modalUtente').value = user.email;
-
-    aggiornaDatePrestito();
-
-    const modal =
-        new bootstrap.Modal(
-            document.getElementById(
-                'prestitoModal'
-            )
-        );
-
-    modal.show();
-}
-
-function aggiornaDatePrestito() {
-    const mesi = Number(document.getElementById('durataPrestito').value);
-    const oggi = new Date();
-    const fine = new Date();
-    fine.setMonth(fine.getMonth() + mesi);
-
-    document.getElementById('dataInizio').value = oggi.toLocaleDateString('it-IT');
-    document.getElementById('dataFine').value = fine.toLocaleDateString('it-IT');
-}
-
-async function confermaPrestito() {
-    try {
-        const idLibro = document.getElementById('prestitoModal').dataset.idLibro;
-        const durataMesi = Number(document.getElementById('durataPrestito').value);
-
-        const response =
-            await fetch('/prestiti',
-                { method: 'POST',
-                  headers: {'Content-Type':'application/json'},
-                  body: JSON.stringify({idLibro, durataMesi})
-                }
-            );
-
-        if (!response.ok) {
-            const errore = await response.json();
-            throw new Error(errore.errore);
-        }
-
-        alert(
-            'Prestito inserito correttamente'
-        );
-
-        location.reload();
-
-    } catch (err) {
-        console.error(err);
-        alert(err.message);
-    }
-}
-
-document.addEventListener(
-    'DOMContentLoaded',
-    () => {
-
-        caricaDettaglioLibro();
-
-        document
-            .getElementById('durataPrestito')
-            .addEventListener(
-                'change',
-                aggiornaDatePrestito
+                () => apriModalPrestito(materiale)
             );
 
         document
