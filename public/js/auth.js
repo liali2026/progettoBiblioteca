@@ -10,7 +10,7 @@ async function requireLogin() {
     }
 
     const returnUrl = encodeURIComponent(window.location.href);
-
+    console.log("returnUrl "+returnUrl);
     window.location.href =
         `/pages/login.html?returnUrl=${returnUrl}`;
 
@@ -37,7 +37,7 @@ async function initPage(requireLogin = false, preserveReturnUrl = false) {
         return null;
     }
 
-    AuthView.aggiornaLayout(user);
+    AuthView.aggiornaNavbar(user, logout);
     return user;
 
 }

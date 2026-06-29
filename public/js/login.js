@@ -31,7 +31,7 @@ document.getElementById('loginForm').addEventListener('submit',
 
                 if (returnUrl) {
                     window.location.href = decodeURIComponent(returnUrl);
-                } else { window.location.href ='/pages/home.html';
+                } else { window.location.href ='/pages/area-personale.html';
                 }
                 
             } else {

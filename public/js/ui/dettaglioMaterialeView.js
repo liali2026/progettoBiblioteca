@@ -1,6 +1,5 @@
 //GESTIONE DEL DOM
-
-export function mostraMateriale(libro) {
+function mostraMateriale(libro) {
     
     document.getElementById('titolo').textContent = libro.titolo;
     document.getElementById('autore').textContent = libro.autore;
@@ -56,7 +55,7 @@ function mostraMessaggio(html, tipo) {
     });
 }
 
-export function mostraMessaggioPrestito(dati) {
+function mostraMessaggioPrestito(dati) {
 
     mostraMessaggio(
         `
@@ -71,7 +70,7 @@ export function mostraMessaggioPrestito(dati) {
 
 }
 
-export function mostraErrore(testo) {
+function mostraErrore(testo) {
 
     mostraMessaggio(
         `
@@ -82,10 +81,17 @@ export function mostraErrore(testo) {
     );
 }
 
-export function nascondiMessaggio() {
+function nascondiMessaggio() {
 
     const box = document.getElementById('messaggioPagina');
 
     box.classList.add('d-none');
     box.innerHTML = '';
+}
+
+export {
+    mostraMateriale,
+    mostraMessaggioPrestito,
+    mostraErrore,
+    nascondiMessaggio
 }

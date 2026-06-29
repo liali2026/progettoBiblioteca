@@ -1,0 +1,27 @@
+function render(activePage = '') {
+
+    document.getElementById('navbarContainer').innerHTML = `
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="../"><i class="bi bi-house me-2"></i>Home</a>
+                <a class="navbar-brand btn" href="/pages/catalogo.html">Catalogo</a>
+                <!--<a class="navbar-brand btn btn-success d-none" href="/pages/area-personale.html" id="areaPersonaleLink">Area personale</a>-->
+                <a class="navbar-brand btn d-none" href="/pages/area-personale.html" id="areaPersonaleLink">Area personale</a>
+
+                <div id = "divLogInReg" class="ms-auto">
+                    <a href="/pages/login.html" id="loginLink" class="btn btn-outline-light me-2">Login</a>
+                    <a href="/pages/registrazione.html" id="registerLink" class="btn btn-primary">Registrati</a>
+                </div>
+                <div id = "divUserLogout" class="ms-auto d-flex align-items-center d-none">
+                    <span id="utenteLoggato" class="text-light me-3"></span>
+                    <button id="logoutButton" class="btn btn-outline-light">Logout</button>
+                </div>
+            </div>
+        </nav>
+    `;
+}
+
+export {
+    render
+}

@@ -1,35 +1,36 @@
-function aggiornaLayout(user) {
+function aggiornaNavbar(user, onLogout) {
 
     if (!user) {
         return;
     }
 
-    const utenteLoggato = document.getElementById('utenteLoggato');
-    if (utenteLoggato) {
-        utenteLoggato.textContent = user.email;
-        utenteLoggato.classList.remove('d-none');
+    // se utente è loggato, allora:
+    // 1. devo nascondere i bottoni di Login e Registrazione
+    const divLogInReg = document.getElementById("divLogInReg");
+    if (divLogInReg) {
+        divLogInReg.classList.add('d-none');
     }
 
-    const logoutButton = document.getElementById('logoutButton');
-    if (logoutButton) {
-        logoutButton.classList.remove('d-none');
-        //logoutButton.onclick = Auth.logout;
-        logoutButton.onclick = logout;
+    //2. mostrare l'utente e il bottone di logout
+    const divUserLogout = document.getElementById("divUserLogout");
+    if (divUserLogout) {
+
+        //mostro il gruppo di utenza e di logout
+        divUserLogout.classList.remove('d-none');
+
+        //mostro utente loggato
+        const utenteLoggato = document.getElementById('utenteLoggato');
+        if (utenteLoggato) {
+            utenteLoggato.textContent = user.email;
+        }
+
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.onclick = onLogout;
+        }
     }
 
-    // se l'utente è loggato rimuovo il bottone di login e di registrazione
-    const loginLink = document.getElementById('loginLink');
-    if (loginLink) {
-        loginLink.classList.add('d-none');
-    }
-    const registerLink = document.getElementById('registerLink');
-    if (registerLink) {
-        registerLink.classList.add('d-none');
-    }
-
-    /*se ritorno alla pagina iniziale index.html con utente già loggato abilito
-      la visualizzazione del bottone 'Area Personale'
-    */
+    //mostro il tasto dell'area personale
     const areaPersonaleLink = document.getElementById('areaPersonaleLink');
     if (areaPersonaleLink) {
         areaPersonaleLink.classList.remove('d-none');
@@ -42,5 +43,5 @@ function aggiornaLayout(user) {
 }
 
 export {
-    aggiornaLayout
+    aggiornaNavbar
 }

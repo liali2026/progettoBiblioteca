@@ -1,4 +1,6 @@
 import * as Auth from './auth.js';
+import * as NavbarView from './ui/navbarView.js';
+import * as BreadcrumbView from './ui/breadcrumbView.js';
 
 let materiali = [];
 
@@ -109,12 +111,26 @@ document.getElementById('btnPulisci').addEventListener('click', resetRicerca);
 /**
  * Avvio pagina
  */
-/*async function inizializzaPagina() {
+async function inizializzaPagina() {
+    NavbarView.render('home');
+    BreadcrumbView.render([
+        {
+            label: "Home",
+            href: "/"
+        },
+        {
+            label: "Catalogo",
+            active: true
+        }
+    ]);
+
     await Auth.initPage();
+
+
+
 }
 
-inizializzaPagina();*/
-
-window.addEventListener('DOMContentLoaded',
-    async () => { await Auth.initPage(); }
+document.addEventListener(
+    'DOMContentLoaded',
+    inizializzaPagina
 );

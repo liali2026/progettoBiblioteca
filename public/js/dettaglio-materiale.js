@@ -2,6 +2,8 @@ import * as Auth from './auth.js';
 import * as PrestitiApi from './api/prestitiApi.js';
 import * as ModalPrestito from './ui/prestitiModal.js';
 import * as View from './ui/dettaglioMaterialeView.js';
+import * as NavbarView from './ui/navbarView.js';
+import * as BreadcrumbView from './ui/breadcrumbView.js';
 
 let materiale = null;
 
@@ -40,7 +42,6 @@ async function apriModalPrestito(materiale) {
         }
 
         const user = await Auth.requireLogin();
-
         if (!user) {
             return;
         }
@@ -77,29 +78,49 @@ async function confermaPrestito() {
 }
 
 
+async function inizializzaPagina() {
+
+    NavbarView.render('catalogo'); // da verificare il parametro
+
+    BreadcrumbView.render([
+        {
+            label: "Home",
+            href: "/"
+        },
+        {
+            label: "Catalogo",
+            href: "/pages/catalogo.html"
+        },
+        {
+            label: "Dettaglio materiale",
+            active: true
+        }
+    ]);
+
+    await Auth.initPage(false);
+
+    await caricaMateriale();
+
+    ModalPrestito.inizializza();
+
+    document
+        .getElementById('btnPrestito')
+        .addEventListener(
+            'click',
+            () => apriModalPrestito(materiale)
+        );
+
+    document
+        .getElementById('btnConfermaPrestito')
+        .addEventListener(
+            'click',
+            confermaPrestito
+        );
+}
+
+
+
 document.addEventListener(
     'DOMContentLoaded',
-    async () => {
-        //() => {
-
-        ModalPrestito.inizializza();
-        await caricaMateriale();
-
-        document
-            .getElementById('btnPrestito')
-            .addEventListener(
-                'click',
-                () => apriModalPrestito(materiale)
-            );
-
-        document
-            .getElementById('btnConfermaPrestito')
-            .addEventListener(
-                'click',
-                confermaPrestito
-            );
-
-    }
+    inizializzaPagina
 );
-
-
