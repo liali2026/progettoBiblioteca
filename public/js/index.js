@@ -1,9 +1,9 @@
-import * as NavbarView from './ui/navbarView.js';
+import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as Auth from './auth.js';
 
 async function inizializzaPagina() {
 
-    NavbarView.render('home');
+    CommonLayoutView.renderNavbar('home');
     await Auth.initPage(false);
 }
 

@@ -1,21 +1,7 @@
-// GESTIONE DELLE CHIAMATE HTTP
-async function ricercaMateriale(idLibro) {
-
-    const response = await fetch(`/materiali/${idLibro}`);
-
-    if (!response.ok) {
-        throw new Error(
-            'Materiale non trovato'
-        );
-    }
-
-    return await response.json();
-}
-
 async function creaPrestito(idLibro, durataMesi) {
 
     const response = await fetch(
-        '/prestiti',
+        '/prestiti/creaPrestito',
         {
             method: 'POST',
             headers: {
@@ -36,7 +22,19 @@ async function creaPrestito(idLibro, durataMesi) {
     return await response.json();
 }
 
+async function ricercaAllPrestiti() {
+
+    const response = await fetch('/prestiti/ricercaAllPrestiti');
+
+    if (!response.ok) {
+        const errore = await response.json();
+        throw new Error(errore.errore);
+    }
+
+    return await response.json();
+}
+
 export {
-    ricercaMateriale,
-    creaPrestito
+    creaPrestito,
+    ricercaAllPrestiti
 }

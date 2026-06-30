@@ -1,11 +1,10 @@
-import * as NavbarView from './ui/navbarView.js';
 import * as Auth from './auth.js';
-import * as BreadcrumbView from './ui/breadcrumbView.js';
+import * as CommonLayoutView from './ui/commonLayoutView.js';
 
 async function inizializzaPagina() {
 
-    NavbarView.render('home');
-    BreadcrumbView.render([
+    CommonLayoutView.renderNavbar('area-personale');
+    CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
             href: "/"

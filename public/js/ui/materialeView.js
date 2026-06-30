@@ -1,5 +1,5 @@
 //GESTIONE DEL DOM
-function mostraMateriale(libro) {
+function mostraDettaglioMateriale(libro) {
     
     document.getElementById('titolo').textContent = libro.titolo;
     document.getElementById('autore').textContent = libro.autore;
@@ -29,69 +29,50 @@ function mostraMateriale(libro) {
     }
 
     document.getElementById('prestitoModal').dataset.idLibro = libro.id_libro;
-
-    //aggiunta listener per l'apertura della finestra modale per la richiesta di prenotazione del libro
-    /*document
-        .getElementById('btnPrestito')
-        .addEventListener(
-            'click',
-            () => apriModalPrestito(libro)
-        );*/
 }
 
+//renderPaginazione(data.total, page); -- DA FARE
+function renderCatalogo(materiali) {
 
-function mostraMessaggio(html, tipo) {
-    const box = document.getElementById('messaggioPagina');
-
-    box.className = `alert alert-${tipo}`;
-
-    box.innerHTML = html;
-
-    box.classList.remove('d-none');
-
-    box.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-    });
-}
-
-function mostraMessaggioPrestito(dati) {
-
-    mostraMessaggio(
-        `
-        <h5>Prestito registrato</h5>
-        <p>
-            La richiesta è stata registrata con successo. Codice prestito:
-        <strong>${dati.idPrestito}</strong>
-        </p>
-        `,
-        'success'
-    );
-
-}
-
-function mostraErrore(testo) {
-
-    mostraMessaggio(
-        `
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        ${testo}
-        `,
-        'danger'
-    );
-}
-
-function nascondiMessaggio() {
-
+    const tbody = document.getElementById('tabellaMateriali');
     const box = document.getElementById('messaggioPagina');
 
     box.classList.add('d-none');
-    box.innerHTML = '';
+    tbody.innerHTML =
+        materiali.map(m => `
+            <tr>
+                <td>${m.titolo}</td>
+                <td>${m.autore}</td>
+                <td>${m.genere ?? '-'}</td>
+                <td>${m.copie_disponibili}</td>
+                <td>
+                    <a 
+                        href="/pages/dettaglio_materiale.html?id=${m.id_libro}"
+                        class="btn btn-sm btn-primary">
+                        Dettagli
+                    </a>
+                </td>
+            </tr>
+        `).join('');
+}
+
+function resetCatalogo(){
+    document.getElementById('tabellaMateriali').innerHTML = '';
+}
+
+function resetRicerca() {
+
+    document.getElementById('titolo').value = '';
+    document.getElementById('autore').value = '';
+    resetCatalogo();
+
+    // reset paginazione + ricerca --DA FARE
+    //cercaMateriali(1);
 }
 
 export {
-    mostraMateriale,
-    mostraMessaggioPrestito,
-    mostraErrore,
-    nascondiMessaggio
+    mostraDettaglioMateriale,
+    renderCatalogo,
+    resetCatalogo,
+    resetRicerca
 }

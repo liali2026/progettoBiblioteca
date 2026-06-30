@@ -1,25 +1,28 @@
 import * as Auth from './auth.js';
-import * as MaterialiApi from './api/materialiApi.js';
-import * as MaterialiView from './ui/materialeView.js';
 import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as MessageView from './ui/messageView.js';
 
-async function ricercaMateriali() {
+import * as PrestitiApi from './api/prestitiApi.js';
+import * as PrestitiView from './ui/miei-prestitiView.js';
+
+async function ricercaPrestiti() {
     try {
 
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
 
-        const risultati = await MaterialiApi.ricercabyAutoreTitolo(titolo, autore);
+        //const risultati = await PrestitiApi.ricercaAllPrestiti(titolo, autore);
+        const risultati = await PrestitiApi.ricercaAllPrestiti();
+        console.log(risultati);
 
         if (!risultati || risultati.length === 0) {
 
-            MaterialiView.resetCatalogo();
+            PrestitiView.resetPrestiti();
             MessageView.mostraWarning('Nessun materiale trovato con i criteri di ricerca.');
 
         } else {
 
-            MaterialiView.renderCatalogo(risultati);
+            PrestitiView.renderPrestiti(risultati);
         }
 
     } catch (err) {
@@ -31,7 +34,7 @@ async function ricercaMateriali() {
 }
 
 function resetRicerca() {
-   MaterialiView.resetRicerca();
+   PrestitiView.resetRicerca();
    MessageView.nascondiMessaggio();
 }
 
@@ -53,7 +56,7 @@ async function inizializzaPagina() {
 
     document
         .getElementById('btnRicerca')
-        .addEventListener('click', ricercaMateriali);
+        .addEventListener('click', ricercaPrestiti);
     document
         .getElementById('btnPulisci')
         .addEventListener('click', resetRicerca);

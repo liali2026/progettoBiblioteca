@@ -11,6 +11,17 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
     return await prestitiModel.creaPrestito(idUtente, idLibro, durataMesi);
 }
 
+async function ricercaAllPrestiti(idUtente){
+    if (!idUtente){
+         throw new Error(
+            'Utente non loggato'
+        );
+    }
+    
+    return await prestitiModel.ricercaAllPrestiti(idUtente);
+}
+
 module.exports = {
-    creaPrestito
+    creaPrestito,
+    ricercaAllPrestiti
 }

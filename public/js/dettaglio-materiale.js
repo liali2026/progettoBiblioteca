@@ -1,36 +1,33 @@
 import * as Auth from './auth.js';
+import * as MaterialiApi from './api/materialiApi.js';
 import * as PrestitiApi from './api/prestitiApi.js';
-import * as ModalPrestito from './ui/prestitiModal.js';
-import * as View from './ui/dettaglioMaterialeView.js';
-import * as NavbarView from './ui/navbarView.js';
-import * as BreadcrumbView from './ui/breadcrumbView.js';
+import * as ModalPrestito from './ui/prestitoModalView.js';
+import * as View from './ui/materialeView.js';
+import * as CommonLayoutView from './ui/commonLayoutView.js';
+import * as MessageView from './ui/messageView.js';
 
 let materiale = null;
 
 async function caricaMateriale() {
     try {
 
-        View.nascondiMessaggio();
+        MessageView.nascondiMessaggio();
 
         const params = new URLSearchParams(window.location.search);
         const idMateriale = params.get('id');
 
         if (!idMateriale) {
-            /*alert('Identificativo libro non valido');
-            window.location.href = '/pages/catalogo.html';*/
-            View.mostraErrore('Identificativo materiale non valido.');
+            MessageView.mostraErrore('Identificativo materiale non valido.');
             return;
         }
 
-        //const libro = await PrestitiApi.ricercaLibro(idLibro);
-        materiale = await PrestitiApi.ricercaMateriale(idMateriale);
+        materiale = await MaterialiApi.ricercaById(idMateriale);
 
-        View.mostraMateriale(materiale);
+        View.mostraDettaglioMateriale(materiale);
 
     } catch (err) {
         console.error(err);
-        View.mostraErrore('Errore durante il caricamento del materiale.');
-        //alert('Errore durante il caricamento del materiale');
+        MessageView.mostraErrore('Errore durante il caricamento del materiale.');
     }
 }
 
@@ -50,7 +47,7 @@ async function apriModalPrestito(materiale) {
 
     } catch (err) {
         console.log(err.message);
-        View.mostraErrore(err.message);
+        MessageView.mostraErrore(err.message);
 
     }
 }
@@ -66,23 +63,24 @@ async function confermaPrestito() {
 
         ModalPrestito.chiudi();
         await caricaMateriale();
-        View.mostraMessaggioPrestito(datiPrestito);
+        MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
+                                    Codice prestito: <strong>${dati.idPrestito}</strong>
+                                    `);
 
     } catch (err) {
         console.error(err);
         ModalPrestito.chiudi();
         await caricaMateriale();
-        View.mostraErrore(err.message);
-        //alert(err.message);
+        MessageView.mostraErrore(err.message);
     }
 }
 
 
 async function inizializzaPagina() {
 
-    NavbarView.render('catalogo'); // da verificare il parametro
+    CommonLayoutView.renderNavbar('catalogo'); // da verificare il parametro
 
-    BreadcrumbView.render([
+    CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
             href: "/"

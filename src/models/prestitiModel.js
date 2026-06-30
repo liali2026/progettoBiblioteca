@@ -103,6 +103,37 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
     }
 }
 
+async function ricercaAllPrestiti(idUtente){
+    const conn = await getConnection();
+    try {
+        let sql = `SELECT p.*, l.*
+                     FROM prestiti p, copie c, libri l
+                    WHERE p.id_copia = c.id_copia
+                      AND c.id_libro = l.id_libro`;
+    
+        const params = [];
+
+        //ATTENZIONE! DA MODIFICARE DATO CHE NON PUò ESSERE NULLO (?)
+        if (idUtente) {
+            sql += ` AND id_utente = ?`;
+            params.push(idUtente);
+        }
+
+
+        const [prestiti] = await conn.query(sql, params);
+            /*await conn.query(
+                'SELECT * FROM prestiti WHERE id_utente = ?', [idUtente]
+            );*/
+
+        //console.log(prestiti);
+        return prestiti;
+
+    } finally {
+        await conn.end();
+    }
+}
+
 module.exports = {
-    creaPrestito
+    creaPrestito,
+    ricercaAllPrestiti
 }

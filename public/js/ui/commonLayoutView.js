@@ -1,4 +1,4 @@
-function render(activePage = '') {
+function renderNavbar(activePage = '') {
 
     document.getElementById('navbarContainer').innerHTML = `
 
@@ -6,7 +6,6 @@ function render(activePage = '') {
             <div class="container-fluid">
                 <a class="navbar-brand" href="../"><i class="bi bi-house me-2"></i>Home</a>
                 <a class="navbar-brand btn" href="/pages/catalogo.html">Catalogo</a>
-                <!--<a class="navbar-brand btn btn-success d-none" href="/pages/area-personale.html" id="areaPersonaleLink">Area personale</a>-->
                 <a class="navbar-brand btn d-none" href="/pages/area-personale.html" id="areaPersonaleLink">Area personale</a>
 
                 <div id = "divLogInReg" class="ms-auto">
@@ -22,6 +21,47 @@ function render(activePage = '') {
     `;
 }
 
+function renderBreadcrumb(items =[]) {
+
+    const html = `
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                ${items.map(item => {
+
+                    if (item.active) {
+                        return `
+                            <li class="breadcrumb-item active">
+                                ${item.label}
+                            </li>
+                        `;
+                    }
+
+                    return `
+                        <li class="breadcrumb-item">
+                            <a href="${item.href}">
+                                ${item.label}
+                            </a>
+                        </li>
+                    `;
+
+                }).join('')}
+            </ol>
+        </nav>
+    `;
+
+    document.getElementById("breadcrumb").innerHTML = html;
+}
+
+/*function renderLayout({
+    activePage,
+    breadcrumb
+}) {
+
+    renderNavbar(activePage);
+    renderBreadcrumb(breadcrumb);
+}*/
+
 export {
-    render
+    renderNavbar,
+    renderBreadcrumb
 }
