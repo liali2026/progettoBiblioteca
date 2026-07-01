@@ -16,19 +16,20 @@ function renderPrestiti(prestiti) {
                 <td>${formattaData(m.data_inizio)}</td>
                 <td>${formattaData(m.data_fine)}</td>
                 <td>${formattaData(m.data_restituzione) ?? '-'}</td>
-                <td>${m.stato}</td>
+                <td>${badgeStato(m.stato)}</td>
                 <td>
-                    <!--<a 
-                        href="/pages/dettaglio_materiale.html?id=${m.id_libro}"
-                        class="btn btn-sm btn-primary">
-                        Dettagli
-                    </a>-->
+                    <button
+                        class="btn btn-sm btn-warning btnRestituisci"
+                        data-id-prestito="${m.id_prestito}"
+                        ${m.stato === 'RESTITUITO' ? 'disabled' : ''}>
+                        Restituisci
+                    </button>
                 </td>
             </tr>
         `).join('');
 }
 
-function resetPrestiti(){
+function resetPrestiti() {
     document.getElementById('tabellaPrestiti').innerHTML = '';
 }
 
@@ -39,6 +40,24 @@ function resetRicerca() {
     document.getElementById('stato').value = '';
     resetPrestiti();
 
+}
+
+function badgeStato(stato) {
+
+    switch (stato) {
+
+        case 'SCADUTO':
+            return '<span class="badge bg-danger">SCADUTO</span>';
+
+        case 'RESTITUITO':
+            return '<span class="badge bg-success">RESTITUITO</span>';
+
+        case 'ATTIVO':
+            return '<span class="badge bg-warning text-dark">IN PRESTITO</span>';
+
+        default:
+            return stato;
+    }
 }
 
 export {

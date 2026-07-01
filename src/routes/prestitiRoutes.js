@@ -3,6 +3,7 @@ const prestitiController = require('../controllers/prestitiController');
 const router = express.Router();
 
 router.post('/creaPrestito', prestitiController.creaPrestito);
-router.get('/ricercaAllPrestiti', prestitiController.ricercaAllPrestiti);
+router.post('/ricercaPrestiti', prestitiController.ricercaPrestiti);
+router.post('/restituisciPrestito', prestitiController.restituisciPrestito);
 
 module.exports = router;

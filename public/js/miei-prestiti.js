@@ -10,18 +10,16 @@ async function ricercaPrestiti() {
 
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
+        const stato = document.getElementById('stato').value;
 
-        //const risultati = await PrestitiApi.ricercaAllPrestiti(titolo, autore);
-        const risultati = await PrestitiApi.ricercaAllPrestiti();
+        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato);
+
         console.log(risultati);
 
         if (!risultati || risultati.length === 0) {
-
             PrestitiView.resetPrestiti();
-            MessageView.mostraWarning('Nessun materiale trovato con i criteri di ricerca.');
-
+            MessageView.mostraWarning('Nessun dato trovato con i criteri di ricerca.');
         } else {
-
             PrestitiView.renderPrestiti(risultati);
         }
 
@@ -34,20 +32,42 @@ async function ricercaPrestiti() {
 }
 
 function resetRicerca() {
-   PrestitiView.resetRicerca();
-   MessageView.nascondiMessaggio();
+    PrestitiView.resetRicerca();
+    MessageView.nascondiMessaggio();
+}
+
+async function restituisciPrestito(idPrestito) {
+    try {
+
+        const risultato = await PrestitiApi.restituisciPrestito(idPrestito);
+
+        await ricercaPrestiti();
+        //MessageView.mostraSuccesso("Operazione di restituzione eseguita con successo");
+        MessageView.mostraSuccesso(
+            `Prestito n. <strong>${risultato.idPrestito}</strong>: ${risultato.messaggio}`
+        );
+
+    } catch (err) {
+        console.error(err);
+        MessageView.mostraErrore(err.message);
+    }
 }
 
 
+
 async function inizializzaPagina() {
-    CommonLayoutView.renderNavbar('catalogo');
+    CommonLayoutView.renderNavbar('miei-prestiti');
     CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
             href: "/"
         },
         {
-            label: "Catalogo",
+            label: "Area Personale",
+            href: "/pages/area-personale.html"
+        },
+        {
+            label: "Prestiti",
             active: true
         }
     ]);
@@ -60,6 +80,20 @@ async function inizializzaPagina() {
     document
         .getElementById('btnPulisci')
         .addEventListener('click', resetRicerca);
+
+    document
+        .getElementById('tabellaPrestiti')
+        .addEventListener(
+            'click',
+            async (e) => {
+                if (!e.target.classList.contains('btnRestituisci')) {
+                    return;
+                }
+                const idPrestito =
+                    e.target.dataset.idPrestito;
+                await restituisciPrestito(idPrestito);
+            }
+        );
 }
 
 document.addEventListener(

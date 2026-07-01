@@ -22,9 +22,21 @@ async function creaPrestito(idLibro, durataMesi) {
     return await response.json();
 }
 
-async function ricercaAllPrestiti() {
+async function ricercaPrestiti(titolo, autore, stato) {
 
-    const response = await fetch('/prestiti/ricercaAllPrestiti');
+    const response = await fetch(
+        '/prestiti/ricercaPrestiti',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                titolo,
+                autore,
+                stato
+            })
+        });
 
     if (!response.ok) {
         const errore = await response.json();
@@ -34,7 +46,29 @@ async function ricercaAllPrestiti() {
     return await response.json();
 }
 
+async function restituisciPrestito(idPrestito) {
+    const response = await fetch(
+        '/prestiti/restituisciPrestito',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                idPrestito
+            })
+        }
+    );
+
+    if (!response.ok) {
+        const errore = await response.json();
+        throw new Error(errore.errore);
+    }
+
+    return await response.json();
+}
 export {
     creaPrestito,
-    ricercaAllPrestiti
+    ricercaPrestiti,
+    restituisciPrestito
 }

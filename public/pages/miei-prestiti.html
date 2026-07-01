@@ -24,14 +24,28 @@
             <div class="card-body">
                 <h5 class="card-title">Ricerca</h5>
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <input type="text" id="titolo" class="form-control" placeholder="Titolo">
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <input type="text" id="autore" class="form-control" placeholder="Autore">
                     </div>
-                    <div class="col-md-5">
-                        <input type="text" id="stato" class="form-control" placeholder="Stato del prestito">
+                    <div class="col-md-3">
+                        <select id="stato" class="form-select">
+                            <option value = "ALL" selected>
+                                TUTTI
+                            </option>
+                            <option value="ATTIVO">
+                                ATTIVO
+                            </option>
+                            <option value="RESTITUITO">
+                                RESTITUITO
+                            </option>
+                            <option value="SCADUTO">
+                                SCADUTO
+                            </option>
+                        </select>
+                        <!--<input type="text" id="stato" class="form-control" placeholder="Stato del prestito">-->
                     </div>
                     <div class="col-md-2 d-flex gap-2">
                         <button id="btnRicerca" class="btn btn-primary w-100">Cerca</button>

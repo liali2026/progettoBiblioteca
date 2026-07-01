@@ -31,23 +31,44 @@ async function ricercaMateriali() {
 }
 
 function resetRicerca() {
-   MaterialiView.resetRicerca();
-   MessageView.nascondiMessaggio();
+    MaterialiView.resetRicerca();
+    MessageView.nascondiMessaggio();
 }
 
 
 async function inizializzaPagina() {
+    
     CommonLayoutView.renderNavbar('catalogo');
-    CommonLayoutView.renderBreadcrumb([
-        {
-            label: "Home",
-            href: "/"
-        },
-        {
-            label: "Catalogo",
-            active: true
-        }
-    ]);
+    // posso arrivarci direttamente dalla home (index.html)
+    // oppure da area-personale.html
+    const from = new URLSearchParams(window.location.search).get('from');
+    if (from === 'area-personale') {
+        CommonLayoutView.renderBreadcrumb([
+            {
+                label: "Home",
+                href: "/"
+            },
+            {
+                label: "Area personale",
+                href: "/pages/area-personale.html"
+            },
+            {
+                label: "Catalogo",
+                active: true
+            }
+        ]);
+    } else {
+        CommonLayoutView.renderBreadcrumb([
+            {
+                label: "Home",
+                href: "/"
+            },
+            {
+                label: "Catalogo",
+                active: true
+            }
+        ]);
+    }
 
     await Auth.initPage();
 
