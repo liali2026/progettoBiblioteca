@@ -30,7 +30,7 @@ async function ricercaPrestiti(req, res, next) {
         //occorre gestire il bibliotecario
         //const idUtente = req.session.user.id_utente; 
 
-        const isBibliotecario = user.ruolo === 'BIBLIOTECARIO';
+        const isBibliotecario = req.session.user.ruolo === 'BIBLIOTECARIO';
         let utenteFiltro = null;
 
         if (isBibliotecario) {
@@ -38,7 +38,7 @@ async function ricercaPrestiti(req, res, next) {
             utenteFiltro = idUtente || null;
         } else {
             // utente normale può vedere solo i suoi prestiti
-            utenteFiltro = user.id_utente;
+            utenteFiltro = req.session.user.id_utente;
         }
 
         

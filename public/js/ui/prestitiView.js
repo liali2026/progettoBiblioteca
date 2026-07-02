@@ -11,7 +11,7 @@ function renderPrestiti(prestiti, CONTEXT) {
 
     box.classList.add('d-none');
     tbody.innerHTML =
-         prestiti.map(p => {
+         prestiti.map(m => {
 
             const isRestituito = m.stato === 'RESTITUITO';
 
@@ -28,7 +28,7 @@ function renderPrestiti(prestiti, CONTEXT) {
                     ${(!isRestituito && !isAdmin) ? `
                         <button
                             class="btn btn-sm btn-warning btnRestituisci"
-                            data-id-prestito="${p.id_prestito}">
+                            data-id-prestito="${m.id_prestito}">
                             Restituisci
                         </button>
                     ` : ''}

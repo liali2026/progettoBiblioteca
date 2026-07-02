@@ -95,7 +95,8 @@ async function ricercaPrestiti(idUtente, titolo, autore, stato) {
                     WHERE p.id_copia = c.id_copia
                       AND c.id_libro = l.id_libro`;*/
         let sql = `SELECT *
-                     FROM vista_prestiti`
+                     FROM vista_prestiti
+                     WHERE 1=1`
 
         const params = [];
 

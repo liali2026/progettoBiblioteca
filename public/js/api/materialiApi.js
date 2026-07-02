@@ -28,6 +28,10 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     return await response.json();
 }
 
+async function deleteMateriale(){
+    
+}
+
 export {
     ricercaById,
     ricercabyAutoreTitolo

@@ -12,11 +12,12 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
 }
 
 async function ricercaPrestiti(idUtente, titolo, autore, stato){
-    if (!idUtente){
+    //l'utente o è quello loggato o quello passato nella post
+    /*if (!idUtente){
          throw new Error(
             'Utente non loggato'
         );
-    }
+    }*/
 
     if (stato === 'ALL') {
         stato = null;

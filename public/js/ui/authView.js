@@ -36,10 +36,13 @@ function aggiornaNavbar(user, onLogout) {
         areaPersonaleLink.classList.remove('d-none');
     }
 
-    const adminSection = document.getElementById('adminSection');
+    // non dovrebbe servire più in area-personale.html (non riguarda neanche la navbar..)
+    /*const adminSection = document.getElementById('adminSection');
     if (adminSection && user.ruolo === 'BIBLIOTECARIO') {
-        document.getElementById('adminSection').style.display = 'block';
-    }
+        //document.getElementById('adminSection').style.display = 'block';
+        document.getElementById('adminSection').classList.remove('d-none');
+        document.getElementById('userSection').classList.add('d-none');
+    }*/
 }
 
 export {

@@ -4,6 +4,11 @@ import * as MaterialiView from './ui/materialeView.js';
 import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as MessageView from './ui/messageView.js';
 
+let CONTEXT = {
+    role: null,
+    isAdmin: false
+};
+
 async function ricercaMateriali() {
     try {
 
@@ -19,7 +24,8 @@ async function ricercaMateriali() {
 
         } else {
 
-            MaterialiView.renderCatalogo(risultati);
+            // MaterialiView.renderCatalogo(risultati);
+            MaterialiView.renderCatalogo(risultati, CONTEXT);
         }
 
     } catch (err) {
@@ -37,7 +43,7 @@ function resetRicerca() {
 
 
 async function inizializzaPagina() {
-    
+
     CommonLayoutView.renderNavbar('catalogo');
     // posso arrivarci direttamente dalla home (index.html)
     // oppure da area-personale.html
@@ -70,7 +76,16 @@ async function inizializzaPagina() {
         ]);
     }
 
-    await Auth.initPage();
+    const user = await Auth.initPage();
+    CONTEXT.role = user.ruolo;
+    CONTEXT.isAdmin = user.ruolo === "BIBLIOTECARIO";
+
+    if (CONTEXT.isAdmin) {
+        document
+            .getElementById("btnNuovoMateriale")
+            .classList.remove("d-none");
+
+    }
 
     document
         .getElementById('btnRicerca')
@@ -78,6 +93,40 @@ async function inizializzaPagina() {
     document
         .getElementById('btnPulisci')
         .addEventListener('click', resetRicerca);
+
+
+    document
+        .getElementById("tabellaMateriali")
+        .addEventListener("click", async (e) => {
+
+            if (e.target.classList.contains("btnModifica")) {
+                const id = e.target.dataset.idLibro;
+                window.location.href =
+                    `/pages/dettaglio-materiale.html?id=${id}&mode=edit`;
+            }
+
+            if (e.target.classList.contains("btnElimina")) {
+                if (!confirm("Confermi l'eliminazione del materiale?")) {
+                    return;
+                }
+                try {
+                    const risultato =
+                        await MaterialiApi.deleteItem(id);
+                        
+                    MessageView.mostraSuccesso(
+                        risultato.messaggio
+                    );
+
+                    await ricercaMateriali();
+
+                } catch (err) {
+
+                    MessageView.mostraErrore(err.message);
+
+                }
+            }
+
+        });
 }
 
 document.addEventListener(

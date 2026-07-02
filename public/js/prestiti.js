@@ -89,7 +89,7 @@ async function inizializzaPagina() {
     CONTEXT.isAdmin = CONTEXT.role === 'BIBLIOTECARIO';
 
     //verificare se meglio piazzare altrove questa parte di codice
-    if (isAdmin) {
+    if (CONTEXT.isAdmin) {
         document
             .getElementById('filtroUtenteContainer')
             .classList.remove('d-none');

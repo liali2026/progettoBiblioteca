@@ -32,7 +32,7 @@ function mostraDettaglioMateriale(libro) {
 }
 
 //renderPaginazione(data.total, page); -- DA FARE
-function renderCatalogo(materiali) {
+function renderCatalogo(materiali, context) {
 
     const tbody = document.getElementById('tabellaMateriali');
     const box = document.getElementById('messaggioPagina');
@@ -46,14 +46,45 @@ function renderCatalogo(materiali) {
                 <td>${m.genere ?? '-'}</td>
                 <td>${m.copie_disponibili}</td>
                 <td>
-                    <a 
+                    <!--<a 
                         href="/pages/dettaglio_materiale.html?id=${m.id_libro}"
                         class="btn btn-sm btn-primary">
                         Dettagli
-                    </a>
+                    </a>-->
+                    ${renderAzioni(m, CONTEXT)}
                 </td>
             </tr>
         `).join('');
+}
+
+function renderAzioni(materiale, context) {
+
+    let html = `
+        <a
+            href="/pages/dettaglio_materiale.html?id=${materiale.id_libro}"
+            class="btn btn-sm btn-primary">
+            Dettagli
+        </a>
+    `;
+
+    if (context.isAdmin) {
+
+        html += `
+            <button
+                class="btn btn-sm btn-warning btnModifica"
+                data-id-libro="${materiale.id_libro}">
+                Modifica
+            </button>
+
+            <button
+                class="btn btn-sm btn-danger btnElimina"
+                data-id-libro="${materiale.id_libro}">
+                Elimina
+            </button>
+        `;
+    }
+
+    return html;
 }
 
 function resetCatalogo(){
