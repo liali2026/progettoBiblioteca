@@ -1,32 +1,41 @@
 import { formattaData } from '../utils/dateUtils.js';
 
 //renderPaginazione(data.total, page); -- DA FARE
-function renderPrestiti(prestiti) {
+function renderPrestiti(prestiti, CONTEXT) {
 
     const tbody = document.getElementById('tabellaPrestiti');
     const box = document.getElementById('messaggioPagina');
 
+    //per bibliotecario
+    const isAdmin = CONTEXT?.isAdmin;
+
     box.classList.add('d-none');
     tbody.innerHTML =
-        prestiti.map(m => `
+         prestiti.map(p => {
+
+            const isRestituito = m.stato === 'RESTITUITO';
+
+            return `
             <tr>
                 <td>${m.titolo}</td>
                 <td>${m.autore}</td>
                 <td>${m.genere ?? '-'}</td>
                 <td>${formattaData(m.data_inizio)}</td>
                 <td>${formattaData(m.data_fine)}</td>
-                <td>${formattaData(m.data_restituzione) ?? '-'}</td>
+                <td>${m.data_restituzione ? formattaData(m.data_restituzione) : '-'}</td>
                 <td>${badgeStato(m.stato)}</td>
-                <td>
-                    <button
-                        class="btn btn-sm btn-warning btnRestituisci"
-                        data-id-prestito="${m.id_prestito}"
-                        ${m.stato === 'RESTITUITO' ? 'disabled' : ''}>
-                        Restituisci
-                    </button>
+                 <td>
+                    ${(!isRestituito && !isAdmin) ? `
+                        <button
+                            class="btn btn-sm btn-warning btnRestituisci"
+                            data-id-prestito="${p.id_prestito}">
+                            Restituisci
+                        </button>
+                    ` : ''}
                 </td>
             </tr>
-        `).join('');
+         `;
+    }).join('');
 }
 
 function resetPrestiti() {
@@ -37,7 +46,7 @@ function resetRicerca() {
 
     document.getElementById('titolo').value = '';
     document.getElementById('autore').value = '';
-    document.getElementById('stato').value = '';
+    document.getElementById('stato').value = 'ALL';
     resetPrestiti();
 
 }

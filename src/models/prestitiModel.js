@@ -90,31 +90,33 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
 async function ricercaPrestiti(idUtente, titolo, autore, stato) {
     const conn = await getConnection();
     try {
-        let sql = `SELECT p.*, l.*
+        /*let sql = `SELECT p.*, l.*
                      FROM prestiti p, copie c, libri l
                     WHERE p.id_copia = c.id_copia
-                      AND c.id_libro = l.id_libro`;
+                      AND c.id_libro = l.id_libro`;*/
+        let sql = `SELECT *
+                     FROM vista_prestiti`
 
         const params = [];
 
         //ATTENZIONE! DA MODIFICARE DATO CHE NON PUò ESSERE NULLO (?)
         if (idUtente) {
-            sql += ` AND p.id_utente = ?`;
+            sql += ` AND id_utente = ?`;
             params.push(idUtente);
         }
 
         if (titolo) {
-            sql += ` AND l.titolo like ?`;
+            sql += ` AND titolo like ?`;
             params.push(`%${titolo}%`);
         }
 
         if (autore) {
-            sql += ` AND l.autore like ?'`;
+            sql += ` AND autore like ?'`;
             params.push(`%${autore}%`);
         }
 
         if (stato) {
-            sql += ` AND p.stato like ?`;
+            sql += ` AND stato like ?`;
             params.push(`%${stato}%`);
         }
 
@@ -140,8 +142,8 @@ async function restituisciPrestito(idPrestito) {
 
         const [prestito] = await conn.query(
             `SELECT *
-                   FROM prestiti 
-                 where id_prestito = ?;`,
+               FROM prestiti 
+              WHERE id_prestito = ?;`,
             [idPrestito]
         );
 

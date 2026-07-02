@@ -64,7 +64,7 @@ async function confermaPrestito() {
         ModalPrestito.chiudi();
         await caricaMateriale();
         MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
-                                    Codice prestito: <strong>${dati.idPrestito}</strong>
+                                    Codice prestito: <strong>${datiPrestito.idPrestito}</strong>
                                     `);
 
     } catch (err) {

@@ -1,9 +1,10 @@
 const express = require('express');
 const prestitiController = require('../controllers/prestitiController');
+const authenticate = require('../middlewares/authenticate');
 const router = express.Router();
 
-router.post('/creaPrestito', prestitiController.creaPrestito);
+router.post('/creaPrestito', authenticate, prestitiController.creaPrestito);
 router.post('/ricercaPrestiti', prestitiController.ricercaPrestiti);
-router.post('/restituisciPrestito', prestitiController.restituisciPrestito);
+router.post('/restituisciPrestito', authenticate, prestitiController.restituisciPrestito);
 
 module.exports = router;

@@ -3,7 +3,12 @@ import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as MessageView from './ui/messageView.js';
 
 import * as PrestitiApi from './api/prestitiApi.js';
-import * as PrestitiView from './ui/miei-prestitiView.js';
+import * as PrestitiView from './ui/prestitiView.js';
+
+let CONTEXT = {
+    role: null,
+    isAdmin: false
+};
 
 async function ricercaPrestiti() {
     try {
@@ -11,8 +16,13 @@ async function ricercaPrestiti() {
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
         const stato = document.getElementById('stato').value;
+        //gestione del bibliotecario
+        const utente = CONTEXT.isAdmin
+            ? document.getElementById('utente')?.value?.trim()
+            : null;
 
-        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato);
+        //const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato);
+        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente);
 
         console.log(risultati);
 
@@ -20,7 +30,8 @@ async function ricercaPrestiti() {
             PrestitiView.resetPrestiti();
             MessageView.mostraWarning('Nessun dato trovato con i criteri di ricerca.');
         } else {
-            PrestitiView.renderPrestiti(risultati);
+            //PrestitiView.renderPrestiti(risultati);
+            PrestitiView.renderPrestiti(risultati, CONTEXT);
         }
 
     } catch (err) {
@@ -56,7 +67,8 @@ async function restituisciPrestito(idPrestito) {
 
 
 async function inizializzaPagina() {
-    CommonLayoutView.renderNavbar('miei-prestiti');
+
+    CommonLayoutView.renderNavbar('prestiti');
     CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
@@ -72,7 +84,17 @@ async function inizializzaPagina() {
         }
     ]);
 
-    await Auth.initPage();
+    const user = await Auth.initPage();
+    CONTEXT.role = user?.ruolo || 'UTENTE';
+    CONTEXT.isAdmin = CONTEXT.role === 'BIBLIOTECARIO';
+
+    //verificare se meglio piazzare altrove questa parte di codice
+    if (isAdmin) {
+        document
+            .getElementById('filtroUtenteContainer')
+            .classList.remove('d-none');
+    }
+    //
 
     document
         .getElementById('btnRicerca')

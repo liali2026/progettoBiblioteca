@@ -25,15 +25,29 @@ async function creaPrestito(req, res, next) {
 async function ricercaPrestiti(req, res, next) {
     try {
 
-        const { titolo, autore, stato } = req.body;
-        //DA VERIFICARE
-        // nel caso sia l'utente proprietario dei servizi allora deve essere nella sessione
-        // se sono il bibliotecario potrei voler cercare i prestiti di un certo utente
-        const idUtente = req.session.user.id_utente;
+        const { titolo, autore, stato, idUtente } = req.body;
+
+        //occorre gestire il bibliotecario
+        //const idUtente = req.session.user.id_utente; 
+
+        const isBibliotecario = user.ruolo === 'BIBLIOTECARIO';
+        let utenteFiltro = null;
+
+        if (isBibliotecario) {
+            // il bibliotecario può filtrare per utente
+            utenteFiltro = idUtente || null;
+        } else {
+            // utente normale può vedere solo i suoi prestiti
+            utenteFiltro = user.id_utente;
+        }
+
+        
         const prestiti = await prestitiService.ricercaPrestiti
-                                (idUtente,
-                                    titolo,
-                                    autore, stato
+                                (//idUtente,
+                                 utenteFiltro,
+                                 titolo,
+                                 autore, 
+                                 stato
                                 );
         res.json(prestiti);
 

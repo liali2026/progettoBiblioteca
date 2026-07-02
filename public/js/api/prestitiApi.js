@@ -22,7 +22,8 @@ async function creaPrestito(idLibro, durataMesi) {
     return await response.json();
 }
 
-async function ricercaPrestiti(titolo, autore, stato) {
+//async function ricercaPrestiti(titolo, autore, stato) {
+async function ricercaPrestiti(titolo, autore, stato, utente) {
 
     const response = await fetch(
         '/prestiti/ricercaPrestiti',
@@ -34,7 +35,8 @@ async function ricercaPrestiti(titolo, autore, stato) {
             body: JSON.stringify({
                 titolo,
                 autore,
-                stato
+                stato,
+                utente //aggiunta per bibliotecario
             })
         });
 
