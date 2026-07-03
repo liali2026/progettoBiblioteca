@@ -110,6 +110,8 @@ async function inizializzaPagina() {
                     return;
                 }
                 try {
+                    const id = e.target.dataset.idLibro;
+                    //console.log(id);
                     const risultato =
                         await MaterialiApi.deleteItem(id);
                         

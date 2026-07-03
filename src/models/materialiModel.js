@@ -16,6 +16,7 @@ async function search(titolo, autore) {
         let sql = `
                   SELECT *
                     FROM vista_catalogo_libri
+                   WHERE 1=1
                 `
 
         const params = [];
@@ -157,6 +158,7 @@ async function updateItem(materiale) {
 
 async function deleteItem(idMateriale) {
     const conn = await getConnection();
+    console.log("idMateriale " + idMateriale);
     try {
         await conn.beginTransaction();
 
@@ -230,7 +232,7 @@ async function deleteItem(idMateriale) {
 
         return {
             idLibro: idMateriale,
-            righeAggiornate: result.affectedRows
+            righeCancellate: result.affectedRows
         };
 
     } catch (err) {

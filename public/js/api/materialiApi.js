@@ -2,11 +2,18 @@ async function ricercaById(idLibro) {
 
     const response = await fetch(`/materiali/${idLibro}`);
 
-    if (!response.ok) {
+    /*if (!response.ok) {
         throw new Error('Errore server database: verificare che sia attivo');
     }
 
-    return await response.json();
+    return await response.json();*/
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
 }
 
 
@@ -21,18 +28,58 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     }
 
     const response = await fetch(`/materiali?${params.toString()}`);
-    if (!response.ok) {
+
+    /*if (!response.ok) {
         throw new Error('Errore server database: verificare che sia attivo');
     }
 
-    return await response.json();
+    return await response.json();*/
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
 }
 
-async function deleteMateriale(){
-    
+async function updateItem(idMateriale) {
+
+    console.log(idMateriale);
+    const response = await fetch(
+        `/materiali/admin/update/${idMateriale}`,
+        {
+            method: "PUT"
+        }
+    );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
+}
+
+async function deleteItem(idMateriale) {
+
+    console.log(idMateriale);
+    const response = await fetch(
+        `/materiali/admin/delete/${idMateriale}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
 }
 
 export {
     ricercaById,
-    ricercabyAutoreTitolo
+    ricercabyAutoreTitolo,
+    deleteItem
 }

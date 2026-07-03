@@ -49,11 +49,11 @@ async function updateItem(req, res, next) {
         materiale.idLibro = Number(req.params.id);
         const risultato = await materialiService.updateItem(materiale);
 
-        return {
+         res.json({
             idLibro: risultato.idLibro,
             righeAggiornate: risultato.righeAggiornate,
             messaggio: "Materiale aggiornato correttamente"
-        };
+        });
 
     } catch (err) {
         next(err);
@@ -64,13 +64,14 @@ async function updateItem(req, res, next) {
 async function deleteItem(req, res, next) {
     try {
 
-        const risultato = await materialiService.deleteItem(req.params.id);
+        const idMateriale = req.params.id;
+        const risultato = await materialiService.deleteItem(idMateriale);
 
-        return {
+        res.json({
             idLibro: risultato.idLibro,
-            righeAggiornate: risultato.righeAggiornate,
+            righeCancellate: risultato.righeCancellate,
             messaggio: "Materiale cancellato correttamente"
-        };
+        });
 
     } catch (err) {
         next(err);

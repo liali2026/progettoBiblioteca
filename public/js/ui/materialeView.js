@@ -51,7 +51,7 @@ function renderCatalogo(materiali, context) {
                         class="btn btn-sm btn-primary">
                         Dettagli
                     </a>-->
-                    ${renderAzioni(m, CONTEXT)}
+                    ${renderAzioni(m, context)}
                 </td>
             </tr>
         `).join('');

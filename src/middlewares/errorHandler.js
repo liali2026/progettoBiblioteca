@@ -9,13 +9,13 @@ function errorHandler(err, req, res, next) {
     if (dbError) {
 
         return res.status(dbError.status).json({
-            errore: dbError.message
+            message: dbError.message
         });
 
     }
 
     return res.status(500).json({
-        errore: 'Errore interno del server'
+        message: 'Errore interno del server'
     });
 
 }
