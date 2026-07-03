@@ -21,6 +21,7 @@
 
     <!-- CONTENUTO -->
     <div class="container mt-4">
+        <h2 id="pageTitle" class="mb-4">Dettaglio materiale</h2>
         <div class="card shadow">
             <div class="card-body">
                 <div class="row">
@@ -31,36 +32,56 @@
                     </div>
                     <!-- DATI LIBRO -->
                     <div class="col-md-9">
-                        <h2 id="titolo"></h2>
+                        <!--<h2 id="titolo"></h2>-->
+                        <div class="mb-3">
+                            <label for="titolo" class="form-label">
+                                <strong>Titolo</strong>
+                            </label>
+                            <input id="titolo" class="form-control form-control-lg" readonly
+                                placeholder="Inserisci il titolo">
+                        </div>
                         <hr>
                         <div class="row mb-2">
                             <div class="col-md-6">
-                                <strong>Autore:</strong>
-                                <span id="autore"></span>
+                                <label for="autore" class="form-label">
+                                    <strong>Autore</strong>
+                                </label>
+                                <input id="autore" class="form-control" readonly placeholder="Inserisci l'autore">
                             </div>
                             <div class="col-md-6">
-                                <strong>Genere:</strong>
-                                <span id="genere"></span>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-6">
-                                <strong>Editore:</strong>
-                                <span id="editore"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <strong>Anno:</strong>
-                                <span id="annoPubblicazione"></span>
+                                <label for="genere" class="form-label">
+                                    <strong>Genere</strong>
+                                </label>
+                                <input id="genere" class="form-control" readonly placeholder="Inserisci il genere">
                             </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-6">
-                                <strong>ISBN:</strong>
-                                <span id="isbn"></span>
+                                <label for="editore" class="form-label">
+                                    <strong>Editore</strong>
+                                </label>
+                                <input id="editore" class="form-control" readonly placeholder="Inserisci l'editore">
                             </div>
                             <div class="col-md-6">
-                                <strong>Disponibilità:</strong>
-                                <span id="disponibilita"></span>
+                                <label for="annoPubblicazione" class="form-label">
+                                    <strong>Anno di pubblicazione</strong>
+                                </label>
+                                <input id="annoPubblicazione" class="form-control" readonly
+                                    placeholder="Inserisci l'anno di pubblicazione">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label for="isbn" class="form-label">
+                                    <strong>ISBN</strong>
+                                </label>
+                                <input id="isbn" class="form-control" readonly placeholder="Inserisci l'ISBN">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="disponibilita" class="form-label">
+                                    <strong>Disponibilità</strong>
+                                </label>
+                                <input id="disponibilita" class="form-control" readonly>
                             </div>
                         </div>
                     </div>
@@ -71,11 +92,17 @@
                 <hr>
                 <!-- DESCRIZIONE -->
                 <h5>Descrizione</h5>
-                <p id="descrizione"></p>
+                <!--<p id="descrizione"></p>-->
+                <textarea id="descrizione" class="form-control" rows="5" readonly></textarea>
                 <hr>
                 <!-- AZIONI -->
                 <div class="d-flex gap-2">
-                    <button id="btnPrestito" class="btn btn-success">Richiedi prestito</button>
+                    <button id="btnPrestito" class="btn btn-success">
+                        Richiedi prestito
+                    </button>
+                    <button id="btnSalva" class="btn btn-primary d-none">
+                        Salva
+                    </button>
                     <a href="/pages/catalogo.html" class="btn btn-secondary">Torna al catalogo</a>
                 </div>
             </div>

@@ -8,6 +8,13 @@ import * as MessageView from './ui/messageView.js';
 
 let materiale = null;
 
+const CONTEXT = {
+    mode: "view",
+    isEdit: false,
+    isNew: false,
+    idLibro: null
+};
+
 async function caricaMateriale() {
     try {
 
@@ -75,6 +82,43 @@ async function confermaPrestito() {
     }
 }
 
+async function insertMateriale() {
+    try {
+
+        const materiale = View.getMaterialeForm();
+
+        const risultato =
+            await MaterialiApi.insertItem(materiale);
+
+        MessageView.mostraSuccesso(
+            "Materiale inserito correttamente."
+        );
+
+        window.location.href =
+            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
+
+    } catch (err) {
+        MessageView.mostraErrore(err.message);
+    }
+}
+
+async function updateMateriale() {
+    try {
+
+        const materiale = View.getMaterialeForm();
+
+        materiale.id_libro = CONTEXT.idLibro;
+
+        await MaterialiApi.updateItem(materiale);
+
+        MessageView.mostraSuccesso(
+            "Materiale aggiornato correttamente."
+        );
+
+    } catch (err) {
+        MessageView.mostraErrore(err.message);
+    }
+}
 
 async function inizializzaPagina() {
 
@@ -97,7 +141,63 @@ async function inizializzaPagina() {
 
     await Auth.initPage(false);
 
-    await caricaMateriale();
+    const params = new URLSearchParams(window.location.search);
+
+    CONTEXT.mode = params.get("mode") || "view";
+    CONTEXT.isEdit = CONTEXT.mode === "edit";
+    CONTEXT.isNew = CONTEXT.mode === "new";
+    CONTEXT.idLibro = params.get("id");
+
+    if (!CONTEXT.isNew) {
+        await caricaMateriale();
+    }
+
+    if (CONTEXT.isEdit) {
+
+        View.setEditMode(true);
+
+        document
+            .getElementById("btnPrestito")
+            .classList.add("d-none");
+
+        document
+            .getElementById("btnSalva")
+            .classList.remove("d-none");
+
+        document.getElementById("btnSalva").textContent =
+            CONTEXT.isNew ? "Inserisci" : "Salva";
+
+    }
+    else if (CONTEXT.isNew) {
+
+        View.resetMateriale();
+        View.setEditMode(true);
+
+        document
+            .getElementById("btnPrestito")
+            .classList.add("d-none");
+
+        document
+            .getElementById("btnSalva")
+            .classList.remove("d-none");
+
+        document.getElementById("btnSalva").textContent =
+            CONTEXT.isNew ? "Inserisci" : "Salva";
+    }
+
+    switch (CONTEXT.mode) {
+    case "view":
+        document.getElementById("pageTitle").textContent = "Dettaglio materiale";
+        break;
+
+    case "edit":
+        document.getElementById("pageTitle").textContent = "Modifica materiale";
+        break;
+
+    case "new":
+        document.getElementById("pageTitle").textContent = "Nuovo materiale";
+        break;
+}
 
     ModalPrestito.inizializza();
 
@@ -114,6 +214,18 @@ async function inizializzaPagina() {
             'click',
             confermaPrestito
         );
+
+    document
+        .getElementById("btnSalva")
+        .addEventListener("click", async () => {
+
+            if (CONTEXT.isNew) {
+                await insertMateriale();
+            } else {
+                await updateMateriale();
+            }
+
+        });
 }
 
 

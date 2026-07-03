@@ -85,6 +85,12 @@ async function inizializzaPagina() {
             .getElementById("btnNuovoMateriale")
             .classList.remove("d-none");
 
+       document
+        .getElementById('btnNuovoMateriale')
+        .addEventListener('click', ()=> 
+            {window.location.href =
+                    `/pages/dettaglio-materiale.html?mode=new`;
+            });            
     }
 
     document

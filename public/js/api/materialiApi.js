@@ -42,13 +42,31 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     return risultato;
 }
 
-async function updateItem(idMateriale) {
+async function insertItem(materiale) {
+    const response = await fetch
+        (`/materiali/admin/insert`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(materiale)
+            }
+        )
+}
 
-    console.log(idMateriale);
+async function updateItem(materiale) {
+
+    const idMateriale = materiale.id_libro;
+
     const response = await fetch(
         `/materiali/admin/update/${idMateriale}`,
         {
-            method: "PUT"
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(materiale)
         }
     );
 
@@ -81,5 +99,7 @@ async function deleteItem(idMateriale) {
 export {
     ricercaById,
     ricercabyAutoreTitolo,
+    insertItem,
+    updateItem,
     deleteItem
 }

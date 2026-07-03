@@ -1,13 +1,13 @@
 //GESTIONE DEL DOM
 function mostraDettaglioMateriale(libro) {
-    
-    document.getElementById('titolo').textContent = libro.titolo;
-    document.getElementById('autore').textContent = libro.autore;
-    document.getElementById('genere').textContent = libro.genere ?? '-';
-    document.getElementById('editore').textContent = libro.casa_editrice ?? '-';
-    document.getElementById('annoPubblicazione').textContent = libro.anno_pubblicazione ?? '-';
-    document.getElementById('isbn').textContent = libro.isbn ?? '-';
-    document.getElementById('descrizione').textContent = libro.descrizione ?? 'Nessuna descrizione disponibile.';
+
+    document.getElementById('titolo').value = libro.titolo ?? ''; //non più textContent
+    document.getElementById('autore').value = libro.autore;
+    document.getElementById('genere').value = libro.genere ?? '-';
+    document.getElementById('editore').value = libro.casa_editrice ?? '-';
+    document.getElementById('annoPubblicazione').value = libro.anno_pubblicazione ?? '-';
+    document.getElementById('isbn').value = libro.isbn ?? '-';
+    document.getElementById('descrizione').value = libro.descrizione ?? 'Nessuna descrizione disponibile.';
 
     //gestione della visualizzazione della disponibilità
     const disponibilita = document.getElementById('disponibilita');
@@ -31,6 +31,73 @@ function mostraDettaglioMateriale(libro) {
     document.getElementById('prestitoModal').dataset.idLibro = libro.id_libro;
 }
 
+function setEditMode(editable) {
+
+    [
+        "titolo",
+        "autore",
+        "genere",
+        "editore",
+        "annoPubblicazione",
+        "isbn",
+        "descrizione"
+    ].forEach(id => {
+
+        document
+            .getElementById(id)
+            .readOnly = !editable;
+    });
+}
+
+function resetMateriale() {
+
+    [
+        "titolo",
+        "autore",
+        "genere",
+        "editore",
+        "annoPubblicazione",
+        "isbn",
+        "descrizione"
+    ].forEach(id => {
+
+        document.getElementById(id).value = "";
+    });
+
+     document.getElementById("disponibilita").innerHTML =
+        '<span class="badge bg-secondary">Nuovo materiale</span>';
+
+    document.getElementById("copertina").src =
+        "/images/book-placeholder.png";
+}
+
+function getMaterialeForm() {
+
+    return {
+
+        titolo:
+            document.getElementById("titolo").value,
+
+        autore:
+            document.getElementById("autore").value,
+
+        genere:
+            document.getElementById("genere").value,
+
+        casaEditrice:
+            document.getElementById("editore").value,
+
+        annoPubblicazione:
+            document.getElementById("annoPubblicazione").value,
+
+        isbn:
+            document.getElementById("isbn").value,
+
+        descrizione:
+            document.getElementById("descrizione").value
+    };
+}
+
 //renderPaginazione(data.total, page); -- DA FARE
 function renderCatalogo(materiali, context) {
 
@@ -47,7 +114,7 @@ function renderCatalogo(materiali, context) {
                 <td>${m.copie_disponibili}</td>
                 <td>
                     <!--<a 
-                        href="/pages/dettaglio_materiale.html?id=${m.id_libro}"
+                        href="/pages/dettaglio-materiale.html?id=${m.id_libro}"
                         class="btn btn-sm btn-primary">
                         Dettagli
                     </a>-->
@@ -61,7 +128,7 @@ function renderAzioni(materiale, context) {
 
     let html = `
         <a
-            href="/pages/dettaglio_materiale.html?id=${materiale.id_libro}"
+            href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
             class="btn btn-sm btn-primary">
             Dettagli
         </a>
@@ -87,7 +154,7 @@ function renderAzioni(materiale, context) {
     return html;
 }
 
-function resetCatalogo(){
+function resetCatalogo() {
     document.getElementById('tabellaMateriali').innerHTML = '';
 }
 
@@ -105,5 +172,8 @@ export {
     mostraDettaglioMateriale,
     renderCatalogo,
     resetCatalogo,
-    resetRicerca
+    resetRicerca,
+    setEditMode,
+    resetMateriale,
+    getMaterialeForm
 }
