@@ -90,7 +90,14 @@ async function insertMateriale() {
         const risultato =
             await MaterialiApi.insertItem(materiale);
 
+        /*window.location.href =
+            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
+
         MessageView.mostraSuccesso(
+            "Materiale inserito correttamente."
+        );*/
+        sessionStorage.setItem(
+            "successMessage",
             "Materiale inserito correttamente."
         );
 
@@ -120,6 +127,65 @@ async function updateMateriale() {
     }
 }
 
+
+function inizializzaContext() {
+
+    const params = new URLSearchParams(window.location.search);
+
+    CONTEXT.mode = params.get("mode") || "view";
+    CONTEXT.isEdit = CONTEXT.mode === "edit";
+    CONTEXT.isNew = CONTEXT.mode === "new";
+
+    CONTEXT.idLibro = params.get("id");
+}
+
+function mostraMessaggiPendenti() {
+
+    const msg =
+        sessionStorage.getItem("successMessage");
+
+    if (!msg) {
+        return;
+    }
+
+    MessageView.mostraSuccesso(msg);
+
+    sessionStorage.removeItem("successMessage");
+}
+
+function registraEventi() {
+
+    document
+        .getElementById("btnPrestito")
+        .addEventListener(
+            "click",
+            () => apriModalPrestito(materiale)
+        );
+
+    document
+        .getElementById("btnConfermaPrestito")
+        .addEventListener(
+            "click",
+            confermaPrestito
+        );
+
+    document
+        .getElementById("btnSalva")
+        .addEventListener(
+            "click",
+            async () => {
+
+                if (CONTEXT.isNew) {
+                    await insertMateriale();
+                }
+                else {
+                    await updateMateriale();
+                }
+
+            }
+        );
+}
+
 async function inizializzaPagina() {
 
     CommonLayoutView.renderNavbar('catalogo'); // da verificare il parametro
@@ -141,7 +207,20 @@ async function inizializzaPagina() {
 
     await Auth.initPage(false);
 
-    const params = new URLSearchParams(window.location.search);
+    inizializzaContext();
+
+     if (!CONTEXT.isNew) {
+        await caricaMateriale();
+    }
+
+    View.configuraPaginaMateriale();
+    mostraMessaggiPendenti();
+
+    ModalPrestito.inizializza();
+
+    registraEventi();
+
+    /*const params = new URLSearchParams(window.location.search);
 
     CONTEXT.mode = params.get("mode") || "view";
     CONTEXT.isEdit = CONTEXT.mode === "edit";
@@ -186,18 +265,28 @@ async function inizializzaPagina() {
     }
 
     switch (CONTEXT.mode) {
-    case "view":
-        document.getElementById("pageTitle").textContent = "Dettaglio materiale";
-        break;
+        case "view":
+            document.getElementById("pageTitle").textContent = "Dettaglio materiale";
+            break;
 
-    case "edit":
-        document.getElementById("pageTitle").textContent = "Modifica materiale";
-        break;
+        case "edit":
+            document.getElementById("pageTitle").textContent = "Modifica materiale";
+            break;
 
-    case "new":
-        document.getElementById("pageTitle").textContent = "Nuovo materiale";
-        break;
-}
+        case "new":
+            document.getElementById("pageTitle").textContent = "Nuovo materiale";
+            break;
+    }
+
+    //gestione messaggio nel caso di inserimento nuovo libro
+    const msg =
+        sessionStorage.getItem("successMessage");
+
+    if (msg) {
+
+        MessageView.mostraSuccesso(msg);
+        sessionStorage.removeItem("successMessage");
+    }
 
     ModalPrestito.inizializza();
 
@@ -225,7 +314,7 @@ async function inizializzaPagina() {
                 await updateMateriale();
             }
 
-        });
+        });*/
 }
 
 

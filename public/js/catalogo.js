@@ -77,20 +77,20 @@ async function inizializzaPagina() {
     }
 
     const user = await Auth.initPage();
-    CONTEXT.role = user.ruolo;
-    CONTEXT.isAdmin = user.ruolo === "BIBLIOTECARIO";
+    CONTEXT.role = user?.ruolo ?? "UTENTE";
+    CONTEXT.isAdmin = CONTEXT.role === "BIBLIOTECARIO";
 
     if (CONTEXT.isAdmin) {
         document
             .getElementById("btnNuovoMateriale")
             .classList.remove("d-none");
 
-       document
-        .getElementById('btnNuovoMateriale')
-        .addEventListener('click', ()=> 
-            {window.location.href =
+        document
+            .getElementById('btnNuovoMateriale')
+            .addEventListener('click', () => {
+                window.location.href =
                     `/pages/dettaglio-materiale.html?mode=new`;
-            });            
+            });
     }
 
     document
@@ -120,12 +120,12 @@ async function inizializzaPagina() {
                     //console.log(id);
                     const risultato =
                         await MaterialiApi.deleteItem(id);
-                        
+
+                    await ricercaMateriali();
+
                     MessageView.mostraSuccesso(
                         risultato.messaggio
                     );
-
-                    await ricercaMateriali();
 
                 } catch (err) {
 

@@ -52,7 +52,14 @@ async function insertItem(materiale) {
                 },
                 body: JSON.stringify(materiale)
             }
-        )
+        );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
 }
 
 async function updateItem(materiale) {
