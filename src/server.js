@@ -14,7 +14,7 @@ const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
 
-app.use(express.json()); //da verificare cosa usare effettivamente
+app.use(express.json()); 
 app.use(express.static('public'));// per la parte di front-end
 
 app.use(session({
