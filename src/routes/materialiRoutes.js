@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', materialiController.search);
 router.get('/:id', materialiController.findById);
+router.get('/generi', materialiController.getAllGeneri);
 
 router.post(
     '/admin/insert', 

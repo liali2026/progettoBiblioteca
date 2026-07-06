@@ -14,7 +14,7 @@ function renderCatalogo(materiali, context) {
                 <td>${m.titolo}</td>
                 <td>${m.autore}</td>
                 <td>${m.genere ?? '-'}</td>
-                <td>${m.copie_disponibili}</td>
+                <td>${m.nr_copie_disponibili}</td>
                 <td>
                     ${renderAzioni(m, context)}
                 </td>

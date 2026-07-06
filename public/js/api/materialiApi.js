@@ -42,6 +42,19 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     return risultato;
 }
 
+async function getAllGeneri(){
+
+    const response = await fetch(`/materiali/generi`);
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
 async function insertItem(materiale) {
     const response = await fetch
         (`/materiali/admin/insert`,
@@ -106,6 +119,7 @@ async function deleteItem(idMateriale) {
 export {
     ricercaById,
     ricercabyAutoreTitolo,
+    getAllGeneri,
     insertItem,
     updateItem,
     deleteItem

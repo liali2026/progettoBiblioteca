@@ -26,6 +26,18 @@ async function findById(req, res, next) {
 
 }
 
+async function getAllGeneri(req, res, next) {
+
+    try {
+        const generi = await materialiService.getAllGeneri();
+        res.json(generi);
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
 async function insertItem(req, res, next) {
     try {
 
@@ -83,6 +95,7 @@ async function deleteItem(req, res, next) {
 module.exports = {
     search,
     findById,
+    getAllGeneri,
     insertItem,
     updateItem,
     deleteItem

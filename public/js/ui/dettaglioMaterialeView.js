@@ -65,14 +65,14 @@ function popolaForm(materiale) {
         materiale.descrizione ?? 'Nessuna descrizione disponibile.';
 }
 
-function mostraDisponibilita(disponibile) {
+/*function mostraDisponibilita(disponibile) {
     //gestione della visualizzazione della disponibilità
     const disponibilita = document.getElementById('disponibilita');
     disponibilita.innerHTML =
         disponibile
         ? '<span class="badge bg-success">Disponibile</span>'
         : '<span class="badge bg-danger">Non disponibile</span>';
-}
+}*/
 
 function aggiornaCopertina(materiale) {
 
@@ -82,6 +82,17 @@ function aggiornaCopertina(materiale) {
     img.src = materiale.copertina
         ? `/images/covers/${materiale.copertina}`
         : "/images/book-placeholder.png";
+}
+
+function caricaGeneri(generi) {
+
+    console.log(generi);
+    const select = document.getElementById("genere");
+
+    select.innerHTML =
+        generi.map(g =>
+            `<option value="${g.id}">${g.descrizione}</option>`
+        ).join("");
 }
 
 /*function configuraPrestito(materiale) {
@@ -117,48 +128,6 @@ function configuraPagina(mode) {
         resetMateriale();
     }
 
-   /*const titoloPagina = document.getElementById("pageTitle");
-    const btnPrestito = document.getElementById("btnPrestito");
-    const btnSalva = document.getElementById("btnSalva");
-
-    switch (mode) {
-
-        case "view":
-
-            titoloPagina.textContent = "Dettaglio materiale";
-
-            btnPrestito.classList.remove("d-none");
-            btnSalva.classList.add("d-none");
-
-            setEditMode(false);
-
-            break;
-
-        case "edit":
-
-            titoloPagina.textContent = "Modifica materiale";
-
-            btnPrestito.classList.add("d-none");
-            btnSalva.classList.remove("d-none");
-            btnSalva.textContent = "Salva";
-
-            setEditMode(true);
-
-            break;
-
-        case "new":
-
-            titoloPagina.textContent = "Nuovo materiale";
-
-            btnPrestito.classList.add("d-none");
-            btnSalva.classList.remove("d-none");
-            btnSalva.textContent = "Inserisci";
-
-            resetMateriale();
-            setEditMode(true);
-
-            break;
-    }*/
 }
 
 function setEditMode(editable) {
@@ -170,7 +139,8 @@ function setEditMode(editable) {
         "editore",
         "annoPubblicazione",
         "isbn",
-        "descrizione"
+        "descrizione",
+        "disponibilita"
     ].forEach(id => {
 
         document
@@ -234,5 +204,6 @@ function getMaterialeForm() {
 export {
     mostraMateriale,
     configuraPagina,
-    getMaterialeForm
+    getMaterialeForm,
+    caricaGeneri
 }

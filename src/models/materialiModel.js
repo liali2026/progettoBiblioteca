@@ -63,7 +63,7 @@ async function findById(id) {
         const params = [];
 
         if (id) {
-            sql += ` AND l.id_libro = ?`;
+            sql += ` AND id_libro = ?`;
             params.push(`${id}`);
         }
 
@@ -78,12 +78,114 @@ async function findById(id) {
     }
 }
 
+async function getAllGeneri(id) {
+    const conn = await getConnection();
+    try {
+
+        let sql = `
+                  SELECT *
+                    FROM generi
+                `;
+
+        const [generi] = await conn.query(sql);
+
+        return generi;
+
+    } finally {
+        await conn.end();
+    }
+}
+
+async function insertLibro(conn, materiale) {
+
+    const [result] = await conn.query(
+        `
+        INSERT INTO libri(
+            titolo,
+            autore,
+            genere,
+            isbn,
+            anno_pubblicazione,
+            casa_editrice,
+            descrizione
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+            materiale.titolo,
+            materiale.autore,
+            materiale.genere,
+            materiale.isbn,
+            materiale.annoPubblicazione,
+            materiale.casaEditrice,
+            materiale.descrizione
+        ]
+    );
+
+    return result.insertId;
+}
+
+async function insertCopie(conn, idLibro, nrCopie) {
+
+    if (Number.isNaN(nrCopie) || nrCopie < 0) {
+        throw new Error("Numero copie non valido.");
+    }
+
+    for (let i = 0; i < nrCopie; i++) {
+
+        await conn.query(
+            `
+            INSERT INTO copie(
+                id_libro,
+                stato
+            )
+            VALUES (?, 'DISPONIBILE')
+            `,
+            [idLibro]
+        );
+    }
+}
 
 async function insertItem(materiale) {
 
     const conn = await getConnection();
     try {
+        await conn.beginTransaction();
+        const idLibro =  await insertLibro(conn, materiale);
 
+        await insertCopie(
+            conn,
+            idLibro,
+            materiale.nrCopie
+        );
+
+        await conn.commit();
+
+        return {
+            idLibro
+        };
+
+    } catch (err) {
+
+        await conn.rollback();
+        throw err;
+
+    } finally {
+
+        await conn.end();
+
+    }
+}
+
+
+/*async function insertItem(materiale) {
+
+    const conn = await getConnection();
+    try {
+
+        await conn.beginTransaction();
+
+        // inserimento nella tabella libri
         const [result] =
             await conn.query(
                 `
@@ -108,21 +210,48 @@ async function insertItem(materiale) {
                 ]
             );
 
+        // inserimento nella tabella copie
+        const nrCopie = Number(materiale.nrCopie);
+
+        if (Number.isNaN(nrCopie) || nrCopie < 0) {
+            throw new Error("Numero copie non valido.");
+        }
+
+        for (let i = 0; i < nrCopie; i++) {
+            for (let i = 0; i < materiale.nrCopie; i++) {
+                await conn.query(
+                    `
+                INSERT INTO copie( 
+                    id_libro,
+                    stato)
+                VALUES (?, 
+                       'DISPONIBILE')
+                       `,
+                    [result.insertId]
+                );
+            }
+        }
+
+        await conn.commit();
+
         return {
             idLibro: result.insertId
         };
 
+    } catch (err) {
+
+        await conn.rollback();
+        throw err;
+
     } finally {
         await conn.end();
     }
-}
+}*/
 
 async function updateItem(materiale) {
 
     const conn = await getConnection();
     try {
-
-        await conn.beginTransaction();
 
         const [result] =
             await conn.query(
@@ -256,6 +385,7 @@ async function deleteItem(idMateriale) {
 module.exports = {
     search,
     findById,
+    getAllGeneri,
     insertItem,
     updateItem,
     deleteItem

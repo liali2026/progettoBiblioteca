@@ -37,7 +37,7 @@
                             <label for="titolo" class="form-label">
                                 <strong>Titolo</strong>
                             </label>
-                            <input id="titolo" class="form-control form-control-lg" readonly
+                            <input id="titolo" class="form-control form-control-lg" readonly maxlength="255" required
                                 placeholder="Inserisci il titolo">
                         </div>
                         <hr>
@@ -46,13 +46,15 @@
                                 <label for="autore" class="form-label">
                                     <strong>Autore</strong>
                                 </label>
-                                <input id="autore" class="form-control" readonly placeholder="Inserisci l'autore">
+                                <input id="autore" class="form-control" readonly maxlength="255" required
+                                    placeholder="Inserisci l'autore">
                             </div>
                             <div class="col-md-6">
                                 <label for="genere" class="form-label">
                                     <strong>Genere</strong>
                                 </label>
-                                <input id="genere" class="form-control" readonly placeholder="Inserisci il genere">
+                                <!--<input id="genere" class="form-control" readonly placeholder="Inserisci il genere">-->
+                                <select id="genere" class="form-select"></select>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -60,7 +62,8 @@
                                 <label for="editore" class="form-label">
                                     <strong>Editore</strong>
                                 </label>
-                                <input id="editore" class="form-control" readonly placeholder="Inserisci l'editore">
+                                <input id="editore" class="form-control" readonly maxlength="255" required
+                                    placeholder="Inserisci l'editore">
                             </div>
                             <div class="col-md-6">
                                 <label for="annoPubblicazione" class="form-label">
@@ -81,7 +84,8 @@
                                 <label for="disponibilita" class="form-label">
                                     <strong>Disponibilità</strong>
                                 </label>
-                                <input id="disponibilita" class="form-control" readonly>
+                                <input id="disponibilita" class="form-control" readonly
+                                    placeholder="Inserisci il numero di copie">
                             </div>
                         </div>
                     </div>

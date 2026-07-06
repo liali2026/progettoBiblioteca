@@ -8,6 +8,10 @@ async function findById(id){
     return await materialiModel.findById(id);
 }
 
+async function getAllGeneri(){
+    return await materialiModel.getAllGeneri();
+}
+
 async function insertItem(materiale){
     return await materialiModel.insertItem(materiale);
 }
@@ -27,6 +31,7 @@ async function deleteItem(id){
 module.exports = {
     search,
     findById,
+    getAllGeneri,
     insertItem,
     updateItem,
     deleteItem

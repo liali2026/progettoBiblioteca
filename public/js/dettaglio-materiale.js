@@ -210,6 +210,11 @@ async function inizializzaPagina() {
     inizializzaContext();
     View.configuraPagina(CONTEXT.mode);
 
+    //gestione dei generi
+    const generi = await MaterialiApi.getAllGeneri();
+    View.caricaGeneri(generi);
+    //
+
     if (CONTEXT.mode === "view" || CONTEXT.mode === "edit") {
         await caricaMateriale();
     }
