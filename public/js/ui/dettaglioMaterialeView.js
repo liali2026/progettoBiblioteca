@@ -1,15 +1,44 @@
 /**
  * GESTIONE DELLA dettaglio-materiale.html
  * */
-function renderMateriale(materiale) {
-    caricaDatiMateriale(materiale);
-    aggiornaDisponibilita(materiale);
+
+const CONFIG = {
+    view: {
+        titolo: "Dettaglio materiale",
+        mostraPrestito: true,
+        mostraSalva: false,
+        testoSalva: "",
+        editable: false,
+        reset: false
+    },
+
+    edit: {
+        titolo: "Modifica materiale",
+        mostraPrestito: false,
+        mostraSalva: true,
+        testoSalva: "Salva",
+        editable: true,
+        reset: false
+    },
+
+    new: {
+        titolo: "Nuovo materiale",
+        mostraPrestito: false,
+        mostraSalva: true,
+        testoSalva: "Inserisci",
+        editable: true,
+        reset: true
+    }
+};
+
+function mostraMateriale(materiale) {
+    popolaForm(materiale);
+    //mostraDisponibilita(disponibile);
     aggiornaCopertina(materiale);
-    configuraPrestito(materiale);
 }
 
 
-function caricaDatiMateriale(materiale) {
+function popolaForm(materiale) {
 
     document.getElementById('titolo').value =
         materiale.titolo ?? '';
@@ -29,21 +58,20 @@ function caricaDatiMateriale(materiale) {
     document.getElementById('isbn').value =
         materiale.isbn ?? '-';
 
+    document.getElementById('disponibilita').value =
+        materiale.nr_copie_disponibili ?? '-';
+
     document.getElementById('descrizione').value =
         materiale.descrizione ?? 'Nessuna descrizione disponibile.';
 }
 
-function aggiornaDisponibilita(materiale) {
+function mostraDisponibilita(disponibile) {
     //gestione della visualizzazione della disponibilità
     const disponibilita = document.getElementById('disponibilita');
-    if (materiale.copie_disponibili > 0) {
-        disponibilita.innerHTML =
-            `<span class="badge bg-success">Disponibile</span>`;
-    } else {
-        disponibilita.innerHTML =
-            `<span class="badge bg-danger">Non disponibile</span>`;
-        //document.getElementById('btnPrestito').disabled = true;
-    }
+    disponibilita.innerHTML =
+        disponibile
+        ? '<span class="badge bg-success">Disponibile</span>'
+        : '<span class="badge bg-danger">Non disponibile</span>';
 }
 
 function aggiornaCopertina(materiale) {
@@ -56,18 +84,40 @@ function aggiornaCopertina(materiale) {
         : "/images/book-placeholder.png";
 }
 
-function configuraPrestito(materiale) {
+/*function configuraPrestito(materiale) {
 
     document
         .getElementById("prestitoModal")
         .dataset.idLibro =
         materiale.id_libro;
-}
+}*/
 
 
-function configuraPaginaMateriale(mode) {
+function configuraPagina(mode) {
 
-    const titoloPagina = document.getElementById("pageTitle");
+    const cfg = CONFIG[mode];
+    console.log(cfg);
+
+    document.getElementById("pageTitle").textContent = cfg.titolo;
+
+    document
+        .getElementById("btnPrestito")
+        .classList.toggle("d-none", !cfg.mostraPrestito);
+
+    const btnSalva =
+        document.getElementById("btnSalva");
+
+    btnSalva.classList.toggle("d-none", !cfg.mostraSalva);
+
+    btnSalva.textContent = cfg.testoSalva;
+
+    setEditMode(cfg.editable);
+
+    if (cfg.reset) {
+        resetMateriale();
+    }
+
+   /*const titoloPagina = document.getElementById("pageTitle");
     const btnPrestito = document.getElementById("btnPrestito");
     const btnSalva = document.getElementById("btnSalva");
 
@@ -108,7 +158,7 @@ function configuraPaginaMateriale(mode) {
             setEditMode(true);
 
             break;
-    }
+    }*/
 }
 
 function setEditMode(editable) {
@@ -173,85 +223,16 @@ function getMaterialeForm() {
         isbn:
             document.getElementById("isbn").value,
 
+        nrCopie:
+            document.getElementById("disponibilita").value,
+
         descrizione:
             document.getElementById("descrizione").value
     };
 }
 
-
-/**
- * GESTIONE DELLA catalogo.html
- * */
-//renderPaginazione(data.total, page); -- DA FARE
-function renderCatalogo(materiali, context) {
-
-    const tbody = document.getElementById('tabellaMateriali');
-    const box = document.getElementById('messaggioPagina');
-
-    box.classList.add('d-none');
-    tbody.innerHTML =
-        materiali.map(m => `
-            <tr>
-                <td>${m.titolo}</td>
-                <td>${m.autore}</td>
-                <td>${m.genere ?? '-'}</td>
-                <td>${m.copie_disponibili}</td>
-                <td>
-                    ${renderAzioni(m, context)}
-                </td>
-            </tr>
-        `).join('');
-}
-
-function renderAzioni(materiale, context) {
-
-    let html = `
-        <a
-            href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
-            class="btn btn-sm btn-primary">
-            Dettagli
-        </a>
-    `;
-
-    if (context.isAdmin) {
-
-        html += `
-            <button
-                class="btn btn-sm btn-warning btnModifica"
-                data-id-libro="${materiale.id_libro}">
-                Modifica
-            </button>
-
-            <button
-                class="btn btn-sm btn-danger btnElimina"
-                data-id-libro="${materiale.id_libro}">
-                Elimina
-            </button>
-        `;
-    }
-
-    return html;
-}
-
-function resetCatalogo() {
-    document.getElementById('tabellaMateriali').innerHTML = '';
-}
-
-function resetRicerca() {
-
-    document.getElementById('titolo').value = '';
-    document.getElementById('autore').value = '';
-    resetCatalogo();
-
-    // reset paginazione + ricerca --DA FARE
-    //cercaMateriali(1);
-}
-
 export {
-    renderMateriale,
-    configuraPaginaMateriale,
-    getMaterialeForm,
-    renderCatalogo,
-    resetCatalogo,
-    resetRicerca
+    mostraMateriale,
+    configuraPagina,
+    getMaterialeForm
 }

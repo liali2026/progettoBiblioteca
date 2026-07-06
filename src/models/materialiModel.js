@@ -47,12 +47,18 @@ async function findById(id) {
     const conn = await getConnection();
     try {
 
-        let sql = `
+        /*let sql = `
             SELECT l.*, COUNT(c.id_copia) AS copie_disponibili
             FROM libri l
             LEFT JOIN copie c ON l.id_libro = c.id_libro
             WHERE l.attivo = 1
-        `;
+        `;*/
+
+        let sql = `
+                  SELECT *
+                    FROM vista_catalogo_libri
+                   WHERE 1=1
+                `;
 
         const params = [];
 
@@ -61,7 +67,7 @@ async function findById(id) {
             params.push(`${id}`);
         }
 
-        sql += ` GROUP BY l.id_libro`;
+        //sql += ` GROUP BY l.id_libro`;
 
         const [materiali] = await conn.query(sql, params);
 
@@ -116,6 +122,8 @@ async function updateItem(materiale) {
     const conn = await getConnection();
     try {
 
+        await conn.beginTransaction();
+
         const [result] =
             await conn.query(
                 `
@@ -158,7 +166,7 @@ async function updateItem(materiale) {
 
 async function deleteItem(idMateriale) {
     const conn = await getConnection();
-    console.log("idMateriale " + idMateriale);
+    //console.log("idMateriale " + idMateriale);
     try {
         await conn.beginTransaction();
 

@@ -1,84 +1,39 @@
 import * as Auth from './auth.js';
+
 import * as MaterialiApi from './api/materialiApi.js';
 import * as PrestitiApi from './api/prestitiApi.js';
+
 import * as ModalPrestito from './ui/prestitoModalView.js';
-import * as View from './ui/materialeView.js';
+import * as View from './ui/dettaglioMaterialeView.js';
 import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as MessageView from './ui/messageView.js';
 
-let materiale = null;
+//let materiale = null;
 
 const CONTEXT = {
     mode: "view",
-    isEdit: false,
-    isNew: false,
-    idLibro: null
+    idLibro: null,
+    materiale: null
 };
+
 
 async function caricaMateriale() {
     try {
 
         MessageView.nascondiMessaggio();
 
-        const params = new URLSearchParams(window.location.search);
-        const idMateriale = params.get('id');
-
+        const idMateriale = CONTEXT.idLibro;
         if (!idMateriale) {
             MessageView.mostraErrore('Identificativo materiale non valido.');
             return;
         }
+        CONTEXT.materiale = await MaterialiApi.ricercaById(idMateriale);
 
-        materiale = await MaterialiApi.ricercaById(idMateriale);
-
-        View.mostraDettaglioMateriale(materiale);
+        View.mostraMateriale(CONTEXT.materiale, CONTEXT.materiale.copie_disponibili > 0);
 
     } catch (err) {
         console.error(err);
         MessageView.mostraErrore('Errore durante il caricamento del materiale.');
-    }
-}
-
-async function apriModalPrestito(materiale) {
-
-    try {
-        if (!materiale) {
-            return;
-        }
-
-        const user = await Auth.requireLogin();
-        if (!user) {
-            return;
-        }
-
-        ModalPrestito.apri(materiale, user);
-
-    } catch (err) {
-        console.log(err.message);
-        MessageView.mostraErrore(err.message);
-
-    }
-}
-
-
-async function confermaPrestito() {
-    try {
-
-        const idMateriale = materiale.id_libro; //document.getElementById('prestitoModal').dataset.idLibro;
-        const durata = ModalPrestito.getDurataPrestito();
-
-        const datiPrestito = await PrestitiApi.creaPrestito(idMateriale, durata);
-
-        ModalPrestito.chiudi();
-        await caricaMateriale();
-        MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
-                                    Codice prestito: <strong>${datiPrestito.idPrestito}</strong>
-                                    `);
-
-    } catch (err) {
-        console.error(err);
-        ModalPrestito.chiudi();
-        await caricaMateriale();
-        MessageView.mostraErrore(err.message);
     }
 }
 
@@ -127,14 +82,13 @@ async function updateMateriale() {
     }
 }
 
-
 function inizializzaContext() {
 
     const params = new URLSearchParams(window.location.search);
 
     CONTEXT.mode = params.get("mode") || "view";
-    CONTEXT.isEdit = CONTEXT.mode === "edit";
-    CONTEXT.isNew = CONTEXT.mode === "new";
+    /*CONTEXT.isEdit = CONTEXT.mode === "edit";
+    CONTEXT.isNew = CONTEXT.mode === "new";*/
 
     CONTEXT.idLibro = params.get("id");
 }
@@ -153,13 +107,60 @@ function mostraMessaggiPendenti() {
     sessionStorage.removeItem("successMessage");
 }
 
+/**
+ * GESTIONE det prestiti
+ * */
+async function apriModalPrestito(materiale) {
+
+    try {
+        if (!materiale) {
+            return;
+        }
+
+        const user = await Auth.requireLogin();
+        if (!user) {
+            return;
+        }
+
+        ModalPrestito.apri(materiale, user);
+
+    } catch (err) {
+        console.log(err.message);
+        MessageView.mostraErrore(err.message);
+
+    }
+}
+
+async function confermaPrestito() {
+    try {
+
+        const idMateriale = CONTEXT.materiale.id_libro; 
+        const durata = ModalPrestito.getDurataPrestito();
+
+        const datiPrestito = await PrestitiApi.creaPrestito(idMateriale, durata);
+
+        ModalPrestito.chiudi();
+        await caricaMateriale();
+        MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
+                                    Codice prestito: <strong>${datiPrestito.idPrestito}</strong>
+                                    `);
+
+    } catch (err) {
+        console.error(err);
+        ModalPrestito.chiudi();
+        await caricaMateriale();
+        MessageView.mostraErrore(err.message);
+    }
+}
+//
+
 function registraEventi() {
 
     document
         .getElementById("btnPrestito")
         .addEventListener(
             "click",
-            () => apriModalPrestito(materiale)
+            () => apriModalPrestito(CONTEXT.materiale)
         );
 
     document
@@ -175,7 +176,7 @@ function registraEventi() {
             "click",
             async () => {
 
-                if (CONTEXT.isNew) {
+                if (CONTEXT.mode == "new") {
                     await insertMateriale();
                 }
                 else {
@@ -189,7 +190,6 @@ function registraEventi() {
 async function inizializzaPagina() {
 
     CommonLayoutView.renderNavbar('catalogo'); // da verificare il parametro
-
     CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
@@ -208,113 +208,17 @@ async function inizializzaPagina() {
     await Auth.initPage(false);
 
     inizializzaContext();
+    View.configuraPagina(CONTEXT.mode);
 
-     if (!CONTEXT.isNew) {
+    if (CONTEXT.mode === "view" || CONTEXT.mode === "edit") {
         await caricaMateriale();
     }
 
-    View.configuraPaginaMateriale();
     mostraMessaggiPendenti();
 
     ModalPrestito.inizializza();
 
     registraEventi();
-
-    /*const params = new URLSearchParams(window.location.search);
-
-    CONTEXT.mode = params.get("mode") || "view";
-    CONTEXT.isEdit = CONTEXT.mode === "edit";
-    CONTEXT.isNew = CONTEXT.mode === "new";
-    CONTEXT.idLibro = params.get("id");
-
-    if (!CONTEXT.isNew) {
-        await caricaMateriale();
-    }
-
-    if (CONTEXT.isEdit) {
-
-        View.setEditMode(true);
-
-        document
-            .getElementById("btnPrestito")
-            .classList.add("d-none");
-
-        document
-            .getElementById("btnSalva")
-            .classList.remove("d-none");
-
-        document.getElementById("btnSalva").textContent =
-            CONTEXT.isNew ? "Inserisci" : "Salva";
-
-    }
-    else if (CONTEXT.isNew) {
-
-        View.resetMateriale();
-        View.setEditMode(true);
-
-        document
-            .getElementById("btnPrestito")
-            .classList.add("d-none");
-
-        document
-            .getElementById("btnSalva")
-            .classList.remove("d-none");
-
-        document.getElementById("btnSalva").textContent =
-            CONTEXT.isNew ? "Inserisci" : "Salva";
-    }
-
-    switch (CONTEXT.mode) {
-        case "view":
-            document.getElementById("pageTitle").textContent = "Dettaglio materiale";
-            break;
-
-        case "edit":
-            document.getElementById("pageTitle").textContent = "Modifica materiale";
-            break;
-
-        case "new":
-            document.getElementById("pageTitle").textContent = "Nuovo materiale";
-            break;
-    }
-
-    //gestione messaggio nel caso di inserimento nuovo libro
-    const msg =
-        sessionStorage.getItem("successMessage");
-
-    if (msg) {
-
-        MessageView.mostraSuccesso(msg);
-        sessionStorage.removeItem("successMessage");
-    }
-
-    ModalPrestito.inizializza();
-
-    document
-        .getElementById('btnPrestito')
-        .addEventListener(
-            'click',
-            () => apriModalPrestito(materiale)
-        );
-
-    document
-        .getElementById('btnConfermaPrestito')
-        .addEventListener(
-            'click',
-            confermaPrestito
-        );
-
-    document
-        .getElementById("btnSalva")
-        .addEventListener("click", async () => {
-
-            if (CONTEXT.isNew) {
-                await insertMateriale();
-            } else {
-                await updateMateriale();
-            }
-
-        });*/
 }
 
 

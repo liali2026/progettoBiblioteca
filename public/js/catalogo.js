@@ -1,6 +1,6 @@
 import * as Auth from './auth.js';
 import * as MaterialiApi from './api/materialiApi.js';
-import * as MaterialiView from './ui/materialeView.js';
+import * as MaterialiView from './ui/catalogoView.js';
 import * as CommonLayoutView from './ui/commonLayoutView.js';
 import * as MessageView from './ui/messageView.js';
 
