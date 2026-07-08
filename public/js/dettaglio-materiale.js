@@ -85,17 +85,44 @@ async function insertMateriale() {
 
 async function updateMateriale() {
     try {
+        const formData = new FormData(); //gestione copertina
 
         const materiale = View.getMaterialeForm();
         Util.validaMateriale(materiale);
 
         materiale.id_libro = CONTEXT.idLibro;
 
-        await MaterialiApi.updateItem(materiale);
+        formData.append(
+            "materiale",
+            JSON.stringify(materiale)
+        );
 
-        MessageView.mostraSuccesso(
+        //console.log(formData.get("materiale"));
+
+        const file = View.getFileCopertina();
+        if (file) {
+            formData.append(
+                "copertina",
+                file
+            );
+        }
+
+        const risultato =
+            await MaterialiApi.updateItem(formData);
+        
+
+        //await MaterialiApi.updateItem(materiale);
+
+        /*MessageView.mostraSuccesso(
+            "Materiale aggiornato correttamente."
+        );*/
+        sessionStorage.setItem(
+            "successMessage",
             "Materiale aggiornato correttamente."
         );
+
+        window.location.href =
+            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
 
     } catch (err) {
         if (err.dettagli) {

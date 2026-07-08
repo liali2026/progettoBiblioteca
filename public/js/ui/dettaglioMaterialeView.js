@@ -99,8 +99,6 @@ function caricaGeneri(generi) {
             </option>
         `).join("")}
     `;
-
-    console.log( select.innerHTML);
 }
 
 /*function configuraPrestito(materiale) {
@@ -115,7 +113,7 @@ function caricaGeneri(generi) {
 function configuraPagina(mode) {
 
     const cfg = CONFIG[mode];
-    console.log(cfg);
+    //console.log(cfg);
 
     document.getElementById("pageTitle").textContent = cfg.titolo;
 
@@ -161,6 +159,20 @@ function setEditMode(editable) {
     document
         .getElementById("genere")
         .disabled = !editable;
+
+    document
+        .getElementById("load-file")
+        .classList.toggle("d-none", !editable);
+
+    /*if (!editable) {
+        document
+            .getElementById("load-file")
+            .classList.add("d-none");
+    } else {
+        document
+            .getElementById("load-file")
+            .classList.remove("d-none");
+    }*/
 }
 
 function resetMateriale() {

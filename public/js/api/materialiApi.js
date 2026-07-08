@@ -42,7 +42,7 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     return risultato;
 }
 
-async function getAllGeneri(){
+async function getAllGeneri() {
 
     const response = await fetch(`/materiali/generi`);
 
@@ -93,7 +93,7 @@ async function insertItem(formData) {
     return risultato;
 }
 
-async function updateItem(materiale) {
+/*async function updateItem(materiale) {
 
     const idMateriale = materiale.id_libro;
 
@@ -105,6 +105,27 @@ async function updateItem(materiale) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(materiale)
+        }
+    );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
+}*/
+
+async function updateItem(formData) {
+
+    const idMateriale = JSON.parse(formData.get("materiale")).id_libro;
+    //console.log(idMateriale);
+
+    const response = await fetch(
+        `/materiali/admin/update/${idMateriale}`,
+        {
+            method: "PUT",
+            body: formData
         }
     );
 

@@ -41,7 +41,8 @@ async function getAllGeneri(req, res, next) {
 async function insertItem(req, res, next) {
     try {
 
-        const materiale = req.body;
+        //const materiale = req.body;
+        let materiale = JSON.parse(req.body.materiale);
         // gestione della copertina
         if (req.file) {
             materiale.copertina = req.file.filename;
@@ -54,6 +55,7 @@ async function insertItem(req, res, next) {
         });
 
     } catch (err) {
+        console.error("ERRORE INSERT:", err);
         next(err);
     }
 
@@ -61,8 +63,15 @@ async function insertItem(req, res, next) {
 
 async function updateItem(req, res, next) {
     try {
-        const materiale = req.body;
+        //const materiale = req.body;
+        let materiale = JSON.parse(req.body.materiale);
         materiale.idLibro = Number(req.params.id);
+
+        // gestione della copertina
+        if (req.file) {
+            materiale.copertina = req.file.filename;
+        }
+        
         const risultato = await materialiService.updateItem(materiale);
 
          res.json({

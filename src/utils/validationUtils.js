@@ -1,4 +1,3 @@
-
 function isValidISBN13(isbn) {
 
     isbn = isbn.replaceAll("-", "");
@@ -55,75 +54,46 @@ function isPositiveInteger(value) {
     return Number.isInteger(numero) && numero > 0;
 }
 
-export function validaMateriale(materiale) {
-
+//raccoglie tutti gli errori fatti dall'utente in fase di insert/update di un materiale
+function raccogliErrori(materiale) {
     const errori = [];
 
     if (!isRequired(materiale.titolo)) {
-        errori.push({
-            campo: "titolo",
-            messaggio: "Inserire il titolo."
-        });
+        errori.push("Inserire il titolo.");
     }
 
     if (!isRequired(materiale.autore)) {
-        errori.push({
-            campo: "autore",
-            messaggio: "Inserire l'autore."
-        });
+        errori.push("Inserire l'autore.");
     }
 
-    if (!isRequired(materiale.idGenere)) {
-        errori.push({
-            campo: "genere",
-            messaggio: "Selezionare il genere."
-        });
+    if (!isRequired(materiale.genere)) {
+        errori.push("Inserire il genere.");
     }
 
     if (!isRequired(materiale.casaEditrice)) {
-        errori.push({
-            campo: "editore",
-            messaggio: "Inserire la casa editrice."
-        });
+        errori.push("Inserire l'editore.");
     }
 
     if (!isValidISBN13(materiale.isbn)) {
-        errori.push({
-            campo: "isbn",
-            messaggio: "ISBN non valido."
-        });
+        errori.push("ISBN non valido");
     }
 
     if (!isValidPublicationYear(materiale.annoPubblicazione)) {
-        errori.push({
-            campo: "annoPubblicazione",
-            messaggio: "Anno di pubblicazione deve essere maggiore del 1450 e non deve essere nel futuro."
-        });
+        errori.push("Anno di pubblicazione deve essere maggiore del 1450 e non deve essere nel futuro.");
     }
 
     if (!isPositiveInteger(materiale.nrCopie)) {
-        errori.push({
-            campo: "nrCopie",
-            messaggio: "Il numero copie deve essere maggiore di zero."
-        });
+        errori.push("Il numero di copie deve essere maggiore di zero.");
     }
 
-    if (errori.length > 0) {
-
-        const messaggio =
-            "<ul><li>" +
-            errori
-                .map(e => e.messaggio)
-                .join("</li><li>") +
-            "</li></ul>";
-
-        const errore = new Error(messaggio);
-
-        // aggiungo gli errori strutturati per la View
-        errore.dettagli = errori;
-
-        throw errore;
-    }
-
-    return true;
+   return errori;
 }
+
+module.exports ={
+    isRequired,
+    isValidISBN13,
+    isValidPublicationYear,
+    isPositiveInteger,
+    raccogliErrori
+}
+

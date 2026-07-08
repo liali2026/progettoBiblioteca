@@ -201,8 +201,8 @@ async function updateItem(materiale) {
                     materiale.annoPubblicazione,
                     materiale.casaEditrice,
                     materiale.descrizione,
-                    materiale.idLibro,
-                    materiale.copertina
+                    materiale.copertina,
+                    materiale.idLibro
                 ]
             );
 
