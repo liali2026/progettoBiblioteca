@@ -47,7 +47,8 @@ function popolaForm(materiale) {
         materiale.autore ?? '';
 
     document.getElementById('genere').value =
-        materiale.genere ?? '-';
+        //materiale.genere ?? '-';
+        String(materiale.id_genere ?? '');
 
     document.getElementById('editore').value =
         materiale.casa_editrice ?? '-';
@@ -58,7 +59,7 @@ function popolaForm(materiale) {
     document.getElementById('isbn').value =
         materiale.isbn ?? '-';
 
-    document.getElementById('disponibilita').value =
+    document.getElementById('nrCopie').value =
         materiale.nr_copie_disponibili ?? '-';
 
     document.getElementById('descrizione').value =
@@ -86,13 +87,20 @@ function aggiornaCopertina(materiale) {
 
 function caricaGeneri(generi) {
 
-    console.log(generi);
     const select = document.getElementById("genere");
 
-    select.innerHTML =
-        generi.map(g =>
-            `<option value="${g.id}">${g.descrizione}</option>`
-        ).join("");
+    select.innerHTML = `
+        <option value="" selected disabled>
+            Seleziona il genere
+        </option>
+        ${generi.map(g => `
+            <option value="${g.id_genere}">
+                ${g.descrizione}
+            </option>
+        `).join("")}
+    `;
+
+    console.log( select.innerHTML);
 }
 
 /*function configuraPrestito(materiale) {
@@ -128,6 +136,8 @@ function configuraPagina(mode) {
         resetMateriale();
     }
 
+    abilitaPuliziaErrori();
+
 }
 
 function setEditMode(editable) {
@@ -135,18 +145,22 @@ function setEditMode(editable) {
     [
         "titolo",
         "autore",
-        "genere",
+        //"genere",
         "editore",
         "annoPubblicazione",
         "isbn",
         "descrizione",
-        "disponibilita"
+        "nrCopie"
     ].forEach(id => {
 
         document
             .getElementById(id)
             .readOnly = !editable;
     });
+
+    document
+        .getElementById("genere")
+        .disabled = !editable;
 }
 
 function resetMateriale() {
@@ -158,14 +172,15 @@ function resetMateriale() {
         "editore",
         "annoPubblicazione",
         "isbn",
+        "nrCopie",
         "descrizione"
     ].forEach(id => {
 
         document.getElementById(id).value = "";
     });
 
-    document.getElementById("disponibilita").innerHTML =
-        '<span class="badge bg-secondary">Nuovo materiale</span>';
+    /*document.getElementById("nrCopie").innerHTML =
+        '<span class="badge bg-secondary">Nuovo materiale</span>';*/
 
     document.getElementById("copertina").src =
         "/images/book-placeholder.png";
@@ -181,7 +196,7 @@ function getMaterialeForm() {
         autore:
             document.getElementById("autore").value,
 
-        genere:
+        idGenere:
             document.getElementById("genere").value,
 
         casaEditrice:
@@ -194,16 +209,70 @@ function getMaterialeForm() {
             document.getElementById("isbn").value,
 
         nrCopie:
-            document.getElementById("disponibilita").value,
+            document.getElementById("nrCopie").value,
 
         descrizione:
             document.getElementById("descrizione").value
     };
 }
 
+function mostraErrori(errori) {
+
+    errori.forEach(errore => {
+
+        console.log(errore.campo);
+
+        const elemento =
+            document.getElementById(errore.campo);
+
+        if (elemento) {
+            elemento.classList.add("is-invalid");
+        }
+    });
+}
+
+function pulisciErrori() {
+
+    document
+        .querySelectorAll(".is-invalid")
+        .forEach(elemento => {
+
+            elemento.classList.remove("is-invalid");
+        });
+}
+
+function abilitaPuliziaErrori() {
+
+    document
+        .querySelectorAll("input, select, textarea")
+        .forEach(campo => {
+
+            campo.addEventListener(
+                "input",
+                () => campo.classList.remove("is-invalid")
+            );
+
+            campo.addEventListener(
+                "change",
+                () => campo.classList.remove("is-invalid")
+            );
+        });
+}
+
+function getFileCopertina() {
+
+    const input =
+        document.getElementById("fileCopertina");
+
+    return input.files[0] ?? null;
+}
+
 export {
     mostraMateriale,
     configuraPagina,
     getMaterialeForm,
-    caricaGeneri
+    caricaGeneri,
+    mostraErrori,
+    pulisciErrori,
+    getFileCopertina
 }

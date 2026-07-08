@@ -15,7 +15,7 @@ async function search(req, res, next) {
 }
 
 async function findById(req, res, next) {
-
+    
     try {
         const materiali = await materialiService.findById(req.params.id);
         res.json(materiali);
@@ -42,6 +42,10 @@ async function insertItem(req, res, next) {
     try {
 
         const materiale = req.body;
+        // gestione della copertina
+        if (req.file) {
+            materiale.copertina = req.file.filename;
+        }
         const risultato = await materialiService.insertItem(materiale);
 
         res.status(201).json({

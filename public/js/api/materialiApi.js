@@ -55,7 +55,7 @@ async function getAllGeneri(){
     return risultato;
 }
 
-async function insertItem(materiale) {
+/*async function insertItem(materiale) {
     const response = await fetch
         (`/materiali/admin/insert`,
             {
@@ -64,6 +64,24 @@ async function insertItem(materiale) {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(materiale)
+            }
+        );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
+}*/
+
+// gestione dell'immagine della copertina
+async function insertItem(formData) {
+    const response = await fetch
+        (`/materiali/admin/insert`,
+            {
+                method: "POST",
+                body: formData
             }
         );
 

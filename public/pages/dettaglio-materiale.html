@@ -29,6 +29,14 @@
                     <div class="col-md-3 text-center">
                         <img id="copertina" src="/images/book-placeholder.png" class="img-fluid rounded copertina-libro"
                             alt="Copertina libro">
+                        <!-- gestione del caricamento dell'immagine del libro-->
+                        <div class="mb-3">
+                            <label for="fileCopertina" class="form-label">
+                                Copertina
+                            </label>
+                            <input type="file" id="fileCopertina" class="form-control" accept="image/*">
+                        </div>
+                        <!---->
                     </div>
                     <!-- DATI LIBRO -->
                     <div class="col-md-9">
@@ -81,10 +89,10 @@
                                 <input id="isbn" class="form-control" readonly placeholder="Inserisci l'ISBN">
                             </div>
                             <div class="col-md-6">
-                                <label for="disponibilita" class="form-label">
+                                <label for="nrCopie" class="form-label">
                                     <strong>Disponibilità</strong>
                                 </label>
-                                <input id="disponibilita" class="form-control" readonly
+                                <input id="nrCopie" class="form-control" readonly
                                     placeholder="Inserisci il numero di copie">
                             </div>
                         </div>

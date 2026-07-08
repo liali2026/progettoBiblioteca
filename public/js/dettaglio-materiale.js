@@ -1,4 +1,5 @@
 import * as Auth from './auth.js';
+import * as Util from './utils/validationUtils.js';
 
 import * as MaterialiApi from './api/materialiApi.js';
 import * as PrestitiApi from './api/prestitiApi.js';
@@ -39,18 +40,31 @@ async function caricaMateriale() {
 
 async function insertMateriale() {
     try {
+        const formData = new FormData();
 
         const materiale = View.getMaterialeForm();
+        Util.validaMateriale(materiale);
+        //gestione caricamento immagine associata al libro
+        /*const risultato = await MaterialiApi.insertItem(materiale);*/
+
+        formData.append(
+            "materiale",
+            JSON.stringify(materiale)
+        );
+
+        const file = View.getFileCopertina();
+        if (file) {
+            formData.append(
+                "copertina",
+                file
+            );
+        }
 
         const risultato =
-            await MaterialiApi.insertItem(materiale);
+            await MaterialiApi.insertItem(formData);
+        
+        //
 
-        /*window.location.href =
-            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
-
-        MessageView.mostraSuccesso(
-            "Materiale inserito correttamente."
-        );*/
         sessionStorage.setItem(
             "successMessage",
             "Materiale inserito correttamente."
@@ -60,6 +74,11 @@ async function insertMateriale() {
             `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
 
     } catch (err) {
+
+        if (err.dettagli) {
+            View.mostraErrori(err.dettagli);
+        }
+
         MessageView.mostraErrore(err.message);
     }
 }
@@ -68,6 +87,7 @@ async function updateMateriale() {
     try {
 
         const materiale = View.getMaterialeForm();
+        Util.validaMateriale(materiale);
 
         materiale.id_libro = CONTEXT.idLibro;
 
@@ -78,6 +98,9 @@ async function updateMateriale() {
         );
 
     } catch (err) {
+        if (err.dettagli) {
+            View.mostraErrori(err.dettagli);
+        }
         MessageView.mostraErrore(err.message);
     }
 }
@@ -134,7 +157,7 @@ async function apriModalPrestito(materiale) {
 async function confermaPrestito() {
     try {
 
-        const idMateriale = CONTEXT.materiale.id_libro; 
+        const idMateriale = CONTEXT.materiale.id_libro;
         const durata = ModalPrestito.getDurataPrestito();
 
         const datiPrestito = await PrestitiApi.creaPrestito(idMateriale, durata);

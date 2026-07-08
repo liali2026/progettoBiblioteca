@@ -46,14 +46,7 @@ async function search(titolo, autore) {
 async function findById(id) {
     const conn = await getConnection();
     try {
-
-        /*let sql = `
-            SELECT l.*, COUNT(c.id_copia) AS copie_disponibili
-            FROM libri l
-            LEFT JOIN copie c ON l.id_libro = c.id_libro
-            WHERE l.attivo = 1
-        `;*/
-
+        
         let sql = `
                   SELECT *
                     FROM vista_catalogo_libri
@@ -78,19 +71,18 @@ async function findById(id) {
     }
 }
 
-async function getAllGeneri(id) {
+async function getAllGeneri() {
+    
     const conn = await getConnection();
     try {
 
-        let sql = `
-                  SELECT *
-                    FROM generi
-                `;
-
-        const [generi] = await conn.query(sql);
+        const [generi] = await conn.query(`
+            SELECT *
+            FROM generi
+            ORDER BY descrizione
+        `);
 
         return generi;
-
     } finally {
         await conn.end();
     }
@@ -103,22 +95,24 @@ async function insertLibro(conn, materiale) {
         INSERT INTO libri(
             titolo,
             autore,
-            genere,
+            id_genere,
             isbn,
             anno_pubblicazione,
             casa_editrice,
-            descrizione
+            descrizione,
+            copertina
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?,?)
         `,
         [
             materiale.titolo,
             materiale.autore,
-            materiale.genere,
+            materiale.idGenere,
             materiale.isbn,
             materiale.annoPubblicazione,
             materiale.casaEditrice,
-            materiale.descrizione
+            materiale.descrizione,
+            materiale.copertina
         ]
     );
 
@@ -151,7 +145,7 @@ async function insertItem(materiale) {
     const conn = await getConnection();
     try {
         await conn.beginTransaction();
-        const idLibro =  await insertLibro(conn, materiale);
+        const idLibro = await insertLibro(conn, materiale);
 
         await insertCopie(
             conn,
@@ -178,75 +172,6 @@ async function insertItem(materiale) {
 }
 
 
-/*async function insertItem(materiale) {
-
-    const conn = await getConnection();
-    try {
-
-        await conn.beginTransaction();
-
-        // inserimento nella tabella libri
-        const [result] =
-            await conn.query(
-                `
-                INSERT INTO libri( 
-                    titolo,
-                    autore,
-                    genere,
-                    isbn,
-                    anno_pubblicazione,
-                    casa_editrice,
-                    descrizione)
-                VALUES (?, ?, ?, ?, ?, ?,?)
-                `,
-                [
-                    materiale.titolo,
-                    materiale.autore,
-                    materiale.genere,
-                    materiale.isbn,
-                    materiale.annoPubblicazione,
-                    materiale.casaEditrice,
-                    materiale.descrizione
-                ]
-            );
-
-        // inserimento nella tabella copie
-        const nrCopie = Number(materiale.nrCopie);
-
-        if (Number.isNaN(nrCopie) || nrCopie < 0) {
-            throw new Error("Numero copie non valido.");
-        }
-
-        for (let i = 0; i < nrCopie; i++) {
-            for (let i = 0; i < materiale.nrCopie; i++) {
-                await conn.query(
-                    `
-                INSERT INTO copie( 
-                    id_libro,
-                    stato)
-                VALUES (?, 
-                       'DISPONIBILE')
-                       `,
-                    [result.insertId]
-                );
-            }
-        }
-
-        await conn.commit();
-
-        return {
-            idLibro: result.insertId
-        };
-
-    } catch (err) {
-
-        await conn.rollback();
-        throw err;
-
-    } finally {
-        await conn.end();
-    }
-}*/
 
 async function updateItem(materiale) {
 
@@ -259,23 +184,25 @@ async function updateItem(materiale) {
                 UPDATE libri
                 SET titolo = ?,
                     autore = ?,
-                    genere = ?,
+                    id_genere = ?,
                     isbn = ?,
                     anno_pubblicazione = ?,
                     casa_editrice = ?,
-                    descrizione = ?
+                    descrizione = ?,
+                    copertina = ?
                 WHERE id_libro = ?
                   AND attivo = 1
                 `,
                 [
                     materiale.titolo,
                     materiale.autore,
-                    materiale.genere,
+                    materiale.idGenere,
                     materiale.isbn,
                     materiale.annoPubblicazione,
                     materiale.casaEditrice,
                     materiale.descrizione,
-                    materiale.idLibro
+                    materiale.idLibro,
+                    materiale.copertina
                 ]
             );
 
