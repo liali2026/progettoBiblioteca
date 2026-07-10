@@ -1,5 +1,5 @@
-import * as Auth from './auth.js';
-import * as CommonLayoutView from './ui/commonLayoutView.js';
+import * as Auth from '../services/authService.js';
+import * as CommonLayoutView from '../components/commonLayout.js';
 
 function configuraCard(id, config) {
 

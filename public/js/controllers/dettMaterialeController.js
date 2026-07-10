@@ -1,13 +1,13 @@
-import * as Auth from './auth.js';
-import * as Util from './utils/validationUtils.js';
+import * as Auth from '../services/authService.js';
+import * as Util from '../utils/validationUtils.js';
 
-import * as MaterialiApi from './api/materialiApi.js';
-import * as PrestitiApi from './api/prestitiApi.js';
+import * as MaterialiApi from '../api/materialiApi.js';
+import * as PrestitiApi from '../api/prestitiApi.js';
 
-import * as ModalPrestito from './ui/prestitoModalView.js';
-import * as View from './ui/dettaglioMaterialeView.js';
-import * as CommonLayoutView from './ui/commonLayoutView.js';
-import * as MessageView from './ui/messageView.js';
+import * as ModalPrestito from '../components/prestitoModal.js';
+import * as View from '../views/dettaglioMaterialeView.js';
+import * as CommonLayoutView from '../components/commonLayout.js';
+import * as MessageView from '../components/message.js';
 
 //let materiale = null;
 

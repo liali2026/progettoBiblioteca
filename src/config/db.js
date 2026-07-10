@@ -1,18 +1,7 @@
 const mysql = require('mysql2/promise');
+const config = require("./env");
 
-
-/* connessione tentata subito all'avvio
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
-
-module.exports = connection;*/
-
-async function getConnection() {
+/*async function getConnection() {
     return await mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -20,6 +9,10 @@ async function getConnection() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
     })
-};
+};*/
+
+async function getConnection() {
+    return await mysql.createConnection(config.db);
+}
 
 module.exports = getConnection;

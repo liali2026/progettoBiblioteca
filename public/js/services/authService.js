@@ -1,5 +1,5 @@
-import * as AuthApi from './api/authApi.js';
-import * as AuthView from './ui/authView.js';
+import * as AuthApi from '../api/authApi.js';
+import * as AuthView from '../views/authView.js';
 
 async function requireLogin() {
 

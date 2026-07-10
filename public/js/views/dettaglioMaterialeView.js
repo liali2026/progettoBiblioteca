@@ -81,7 +81,7 @@ function aggiornaCopertina(materiale) {
         document.getElementById("copertina");
 
     img.src = materiale.copertina
-        ? `/images/covers/${materiale.copertina}`
+        ? `/covers/${materiale.copertina}`
         : "/images/book-placeholder.png";
 }
 

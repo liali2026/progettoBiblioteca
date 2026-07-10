@@ -1,9 +1,9 @@
-import * as Auth from './auth.js';
-import * as CommonLayoutView from './ui/commonLayoutView.js';
-import * as MessageView from './ui/messageView.js';
+import * as Auth from '../services/authService.js';
+import * as CommonLayoutView from '../components/commonLayout.js';
+import * as MessageView from '../components/message.js';
 
-import * as PrestitiApi from './api/prestitiApi.js';
-import * as PrestitiView from './ui/prestitiView.js';
+import * as PrestitiApi from '../api/prestitiApi.js';
+import * as PrestitiView from '../views/prestitiView.js';
 
 let CONTEXT = {
     role: null,

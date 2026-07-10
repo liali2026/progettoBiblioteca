@@ -1,8 +1,8 @@
-import * as Auth from './auth.js';
-import * as MaterialiApi from './api/materialiApi.js';
-import * as MaterialiView from './ui/catalogoView.js';
-import * as CommonLayoutView from './ui/commonLayoutView.js';
-import * as MessageView from './ui/messageView.js';
+import * as Auth from '../services/authService.js';
+import * as MaterialiApi from '../api/materialiApi.js';
+import * as MaterialiView from '../views/catalogoView.js';
+import * as CommonLayoutView from '../components/commonLayout.js';
+import * as MessageView from '../components/message.js';
 
 let CONTEXT = {
     role: null,

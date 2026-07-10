@@ -1,6 +1,6 @@
 const multer = require("multer");
 const path = require("path");
-
+const config = require("../config/env");
 
 const storage = multer.diskStorage({
 
@@ -8,10 +8,7 @@ const storage = multer.diskStorage({
 
         cb(
             null,
-            path.join(
-                __dirname,
-                "../../public/images/covers"
-            )
+            path.join(config.upload.dir)
         );
     },
 
