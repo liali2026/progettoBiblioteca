@@ -4,18 +4,25 @@ import * as Util from '../utils/validationUtils.js';
 import * as MaterialiApi from '../api/materialiApi.js';
 import * as PrestitiApi from '../api/prestitiApi.js';
 
-import * as ModalPrestito from '../components/prestitoModal.js';
-import * as View from '../views/dettaglioMaterialeView.js';
 import * as CommonLayoutView from '../components/commonLayout.js';
 import * as MessageView from '../components/message.js';
+import * as ModalPrestito from '../components/prestitoModal.js';
 
-//let materiale = null;
+import * as View from '../views/dettaglioMaterialeView.js';
 
 const CONTEXT = {
     mode: "view",
     idLibro: null,
     materiale: null
 };
+
+function inizializzaContext() {
+
+    const params = new URLSearchParams(window.location.search);
+
+    CONTEXT.mode = params.get("mode") || "view";
+    CONTEXT.idLibro = params.get("id");
+}
 
 
 async function caricaMateriale() {
@@ -38,14 +45,16 @@ async function caricaMateriale() {
     }
 }
 
-async function insertMateriale() {
+async function salvaMateriale(operazione = "insert") {
     try {
         const formData = new FormData();
 
         const materiale = View.getMaterialeForm();
         Util.validaMateriale(materiale);
-        //gestione caricamento immagine associata al libro
-        /*const risultato = await MaterialiApi.insertItem(materiale);*/
+
+        if (operazione === "update") {
+            materiale.id_libro = CONTEXT.idLibro;
+        }
 
         formData.append(
             "materiale",
@@ -61,13 +70,15 @@ async function insertMateriale() {
         }
 
         const risultato =
-            await MaterialiApi.insertItem(formData);
-        
-        //
+            await (operazione === "insert"
+                ? MaterialiApi.insertItem(formData)
+                : MaterialiApi.updateItem(formData));
 
         sessionStorage.setItem(
             "successMessage",
-            "Materiale inserito correttamente."
+            operazione === "insert"
+                ? "Materiale inserito correttamente."
+                : "Materiale aggiornato correttamente."
         );
 
         window.location.href =
@@ -83,65 +94,6 @@ async function insertMateriale() {
     }
 }
 
-async function updateMateriale() {
-    try {
-        const formData = new FormData(); //gestione copertina
-
-        const materiale = View.getMaterialeForm();
-        Util.validaMateriale(materiale);
-
-        materiale.id_libro = CONTEXT.idLibro;
-
-        formData.append(
-            "materiale",
-            JSON.stringify(materiale)
-        );
-
-        //console.log(formData.get("materiale"));
-
-        const file = View.getFileCopertina();
-        if (file) {
-            formData.append(
-                "copertina",
-                file
-            );
-        }
-
-        const risultato =
-            await MaterialiApi.updateItem(formData);
-        
-
-        //await MaterialiApi.updateItem(materiale);
-
-        /*MessageView.mostraSuccesso(
-            "Materiale aggiornato correttamente."
-        );*/
-        sessionStorage.setItem(
-            "successMessage",
-            "Materiale aggiornato correttamente."
-        );
-
-        window.location.href =
-            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
-
-    } catch (err) {
-        if (err.dettagli) {
-            View.mostraErrori(err.dettagli);
-        }
-        MessageView.mostraErrore(err.message);
-    }
-}
-
-function inizializzaContext() {
-
-    const params = new URLSearchParams(window.location.search);
-
-    CONTEXT.mode = params.get("mode") || "view";
-    /*CONTEXT.isEdit = CONTEXT.mode === "edit";
-    CONTEXT.isNew = CONTEXT.mode === "new";*/
-
-    CONTEXT.idLibro = params.get("id");
-}
 
 function mostraMessaggiPendenti() {
 
@@ -227,10 +179,12 @@ function registraEventi() {
             async () => {
 
                 if (CONTEXT.mode == "new") {
-                    await insertMateriale();
+                    //await insertMateriale();
+                    await salvaMateriale("insert");
                 }
                 else {
-                    await updateMateriale();
+                    //await updateMateriale();
+                    await salvaMateriale("update");
                 }
 
             }

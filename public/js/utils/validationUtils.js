@@ -1,4 +1,5 @@
 
+//validazione ISBN
 function isValidISBN13(isbn) {
 
     isbn = isbn.replaceAll("-", "");
@@ -29,6 +30,7 @@ function isValidISBN13(isbn) {
 }
 
 
+//validazione anno di pubblicazione
 function isValidPublicationYear(year) {
 
     const anno = Number(year);
@@ -42,12 +44,14 @@ function isValidPublicationYear(year) {
     return anno > 0 && anno <= annoCorrente;
 }
 
+//obbligatorietà dei campi
 function isRequired(value) {
     return value !== null &&
         value !== undefined &&
         String(value).trim() !== "";
 }
 
+//controllo sui campi numerici
 function isPositiveInteger(value) {
 
     const numero = Number(value);
@@ -55,6 +59,7 @@ function isPositiveInteger(value) {
     return Number.isInteger(numero) && numero > 0;
 }
 
+//validazione dei dati del materiale sia in insert sia in update
 export function validaMateriale(materiale) {
 
     const errori = [];
@@ -110,10 +115,21 @@ export function validaMateriale(materiale) {
 
     if (errori.length > 0) {
 
+        /*const messaggi = [];
+        for (const errore of errori) {
+            messaggi.push(errore.messaggio);
+        }
+
+        const messaggio = "<ul><li>" +
+            messaggi.join("</li><li>") +
+            "</li></ul>";
+
+        console.log(messaggio);*/
+
         const messaggio =
             "<ul><li>" +
             errori
-                .map(e => e.messaggio)
+                .map(errore => errore.messaggio)
                 .join("</li><li>") +
             "</li></ul>";
 

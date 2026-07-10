@@ -228,11 +228,11 @@ function getMaterialeForm() {
     };
 }
 
+//in fase di insert/update del materiale per visualizzare i campi
+//con presenza di errori
 function mostraErrori(errori) {
 
     errori.forEach(errore => {
-
-        console.log(errore.campo);
 
         const elemento =
             document.getElementById(errore.campo);
