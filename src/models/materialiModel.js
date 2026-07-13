@@ -189,7 +189,7 @@ async function updateItem(materiale) {
                     anno_pubblicazione = ?,
                     casa_editrice = ?,
                     descrizione = ?,
-                    copertina = ?
+                    copertina = COALESCE(?, copertina)
                 WHERE id_libro = ?
                   AND attivo = 1
                 `,

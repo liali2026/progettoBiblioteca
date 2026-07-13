@@ -60,7 +60,7 @@ function isPositiveInteger(value) {
 }
 
 //validazione dei dati del materiale sia in insert sia in update
-export function validaMateriale(materiale) {
+function controllaDatiMateriale(materiale) {
 
     const errori = [];
 
@@ -113,18 +113,7 @@ export function validaMateriale(materiale) {
         });
     }
 
-    if (errori.length > 0) {
-
-        /*const messaggi = [];
-        for (const errore of errori) {
-            messaggi.push(errore.messaggio);
-        }
-
-        const messaggio = "<ul><li>" +
-            messaggi.join("</li><li>") +
-            "</li></ul>";
-
-        console.log(messaggio);*/
+    /*if (errori.length > 0) {
 
         const messaggio =
             "<ul><li>" +
@@ -141,5 +130,21 @@ export function validaMateriale(materiale) {
         throw errore;
     }
 
-    return true;
+    return true;*/
+    return errori;
+}
+
+export async function validaMateriale(materiale){
+    function validaMateriale(materiale) {
+    
+        const errori = controllaDatiMateriale(materiale);
+        if (errori.length === 0) {
+            return;
+        }
+    
+        const errore = new Error("Dati materiale non validi");
+        errore.dettagli = errori;
+    
+        throw errore;
+    }
 }

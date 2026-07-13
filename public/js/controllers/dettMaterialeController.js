@@ -88,9 +88,17 @@ async function salvaMateriale(operazione = "insert") {
 
         if (err.dettagli) {
             View.mostraErrori(err.dettagli);
-        }
+            const html =
+                "<ul><li>" +
+                err.dettagli
+                    .map(e => e.messaggio)
+                    .join("</li><li>") +
+                "</li></ul>";
 
-        MessageView.mostraErrore(err.message);
+            MessageView.mostraErrore(html);
+        } else {
+            MessageView.mostraErrore(err.message);
+        }
     }
 }
 

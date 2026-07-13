@@ -54,46 +54,11 @@ function isPositiveInteger(value) {
     return Number.isInteger(numero) && numero > 0;
 }
 
-//raccoglie tutti gli errori fatti dall'utente in fase di insert/update di un materiale
-function raccogliErrori(materiale) {
-    const errori = [];
-
-    if (!isRequired(materiale.titolo)) {
-        errori.push("Inserire il titolo.");
-    }
-
-    if (!isRequired(materiale.autore)) {
-        errori.push("Inserire l'autore.");
-    }
-
-    if (!isRequired(materiale.genere)) {
-        errori.push("Inserire il genere.");
-    }
-
-    if (!isRequired(materiale.casaEditrice)) {
-        errori.push("Inserire l'editore.");
-    }
-
-    if (!isValidISBN13(materiale.isbn)) {
-        errori.push("ISBN non valido");
-    }
-
-    if (!isValidPublicationYear(materiale.annoPubblicazione)) {
-        errori.push("Anno di pubblicazione deve essere maggiore del 1450 e non deve essere nel futuro.");
-    }
-
-    if (!isPositiveInteger(materiale.nrCopie)) {
-        errori.push("Il numero di copie deve essere maggiore di zero.");
-    }
-
-   return errori;
-}
 
 module.exports ={
     isRequired,
     isValidISBN13,
     isValidPublicationYear,
-    isPositiveInteger,
-    raccogliErrori
+    isPositiveInteger
 }
 

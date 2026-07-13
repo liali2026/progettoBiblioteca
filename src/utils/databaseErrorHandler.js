@@ -37,12 +37,14 @@ function getDatabaseError(err){
                 message: 'Timeout durante la connessione al database'
             };
 
+        //gestione degli altri tipi di errore nell'ErrorHandler.js
         default:
-            return {
+            /*return {
                 status: 500,
                 code: err.code || 'UNKNOWN_ERROR',
                 message: err.message || 'Errore sconosciuto'
-            };
+            };*/
+            return null;
 }}
 
 module.exports = getDatabaseError;

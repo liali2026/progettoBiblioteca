@@ -16,7 +16,6 @@ async function ricercaById(idLibro) {
     return risultato;
 }
 
-
 async function ricercabyAutoreTitolo(titolo, autore) {
     const params = new URLSearchParams();
     if (titolo) {
@@ -129,12 +128,14 @@ async function updateItem(formData) {
         }
     );
 
-    const risultato = await response.json();
+    const dati = await response.json();
 
     if (!response.ok) {
-        throw new Error(risultato.message);
+        const errore = new Error(dati.message);
+        errore.dettagli = dati.dettagli;
+        throw errore;
     }
-    return risultato;
+    return dati;
 }
 
 async function deleteItem(idMateriale) {

@@ -37,7 +37,7 @@ document.getElementById('loginForm').addEventListener('submit',
             } else {
                 document.getElementById('messaggio').innerHTML =
                     `<div class="alert alert-danger">
-                            ${data.errore}
+                            ${data.message}
                          </div>`;
             }
 
