@@ -71,40 +71,6 @@ async function findById(id) {
     }
 }
 
-async function getAllGeneri() {
-
-    const conn = await getConnection();
-    try {
-
-        const [generi] = await conn.query(`
-            SELECT *
-            FROM generi
-            ORDER BY descrizione
-        `);
-
-        return generi;
-    } finally {
-        await conn.end();
-    }
-}
-
-async function getCopie(id) {
-
-    const conn = await getConnection();
-    try {
-
-        const [copie] = await conn.query(`
-            SELECT *
-            FROM vista_copie
-            WHERE id_libro = ?
-            ORDER BY id_copia
-        `, [id]);
-
-        return copie;
-    } finally {
-        await conn.end();
-    }
-}
 
 async function insertLibro(conn, materiale) {
 
@@ -177,8 +143,11 @@ async function insertItem(materiale) {
     const conn = await getConnection();
     try {
         await conn.beginTransaction();
+
+        //inserimento dati del libro
         const idLibro = await insertLibro(conn, materiale);
 
+        //inserimento delle copie
         await insertCopie(
             conn,
             idLibro,
@@ -351,12 +320,87 @@ async function deleteItem(idMateriale) {
     }
 }
 
+async function getAllGeneri() {
+
+    const conn = await getConnection();
+    try {
+
+        const [generi] = await conn.query(`
+            SELECT *
+            FROM generi
+            ORDER BY descrizione
+        `);
+
+        return generi;
+    } finally {
+        await conn.end();
+    }
+}
+
+async function getCopie(idMateriale) {
+
+    const conn = await getConnection();
+    try {
+
+        const [copie] = await conn.query(`
+            SELECT *
+            FROM vista_copie
+            WHERE id_libro = ?
+            ORDER BY id_copia
+        `, [idMateriale]);
+
+        if (copie.length === 0) {
+            throw new Error("Nessuna copia trovata");
+        }
+
+        return copie;
+    } finally {
+        await conn.end();
+    }
+}
+
+async function addCopie(idMateriale, nrCopie = 1) {
+
+    const conn = await getConnection();
+    try {
+
+        const [materiale] = await conn.query(
+            `
+            SELECT id_libro
+            FROM libri
+            WHERE id_libro = ?
+              AND attivo = 1
+            `,
+            [idMateriale]
+        );
+
+        if (materiale.length === 0) {
+            throw new Error("Materiale non trovato");
+        }
+
+        await insertCopie(conn, idMateriale, nrCopie);
+
+        return {
+            idLibro: idMateriale,
+            righeInserite: nrCopie
+        };
+
+    } finally {
+        await conn.end();
+    }
+}
+
+async function deleteCopia(idCopia, idLibro){
+    
+}
+
 module.exports = {
     search,
     findById,
-    getAllGeneri,
-    getCopie,
     insertItem,
     updateItem,
-    deleteItem
+    deleteItem,
+    getAllGeneri,
+    getCopie,
+    addCopie
 }

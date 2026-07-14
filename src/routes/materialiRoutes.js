@@ -44,13 +44,13 @@ router.get(
     materialiController.getCopie
 );
 
-/*router.post(
+router.post(
     "/admin/:id/copies",
     authenticate,
     authorize("BIBLIOTECARIO"),
-    materialiController.addCopia
+    materialiController.addCopie
 );
-
+/*
 router.delete(
     "/admin/copies/:idCopia",
     authenticate,

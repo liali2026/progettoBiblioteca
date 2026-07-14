@@ -26,30 +26,6 @@ async function findById(req, res, next) {
 
 }
 
-async function getAllGeneri(req, res, next) {
-
-    try {
-        const generi = await materialiService.getAllGeneri();
-        res.json(generi);
-
-    } catch (err) {
-        next(err);
-    }
-
-}
-
-async function getCopie(req, res, next) {
-    
-    try {
-        const copie = await materialiService.getCopie(req.params.id);
-        res.json(copie);
-
-    } catch (err) {
-        next(err);
-    }
-
-}
-
 async function insertItem(req, res, next) {
     try {
 
@@ -116,13 +92,56 @@ async function deleteItem(req, res, next) {
 
 }
 
+async function getAllGeneri(req, res, next) {
+
+    try {
+        const generi = await materialiService.getAllGeneri();
+        res.json(generi);
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
+async function getCopie(req, res, next) {
+    
+    try {
+        const copie = await materialiService.getCopie(req.params.id);
+        res.json(copie);
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
+async function addCopie(req, res, next) {
+    
+    try {
+        const {idLibro, nrCopie} = req.body;
+        const risultato = await materialiService.addCopie(idLibro, nrCopie);
+
+        res.json({
+            idLibro: risultato.idLibro,
+            righeInserite: risultato.righeInserite,
+            messaggio: "Copie inserite correttamente"
+        });
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
 
 module.exports = {
     search,
     findById,
-    getAllGeneri,
-    getCopie,
     insertItem,
     updateItem,
-    deleteItem
+    deleteItem,
+    getAllGeneri,
+    getCopie,
+    addCopie
 };

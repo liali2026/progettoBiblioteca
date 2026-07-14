@@ -1,3 +1,4 @@
+//GESTIONE DEI MATERIALI
 async function ricercaById(idLibro) {
 
     const response = await fetch(`/materiali/${idLibro}`);
@@ -41,53 +42,6 @@ async function ricercabyAutoreTitolo(titolo, autore) {
     return risultato;
 }
 
-async function getAllGeneri() {
-
-    const response = await fetch(`/materiali/generi`);
-
-    const risultato = await response.json();
-
-    if (!response.ok) {
-        throw new Error(risultato.message);
-    }
-
-    return risultato;
-}
-
-async function getCopie(idLibro) {
-
-    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
-
-    const risultato = await response.json();
-
-    if (!response.ok) {
-        throw new Error(risultato.message);
-    }
-
-    return risultato;
-}
-
-/*async function insertItem(materiale) {
-    const response = await fetch
-        (`/materiali/admin/insert`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(materiale)
-            }
-        );
-
-    const risultato = await response.json();
-
-    if (!response.ok) {
-        throw new Error(risultato.message);
-    }
-    return risultato;
-}*/
-
-// gestione dell'immagine della copertina
 async function insertItem(formData) {
     const response = await fetch
         (`/materiali/admin/insert`,
@@ -104,29 +58,6 @@ async function insertItem(formData) {
     }
     return risultato;
 }
-
-/*async function updateItem(materiale) {
-
-    const idMateriale = materiale.id_libro;
-
-    const response = await fetch(
-        `/materiali/admin/update/${idMateriale}`,
-        {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(materiale)
-        }
-    );
-
-    const risultato = await response.json();
-
-    if (!response.ok) {
-        throw new Error(risultato.message);
-    }
-    return risultato;
-}*/
 
 async function updateItem(formData) {
 
@@ -153,7 +84,7 @@ async function updateItem(formData) {
 
 async function deleteItem(idMateriale) {
 
-    console.log(idMateriale);
+    //console.log(idMateriale);
     const response = await fetch(
         `/materiali/admin/delete/${idMateriale}`,
         {
@@ -169,12 +100,67 @@ async function deleteItem(idMateriale) {
     return risultato;
 }
 
+//GENERI
+async function getAllGeneri() {
+
+    const response = await fetch(`/materiali/generi`);
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
+//GESTIONE DELLE COPIE
+async function getCopie(idLibro) {
+
+    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
+async function addCopie(idLibro, nrCopie) {
+
+    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
+
+     const response = await fetch(
+        `/materiali/admin/${idLibro}/copies`,
+        {
+            method: "POST",
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(
+                {idLibro: idLibro, 
+                nrCopie: nrCopie
+            })
+        }
+    );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
+
 export {
     ricercaById,
     ricercabyAutoreTitolo,
-    getAllGeneri,
-    getCopie,
     insertItem,
     updateItem,
-    deleteItem
+    deleteItem,
+    getAllGeneri,
+    getCopie,
+    addCopie
 }

@@ -1,20 +1,13 @@
 const materialiModel = require('../models/materialiModel');
 const Validation = require('../utils/validationUtils.js');
 
+//GESTIONE MATERIALE
 async function search(titolo, autore) {
     return await materialiModel.search(titolo, autore);
 }
 
 async function findById(id) {
     return await materialiModel.findById(id);
-}
-
-async function getAllGeneri() {
-    return await materialiModel.getAllGeneri();
-}
-
-async function getCopie(id) {
-    return await materialiModel.getCopie(id);
 }
 
 async function insertItem(materiale) {
@@ -103,6 +96,19 @@ if (!Validation.isRequired(materiale.titolo)) {
    return errori;
 }
 
+async function getAllGeneri() {
+    return await materialiModel.getAllGeneri();
+}
+
+//GESTIONE COPIE
+async function getCopie(id) {
+    return await materialiModel.getCopie(id);
+}
+
+async function addCopie(id, nrCopie) {
+    return await materialiModel.addCopie(id, nrCopie);
+}
+
 module.exports = {
     search,
     findById,
@@ -110,5 +116,6 @@ module.exports = {
     getCopie,
     insertItem,
     updateItem,
-    deleteItem
+    deleteItem,
+    addCopie
 };
