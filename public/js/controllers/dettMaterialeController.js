@@ -13,7 +13,8 @@ import * as View from '../views/dettaglioMaterialeView.js';
 const CONTEXT = {
     mode: "view",
     idLibro: null,
-    materiale: null
+    materiale: null,
+    copieCaricate: false
 };
 
 function inizializzaContext() {
@@ -118,7 +119,7 @@ function mostraMessaggiPendenti() {
 }
 
 /**
- * GESTIONE det prestiti
+ * GESTIONE dei prestiti
  * */
 async function apriModalPrestito(materiale) {
 
@@ -164,6 +165,8 @@ async function confermaPrestito() {
 }
 //
 
+
+//
 function registraEventi() {
 
     document
@@ -195,6 +198,27 @@ function registraEventi() {
                     await salvaMateriale("update");
                 }
 
+            }
+        );
+
+
+    //GESTIONE DELLE COPIE
+    document.getElementById("collapseCopie")
+        .addEventListener(
+            "show.bs.collapse",
+            async () => {
+                const copie =
+                    await MaterialiApi.getCopie(CONTEXT.idLibro);
+                View.mostraCopie(copie);
+                CONTEXT.copieCaricate = true;
+            }
+        );
+        
+    document.getElementById("btnAggiungiCopia")
+        .addEventListener(
+            "click",
+            async () => {
+                await aggiungiRigaCopia();
             }
         );
 }

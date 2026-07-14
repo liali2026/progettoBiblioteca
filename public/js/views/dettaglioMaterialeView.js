@@ -9,6 +9,7 @@ const CONFIG = {
         mostraSalva: false,
         testoSalva: "",
         editable: false,
+        mostraGestioneCopie: false, //GESTIONE COPIE
         reset: false
     },
 
@@ -18,6 +19,7 @@ const CONFIG = {
         mostraSalva: true,
         testoSalva: "Salva",
         editable: true,
+        mostraGestioneCopie: true, //GESTIONE COPIE
         reset: false
     },
 
@@ -27,6 +29,7 @@ const CONFIG = {
         mostraSalva: true,
         testoSalva: "Inserisci",
         editable: true,
+        mostraGestioneCopie: false, //GESTIONE COPIE
         reset: true
     }
 };
@@ -65,15 +68,6 @@ function popolaForm(materiale) {
     document.getElementById('descrizione').value =
         materiale.descrizione ?? 'Nessuna descrizione disponibile.';
 }
-
-/*function mostraDisponibilita(disponibile) {
-    //gestione della visualizzazione della disponibilità
-    const disponibilita = document.getElementById('disponibilita');
-    disponibilita.innerHTML =
-        disponibile
-        ? '<span class="badge bg-success">Disponibile</span>'
-        : '<span class="badge bg-danger">Non disponibile</span>';
-}*/
 
 function aggiornaCopertina(materiale) {
 
@@ -128,7 +122,13 @@ function configuraPagina(mode) {
 
     btnSalva.textContent = cfg.testoSalva;
 
-    setEditMode(cfg.editable);
+    //GESTIONE COPIE 
+    const btnGestisciCopie =
+        document.getElementById("btnGestisciCopie");
+    btnGestisciCopie.classList.toggle("d-none", !cfg.mostraGestioneCopie);
+    //
+
+    setEditMode(cfg.editable, cfg.mostraGestioneCopie); //GESTIONE DELLE COPIE
 
     if (cfg.reset) {
         resetMateriale();
@@ -138,12 +138,11 @@ function configuraPagina(mode) {
 
 }
 
-function setEditMode(editable) {
+function setEditMode(editable, mostraCopie) {
 
     [
         "titolo",
         "autore",
-        //"genere",
         "editore",
         "annoPubblicazione",
         "isbn",
@@ -163,6 +162,13 @@ function setEditMode(editable) {
     document
         .getElementById("load-file")
         .classList.toggle("d-none", !editable);
+
+    //GESTIONE COPIE
+    // il campo numero copie viene visualizzato
+    // solo in fase di insert
+    document
+        .getElementById("nrCopie")
+        .readonly = mostraCopie;
 
     /*if (!editable) {
         document
@@ -190,9 +196,6 @@ function resetMateriale() {
 
         document.getElementById(id).value = "";
     });
-
-    /*document.getElementById("nrCopie").innerHTML =
-        '<span class="badge bg-secondary">Nuovo materiale</span>';*/
 
     document.getElementById("copertina").src =
         "/images/book-placeholder.png";
@@ -279,6 +282,25 @@ function getFileCopertina() {
     return input.files[0] ?? null;
 }
 
+//gestione delle copie
+async function mostraSezioneCopie() { }
+
+async function nascondiSezioneCopie() { }
+
+async function mostraCopie(copie, context) { 
+    const tbody = document.getElementById('tbodyCopie');
+    tbody.innerHTML =
+        copie.map(m => `
+            <tr>
+                <td>${m.id_copia}</td>
+                <td>${m.stato}</td>
+                <td>${m.email ?? '-'}</td>
+            </tr>
+        `).join('');
+}
+
+async function aggiungiRigaCopia(copia) { }
+
 export {
     mostraMateriale,
     configuraPagina,
@@ -286,5 +308,7 @@ export {
     caricaGeneri,
     mostraErrori,
     pulisciErrori,
-    getFileCopertina
+    getFileCopertina,
+    mostraCopie,
+    aggiungiRigaCopia
 }

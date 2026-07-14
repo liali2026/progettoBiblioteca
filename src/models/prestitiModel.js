@@ -64,7 +64,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
         await conn.query(
             `
             UPDATE copie
-            SET stato = "IN_PRESTITO"
+            SET stato = "PRESTITO"
             WHERE id_copia = ?
             `,
             [idCopia]

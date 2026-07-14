@@ -36,6 +36,28 @@ router.delete(
     authorize("BIBLIOTECARIO"), 
     materialiController.deleteItem);
 
+//GESTIONE DELLE COPIE
+router.get(
+    "/admin/:id/copies",
+    authenticate,
+    authorize("BIBLIOTECARIO"),
+    materialiController.getCopie
+);
+
+/*router.post(
+    "/admin/:id/copies",
+    authenticate,
+    authorize("BIBLIOTECARIO"),
+    materialiController.addCopia
+);
+
+router.delete(
+    "/admin/copies/:idCopia",
+    authenticate,
+    authorize("BIBLIOTECARIO"),
+    materialiController.deleteCopia
+);*/
+
 router.get('/', materialiController.search);
 router.get('/:id', materialiController.findById);
 

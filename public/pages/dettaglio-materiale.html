@@ -30,7 +30,7 @@
                         <img id="copertina" src="/images/book-placeholder.png" class="img-fluid rounded copertina-libro"
                             alt="Copertina libro">
                         <!-- gestione del caricamento dell'immagine del libro-->
-                        <div id ="load-file" class="mb-3">
+                        <div id="load-file" class="mb-3">
                             <label for="fileCopertina" class="form-label">
                                 Copertina
                             </label>
@@ -113,7 +113,39 @@
                     <button id="btnSalva" class="btn btn-primary d-none">
                         Salva
                     </button>
+                    <button id="btnGestisciCopie" class="btn btn-outline-primary d-none" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseCopie" aria-expanded="false"
+                        aria-controls="collapseCopie">
+                        <i class="bi bi-collection"></i>
+                        Gestisci copie
+                    </button>
                     <a href="/pages/catalogo.html" class="btn btn-secondary">Torna al catalogo</a>
+                </div>
+                <!-- GESTIONE DELLE COPIE-->
+                <div class="collapse mt-4" id="collapseCopie">
+                    <div class="card card-body">
+                        <h5 class="mb-3">
+                            Copie del materiale
+                        </h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Codice copia</th>
+                                    <th>Stato</th>
+                                    <th>Prestito</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyCopie">
+                            </tbody>
+                        </table>
+                        <div class="text-end">
+                            <button id="btnAggiungiCopia" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i>
+                                Aggiungi copia
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

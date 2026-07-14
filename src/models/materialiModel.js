@@ -46,7 +46,7 @@ async function search(titolo, autore) {
 async function findById(id) {
     const conn = await getConnection();
     try {
-        
+
         let sql = `
                   SELECT *
                     FROM vista_catalogo_libri
@@ -72,7 +72,7 @@ async function findById(id) {
 }
 
 async function getAllGeneri() {
-    
+
     const conn = await getConnection();
     try {
 
@@ -83,6 +83,24 @@ async function getAllGeneri() {
         `);
 
         return generi;
+    } finally {
+        await conn.end();
+    }
+}
+
+async function getCopie(id) {
+
+    const conn = await getConnection();
+    try {
+
+        const [copie] = await conn.query(`
+            SELECT *
+            FROM vista_copie
+            WHERE id_libro = ?
+            ORDER BY id_copia
+        `, [id]);
+
+        return copie;
     } finally {
         await conn.end();
     }
@@ -125,17 +143,31 @@ async function insertCopie(conn, idLibro, nrCopie) {
         throw new Error("Numero copie non valido.");
     }
 
+    const [rows] = await conn.query(
+        `
+        select COALESCE(max(id_copia),0) as maxCopia
+          from copie
+         where id_libro = ?
+        `,
+        [idLibro]);
+
+    let nrMaxCopia = rows[0].maxCopia;
+
     for (let i = 0; i < nrCopie; i++) {
+
+        nrMaxCopia++;
 
         await conn.query(
             `
             INSERT INTO copie(
+                id_copia,
                 id_libro,
                 stato
             )
-            VALUES (?, 'DISPONIBILE')
+            VALUES (?, ?, 'DISPONIBILE')
             `,
-            [idLibro]
+            [nrMaxCopia,
+             idLibro]
         );
     }
 }
@@ -170,7 +202,6 @@ async function insertItem(materiale) {
 
     }
 }
-
 
 
 async function updateItem(materiale) {
@@ -277,6 +308,17 @@ async function deleteItem(idMateriale) {
 
 
         //cancellazione logica, per mantenere anche i dati di storico
+        // se cancello un libro, allora cancello tutte le sue copie
+        const [resultCopies] =
+            await conn.query(
+                `
+                UPDATE copie
+                   SET attivo = 0
+                WHERE id_libro = ?
+                `,
+                [idMateriale]
+            );
+
         const [result] =
             await conn.query(
                 `
@@ -313,6 +355,7 @@ module.exports = {
     search,
     findById,
     getAllGeneri,
+    getCopie,
     insertItem,
     updateItem,
     deleteItem

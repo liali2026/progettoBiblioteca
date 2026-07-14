@@ -38,6 +38,18 @@ async function getAllGeneri(req, res, next) {
 
 }
 
+async function getCopie(req, res, next) {
+    
+    try {
+        const copie = await materialiService.getCopie(req.params.id);
+        res.json(copie);
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
 async function insertItem(req, res, next) {
     try {
 
@@ -109,6 +121,7 @@ module.exports = {
     search,
     findById,
     getAllGeneri,
+    getCopie,
     insertItem,
     updateItem,
     deleteItem

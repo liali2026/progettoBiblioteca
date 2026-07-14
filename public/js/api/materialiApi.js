@@ -54,6 +54,19 @@ async function getAllGeneri() {
     return risultato;
 }
 
+async function getCopie(idLibro) {
+
+    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
 /*async function insertItem(materiale) {
     const response = await fetch
         (`/materiali/admin/insert`,
@@ -160,6 +173,7 @@ export {
     ricercaById,
     ricercabyAutoreTitolo,
     getAllGeneri,
+    getCopie,
     insertItem,
     updateItem,
     deleteItem

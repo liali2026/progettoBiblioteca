@@ -13,8 +13,12 @@ async function getAllGeneri() {
     return await materialiModel.getAllGeneri();
 }
 
+async function getCopie(id) {
+    return await materialiModel.getCopie(id);
+}
+
 async function insertItem(materiale) {
-    //validaMateriale(materiale);
+    validaMateriale(materiale);
     return await materialiModel.insertItem(materiale);
 }
 
@@ -103,6 +107,7 @@ module.exports = {
     search,
     findById,
     getAllGeneri,
+    getCopie,
     insertItem,
     updateItem,
     deleteItem
