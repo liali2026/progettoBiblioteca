@@ -117,9 +117,7 @@ function configuraPagina(mode) {
 
     const btnSalva =
         document.getElementById("btnSalva");
-
     btnSalva.classList.toggle("d-none", !cfg.mostraSalva);
-
     btnSalva.textContent = cfg.testoSalva;
 
     //GESTIONE COPIE 
@@ -146,39 +144,27 @@ function setEditMode(editable, mostraCopie) {
         "editore",
         "annoPubblicazione",
         "isbn",
-        "descrizione",
-        "nrCopie"
+        "descrizione"
     ].forEach(id => {
 
-        document
-            .getElementById(id)
-            .readOnly = !editable;
+        const campo = document.getElementById(id);
+        campo.readOnly = !editable;
+        campo.classList.toggle("bg-body-secondary", !editable);
     });
 
-    document
-        .getElementById("genere")
-        .disabled = !editable;
+    const genere = document.getElementById("genere");
+    genere.disabled = !editable;
+    genere.classList.toggle("bg-body-secondary", !editable);
 
     document
         .getElementById("load-file")
         .classList.toggle("d-none", !editable);
 
     //GESTIONE COPIE
-    // il campo numero copie viene visualizzato
-    // solo in fase di insert
-    document
-        .getElementById("nrCopie")
-        .readonly = mostraCopie;
-
-    /*if (!editable) {
-        document
-            .getElementById("load-file")
-            .classList.add("d-none");
-    } else {
-        document
-            .getElementById("load-file")
-            .classList.remove("d-none");
-    }*/
+    // il campo nrCopie è editabile solo in fase di insert
+    const nrCopie = document.getElementById("nrCopie");
+    nrCopie.readOnly = (mostraCopie || !editable);
+    nrCopie.classList.toggle("bg-body-secondary", mostraCopie || !editable);
 }
 
 function resetMateriale() {
@@ -283,11 +269,7 @@ function getFileCopertina() {
 }
 
 //gestione delle copie
-async function mostraSezioneCopie() { }
-
-async function nascondiSezioneCopie() { }
-
-async function mostraCopie(copie, context) { 
+async function mostraCopie(copie, context) {
     const tbody = document.getElementById('tbodyCopie');
     tbody.innerHTML =
         copie.map(m => `
@@ -295,11 +277,71 @@ async function mostraCopie(copie, context) {
                 <td>${m.id_copia}</td>
                 <td>${m.stato}</td>
                 <td>${m.email ?? '-'}</td>
+                <td>
+                    ${renderAzioni(m, context)}
+                </td>
             </tr>
         `).join('');
 }
 
-async function aggiungiRigaCopia(copia) { }
+function renderAzioni(copia, context) {
+
+    let html = "";
+    
+    if (context.mode ==="edit") {
+
+        html += `
+            <button
+                class="btn btn-sm btn-danger btnElimina"
+                data-id-materiale="${copia.id_libro}"
+                data-id-copia="${copia.id_copia}">
+                Elimina
+            </button>
+        `;
+    }
+
+    return html;
+}
+/*
+function aggiornaPulsanteCopie(aperto) {
+
+    const btn =
+        document.getElementById("btnGestisciCopie");
+
+    btn.classList.toggle("btn-primary", !aperto);
+    btn.classList.toggle("btn-secondary", aperto);
+
+    btn.textContent =
+        aperto
+            ? "Nascondi copie"
+            : "Gestisci copie";
+}*/
+
+function aggiornaPulsanteCollapse(
+    idBottone,
+    aperto,
+    testoChiuso,
+    testoAperto
+) {
+
+    const btn = document.getElementById(idBottone);
+
+    btn.classList.toggle("btn-primary", !aperto);
+    btn.classList.toggle("btn-secondary", aperto);
+
+    btn.textContent =
+        aperto
+            ? testoAperto
+            : testoChiuso;
+}
+
+function mostraDescrizione(mostra) {
+
+    document
+        .getElementById("descrizioneContainer")
+        .classList.toggle("d-none", !mostra);
+}
+
 
 export {
     mostraMateriale,
@@ -310,5 +352,6 @@ export {
     pulisciErrori,
     getFileCopertina,
     mostraCopie,
-    aggiungiRigaCopia
+    aggiornaPulsanteCollapse,
+    mostraDescrizione
 }

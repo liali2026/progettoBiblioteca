@@ -133,7 +133,7 @@ async function insertCopie(conn, idLibro, nrCopie) {
             VALUES (?, ?, 'DISPONIBILE')
             `,
             [nrMaxCopia,
-             idLibro]
+                idLibro]
         );
     }
 }
@@ -349,9 +349,9 @@ async function getCopie(idMateriale) {
             ORDER BY id_copia
         `, [idMateriale]);
 
-        if (copie.length === 0) {
+        /*if (copie.length === 0) {
             throw new Error("Nessuna copia trovata");
-        }
+        }*/
 
         return copie;
     } finally {
@@ -390,8 +390,61 @@ async function addCopie(idMateriale, nrCopie = 1) {
     }
 }
 
-async function deleteCopia(idCopia, idLibro){
-    
+async function findCopia(idMateriale, idCopia){
+    const conn = await getConnection();
+    try {
+        const [copia] =
+            await conn.query(
+                `
+                SELECT * 
+                  FROM vista_copie
+                WHERE id_libro = ?
+                  AND id_copia = ?
+                `,
+                [idMateriale,
+                    idCopia
+                ]
+            );
+
+        return copia[0];
+
+    } finally {
+        await conn.end();
+    }
+}
+
+async function deleteCopia(idMateriale, idCopia ) {
+    const conn = await getConnection();
+    try {
+        const [result] =
+            await conn.query(
+                `
+                UPDATE copie
+                   SET attivo = 0
+                WHERE id_libro = ?
+                  AND id_copia = ?
+                  AND attivo = 1
+                `,
+                [idMateriale,
+                    idCopia
+                ]
+            );
+
+
+        if (result.affectedRows === 0) {
+            throw new Error("Copia non trovata");
+        }
+
+        return {
+            idLibro: idMateriale,
+            idCopia: idCopia,
+            righeCancellate: result.affectedRows
+        };
+
+    } finally {
+        await conn.end();
+    }
+
 }
 
 module.exports = {
@@ -402,5 +455,7 @@ module.exports = {
     deleteItem,
     getAllGeneri,
     getCopie,
-    addCopie
+    findCopia,
+    addCopie,
+    deleteCopia
 }

@@ -107,7 +107,8 @@ async function getAllGeneri(req, res, next) {
 async function getCopie(req, res, next) {
     
     try {
-        const copie = await materialiService.getCopie(req.params.id);
+        const idMateriale = Number(req.params.idMateriale);
+        const copie = await materialiService.getCopie(idMateriale);
         res.json(copie);
 
     } catch (err) {
@@ -119,13 +120,38 @@ async function getCopie(req, res, next) {
 async function addCopie(req, res, next) {
     
     try {
-        const {idLibro, nrCopie} = req.body;
-        const risultato = await materialiService.addCopie(idLibro, nrCopie);
+        const idMateriale = Number(req.params.idMateriale);
+        const nrCopie = Number(req.body.nrCopie);
+
+        const risultato = await materialiService.addCopie(idMateriale, nrCopie);
 
         res.json({
-            idLibro: risultato.idLibro,
+            idMateriale: risultato.idMateriale,
             righeInserite: risultato.righeInserite,
             messaggio: "Copie inserite correttamente"
+        });
+
+    } catch (err) {
+        next(err);
+    }
+
+}
+
+async function deleteCopia(req, res, next) {
+    
+    try {
+        const idMateriale = Number(req.params.idMateriale);
+        const idCopia = Number(req.params.idCopia);
+
+        //console.log("deleteCopia - idMateriale =" + idMateriale + " idCopia = "+idCopia);
+        
+        const risultato = await materialiService.deleteCopia(idMateriale, idCopia);
+
+        res.json({
+            idMateriale: risultato.idMateriale,
+            idCopia: risultato.idCopia,
+            righeCancellate: risultato.righeCancellate,
+            messaggio: "Copia cancellata correttamente"
         });
 
     } catch (err) {
@@ -143,5 +169,6 @@ module.exports = {
     deleteItem,
     getAllGeneri,
     getCopie,
-    addCopie
+    addCopie,
+    deleteCopia
 };

@@ -2,13 +2,12 @@ const getDatabaseError = require('../utils/databaseErrorHandler');
 
 function errorHandler(err, req, res, next) {
 
-    console.error("errorHandler err " + err);
-    console.log("errorHandler err.dettagli =", err.dettagli);
+    console.log(err);
 
     const dbError = getDatabaseError(err);
 
     if (dbError) {
-        console.log("errorHandler - dbError");
+        console.log("errorHandler - errore dal database");
         return res.status(dbError.status).json({
             message: dbError.message
         });
@@ -16,7 +15,7 @@ function errorHandler(err, req, res, next) {
 
     // errore di validazione
     if (err.dettagli) {
-        console.log("errorHandler - err.dettagli");
+        console.log("errorHandler - errore di validazione");
         return res.status(400).json({
             message: err.message,
             dettagli: err.dettagli
@@ -25,7 +24,7 @@ function errorHandler(err, req, res, next) {
 
     // errore applicativo generico
     if (err.message) {
-        console.log("errorHandler - err.message");
+        console.log("errorHandler - errore applicativo generico");
         return res.status(400).json({
             message: err.message
         });

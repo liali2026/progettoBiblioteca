@@ -38,25 +38,26 @@ router.delete(
 
 //GESTIONE DELLE COPIE
 router.get(
-    "/admin/:id/copies",
+    "/admin/:idMateriale/copies",
     authenticate,
     authorize("BIBLIOTECARIO"),
     materialiController.getCopie
 );
 
 router.post(
-    "/admin/:id/copies",
+    "/admin/:idMateriale/copies",
     authenticate,
     authorize("BIBLIOTECARIO"),
     materialiController.addCopie
 );
-/*
+
 router.delete(
-    "/admin/copies/:idCopia",
+    "/admin/:idMateriale/copies/:idCopia",
     authenticate,
     authorize("BIBLIOTECARIO"),
     materialiController.deleteCopia
-);*/
+);
+
 
 router.get('/', materialiController.search);
 router.get('/:id', materialiController.findById);

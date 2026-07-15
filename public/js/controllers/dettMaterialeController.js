@@ -7,6 +7,7 @@ import * as PrestitiApi from '../api/prestitiApi.js';
 import * as CommonLayoutView from '../components/commonLayout.js';
 import * as MessageView from '../components/message.js';
 import * as ModalPrestito from '../components/prestitoModal.js';
+import * as CopieModal from '../components/copieModal.js';
 
 import * as View from '../views/dettaglioMaterialeView.js';
 
@@ -24,7 +25,6 @@ function inizializzaContext() {
     CONTEXT.mode = params.get("mode") || "view";
     CONTEXT.idLibro = params.get("id");
 }
-
 
 async function caricaMateriale() {
     try {
@@ -103,7 +103,6 @@ async function salvaMateriale(operazione = "insert") {
     }
 }
 
-
 function mostraMessaggiPendenti() {
 
     const msg =
@@ -157,7 +156,7 @@ async function confermaPrestito() {
                                     `);
 
     } catch (err) {
-        console.error(err);
+        //console.error(err);
         ModalPrestito.chiudi();
         await caricaMateriale();
         MessageView.mostraErrore(err.message);
@@ -165,8 +164,37 @@ async function confermaPrestito() {
 }
 //
 
+/**
+ * GESTIONE DELLE COPIE
+ * */
+async function aggiungiCopie() {
+    try {
+        const nrCopie = CopieModal.getNumeroCopie();
 
+        await MaterialiApi.addCopie(
+            CONTEXT.idLibro,
+            nrCopie
+        );
+
+        CopieModal.chiudi();
+
+        //await caricaCopie();
+        const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+        View.mostraCopie(copie, CONTEXT);
+        CONTEXT.copieCaricate = true;
+
+        await caricaMateriale();
+        MessageView.mostraSuccesso(`Copie aggiunte correttamente.`);
+
+    } catch (err) {
+        CopieModal.chiudi();
+        await caricaMateriale();
+        MessageView.mostraErrore(err.message);
+    }
+}
 //
+
+
 function registraEventi() {
 
     document
@@ -203,24 +231,91 @@ function registraEventi() {
 
 
     //GESTIONE DELLE COPIE
-    document.getElementById("collapseCopie")
-        .addEventListener(
-            "show.bs.collapse",
-            async () => {
-                const copie =
-                    await MaterialiApi.getCopie(CONTEXT.idLibro);
-                View.mostraCopie(copie);
+    const collapse = document.getElementById("collapseCopie");
+    collapse.addEventListener(
+        "show.bs.collapse",
+        async () => {
+            //View.aggiornaPulsanteCopie(true);
+            View.aggiornaPulsanteCollapse(
+                "btnGestisciCopie",
+                true,
+                "Gestisci copie",
+                "Nascondi copie");
+            View.mostraDescrizione(false);
+            //DA SISTEMARE!!
+            try {
+                const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
                 CONTEXT.copieCaricate = true;
+                View.mostraCopie(copie, CONTEXT);
+            } catch (err) {
+                View.mostraCopie(copie, CONTEXT);
+                MessageView.mostraErrore(err.message);
             }
-        );
-        
+           
+        }
+    );
+
+    collapse.addEventListener(
+        "hide.bs.collapse",
+        () => //View.aggiornaPulsanteCopie(false)
+        {
+            View.aggiornaPulsanteCollapse(
+                "btnGestisciCopie",
+                false,
+                "Gestisci copie",
+                "Nascondi copie");
+
+            View.mostraDescrizione(true);
+        }
+    );
+
     document.getElementById("btnAggiungiCopia")
         .addEventListener(
             "click",
-            async () => {
-                await aggiungiRigaCopia();
-            }
+            CopieModal.apri
         );
+
+    document
+        .getElementById("btnConfermaAggiungiCopie")
+        .addEventListener(
+            "click",
+            aggiungiCopie
+        );
+
+    document
+        .getElementById("tbodyCopie")
+        .addEventListener("click", async (e) => {
+
+            if (e.target.classList.contains("btnElimina")) {
+                if (!confirm("Confermi l'eliminazione del materiale?")) {
+                    return;
+                }
+                try {
+                    const idMateriale = e.target.dataset.idMateriale;
+                    const idCopia = e.target.dataset.idCopia;
+                    //console.log(id);
+                    const risultato =
+                        await MaterialiApi.deleteCopia(idMateriale, idCopia);
+
+                     //DA SISTEMARE!!
+                    const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+                    View.mostraCopie(copie, CONTEXT);
+                    CONTEXT.copieCaricate = true;
+
+                    await caricaMateriale();
+                    MessageView.mostraSuccesso(
+                        risultato.messaggio
+                    );
+
+                } catch (err) {
+                    await caricaMateriale();
+                    View.mostraCopie(copie, CONTEXT);
+                    MessageView.mostraErrore(err.message);
+
+                }
+            }
+
+        });
 }
 
 async function inizializzaPagina() {
@@ -258,6 +353,7 @@ async function inizializzaPagina() {
     mostraMessaggiPendenti();
 
     ModalPrestito.inizializza();
+    CopieModal.inizializza();
 
     registraEventi();
 }

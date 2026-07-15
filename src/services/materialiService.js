@@ -44,7 +44,7 @@ function validaMateriale(materiale) {
 function controllaDatiMateriale(materiale) {
     const errori = [];
 
-if (!Validation.isRequired(materiale.titolo)) {
+    if (!Validation.isRequired(materiale.titolo)) {
         errori.push({
             campo: "titolo",
             messaggio: "Inserire il titolo."
@@ -93,7 +93,7 @@ if (!Validation.isRequired(materiale.titolo)) {
         });
     }
 
-   return errori;
+    return errori;
 }
 
 async function getAllGeneri() {
@@ -106,7 +106,29 @@ async function getCopie(id) {
 }
 
 async function addCopie(id, nrCopie) {
+    //CONTROLLI DA INSERIRE QUI
     return await materialiModel.addCopie(id, nrCopie);
+}
+
+async function deleteCopia(idMateriale, idCopia) {
+
+    const copia = await materialiModel.findCopia(
+        idMateriale,
+        idCopia
+    );
+
+    if (!copia) {
+        throw new Error("Copia non trovata.");
+    }
+
+    if (copia.stato !== "DISPONIBILE") {
+        throw new Error(
+            "Impossibile eliminare una copia attualmente in prestito."
+        );
+    }
+
+    return await materialiModel.deleteCopia(idMateriale, idCopia);
+    
 }
 
 module.exports = {
@@ -117,5 +139,6 @@ module.exports = {
     insertItem,
     updateItem,
     deleteItem,
-    addCopie
+    addCopie,
+    deleteCopia
 };

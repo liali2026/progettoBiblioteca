@@ -115,9 +115,9 @@ async function getAllGeneri() {
 }
 
 //GESTIONE DELLE COPIE
-async function getCopie(idLibro) {
+async function getCopie(idMateriale) {
 
-    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
+    const response = await fetch(`/materiali/admin/${idMateriale}/copies`);
 
     const risultato = await response.json();
 
@@ -128,18 +128,39 @@ async function getCopie(idLibro) {
     return risultato;
 }
 
-async function addCopie(idLibro, nrCopie) {
-
-    const response = await fetch(`/materiali/admin/${idLibro}/copies`);
+async function addCopie(idMateriale, nrCopie) {
 
      const response = await fetch(
-        `/materiali/admin/${idLibro}/copies`,
+        `/materiali/admin/${idMateriale}/copies`,
         {
             method: "POST",
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(
-                {idLibro: idLibro, 
-                nrCopie: nrCopie
+                {idMateriale: idMateriale, 
+                 nrCopie: nrCopie
+            })
+        }
+    );
+
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
+}
+
+async function deleteCopia(idMateriale, idCopia) {
+
+     const response = await fetch(
+        `/materiali/admin/${idMateriale}/copies/${idCopia}`,
+        {
+            method: "DELETE",
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(
+                {idMateriale: idMateriale, 
+                 idCopia: idCopia
             })
         }
     );
@@ -162,5 +183,6 @@ export {
     deleteItem,
     getAllGeneri,
     getCopie,
-    addCopie
+    addCopie,
+    deleteCopia
 }
