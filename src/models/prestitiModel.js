@@ -37,6 +37,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                 INSERT INTO prestiti
                 (
                     id_utente,
+                    id_libro,
                     id_copia,
                     data_inizio,
                     data_fine,
@@ -46,6 +47,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                 (
                     ?,
                     ?,
+                    ?,
                     NOW(),
                     DATE_ADD(NOW(), INTERVAL ? MONTH),
                     "ATTIVO"
@@ -53,6 +55,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                 `,
                 [
                     idUtente,
+                    idLibro,
                     idCopia,
                     durataMesi
                 ]

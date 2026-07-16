@@ -349,9 +349,9 @@ async function getCopie(idMateriale) {
             ORDER BY id_copia
         `, [idMateriale]);
 
-        /*if (copie.length === 0) {
+        if (copie.length === 0) {
             throw new Error("Nessuna copia trovata");
-        }*/
+        }
 
         return copie;
     } finally {

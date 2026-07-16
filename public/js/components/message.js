@@ -28,7 +28,7 @@ function mostraErrore(testo) {
 }
 
 function mostraSuccesso(testo) {
-
+    
     mostraMessaggio(
         `
         <i class="bi bi-check-circle-fill me-2"></i>

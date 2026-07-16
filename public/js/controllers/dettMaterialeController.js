@@ -29,7 +29,7 @@ function inizializzaContext() {
 async function caricaMateriale() {
     try {
 
-        MessageView.nascondiMessaggio();
+        //MessageView.nascondiMessaggio();
 
         const idMateriale = CONTEXT.idLibro;
         if (!idMateriale) {
@@ -167,6 +167,19 @@ async function confermaPrestito() {
 /**
  * GESTIONE DELLE COPIE
  * */
+
+async function mostraCopie() {
+    let copie = [];
+    try {
+
+        copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+        CONTEXT.copieCaricate = true;
+    } catch (err) {
+        MessageView.mostraErrore(err.message);
+    }
+    View.mostraCopie(copie, CONTEXT);
+}
+
 async function aggiungiCopie() {
     try {
         const nrCopie = CopieModal.getNumeroCopie();
@@ -178,11 +191,11 @@ async function aggiungiCopie() {
 
         CopieModal.chiudi();
 
-        //await caricaCopie();
+        //await mostraCopie();
         const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
         View.mostraCopie(copie, CONTEXT);
         CONTEXT.copieCaricate = true;
-
+ 
         await caricaMateriale();
         MessageView.mostraSuccesso(`Copie aggiunte correttamente.`);
 
@@ -191,6 +204,24 @@ async function aggiungiCopie() {
         await caricaMateriale();
         MessageView.mostraErrore(err.message);
     }
+}
+
+async function cancellaCopie(idMateriale, idCopia) {
+    try {
+
+        const risultato =
+            await MaterialiApi.deleteCopia(idMateriale, idCopia);
+
+        await caricaMateriale();
+        await mostraCopie();
+        MessageView.mostraSuccesso(
+            risultato.messaggio
+        );
+
+    } catch (err) {
+        MessageView.mostraErrore(err.message);
+    }
+    
 }
 //
 
@@ -218,11 +249,9 @@ function registraEventi() {
             async () => {
 
                 if (CONTEXT.mode == "new") {
-                    //await insertMateriale();
                     await salvaMateriale("insert");
                 }
                 else {
-                    //await updateMateriale();
                     await salvaMateriale("update");
                 }
 
@@ -235,30 +264,23 @@ function registraEventi() {
     collapse.addEventListener(
         "show.bs.collapse",
         async () => {
-            //View.aggiornaPulsanteCopie(true);
+            //modifica il tasto 'Gestisci copie'
             View.aggiornaPulsanteCollapse(
                 "btnGestisciCopie",
                 true,
                 "Gestisci copie",
                 "Nascondi copie");
+
+            //collassa il campo descrizione
             View.mostraDescrizione(false);
-            //DA SISTEMARE!!
-            try {
-                const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
-                CONTEXT.copieCaricate = true;
-                View.mostraCopie(copie, CONTEXT);
-            } catch (err) {
-                View.mostraCopie(copie, CONTEXT);
-                MessageView.mostraErrore(err.message);
-            }
-           
+            //visualizza la tabella dei dati delle copie
+            await mostraCopie();
         }
     );
 
     collapse.addEventListener(
         "hide.bs.collapse",
-        () => //View.aggiornaPulsanteCopie(false)
-        {
+        () => {
             View.aggiornaPulsanteCollapse(
                 "btnGestisciCopie",
                 false,
@@ -266,6 +288,7 @@ function registraEventi() {
                 "Nascondi copie");
 
             View.mostraDescrizione(true);
+            MessageView.nascondiMessaggio();
         }
     );
 
@@ -290,29 +313,30 @@ function registraEventi() {
                 if (!confirm("Confermi l'eliminazione del materiale?")) {
                     return;
                 }
-                try {
-                    const idMateriale = e.target.dataset.idMateriale;
-                    const idCopia = e.target.dataset.idCopia;
-                    //console.log(id);
-                    const risultato =
-                        await MaterialiApi.deleteCopia(idMateriale, idCopia);
+                //try {
+                const idMateriale = e.target.dataset.idMateriale;
+                const idCopia = e.target.dataset.idCopia;
+                cancellaCopie(idMateriale, idCopia);
+                //console.log(id);
+                /*const risultato =
+                    await MaterialiApi.deleteCopia(idMateriale, idCopia);
 
-                     //DA SISTEMARE!!
-                    const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
-                    View.mostraCopie(copie, CONTEXT);
-                    CONTEXT.copieCaricate = true;
+                //DA SISTEMARE!!
+                const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+                View.mostraCopie(copie, CONTEXT);
+                CONTEXT.copieCaricate = true;
 
-                    await caricaMateriale();
-                    MessageView.mostraSuccesso(
-                        risultato.messaggio
-                    );
+                await caricaMateriale();
+                MessageView.mostraSuccesso(
+                    risultato.messaggio
+                );
 
-                } catch (err) {
-                    await caricaMateriale();
-                    View.mostraCopie(copie, CONTEXT);
-                    MessageView.mostraErrore(err.message);
+            } catch (err) {
+                await caricaMateriale();
+                View.mostraCopie(copie, CONTEXT);
+                MessageView.mostraErrore(err.message);
 
-                }
+            }*/
             }
 
         });
