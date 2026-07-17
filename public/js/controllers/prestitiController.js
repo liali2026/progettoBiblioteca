@@ -10,6 +10,12 @@ let CONTEXT = {
     isAdmin: false
 };
 
+function inizializzaContext(user) {
+
+    CONTEXT.role = user?.ruolo || 'UTENTE';
+    CONTEXT.isAdmin = CONTEXT.role === 'BIBLIOTECARIO';
+}
+
 async function ricercaPrestiti() {
     try {
 
@@ -21,7 +27,6 @@ async function ricercaPrestiti() {
             ? document.getElementById('utente')?.value?.trim()
             : null;
 
-        //const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato);
         const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente);
 
         console.log(risultati);
@@ -30,7 +35,6 @@ async function ricercaPrestiti() {
             PrestitiView.resetPrestiti();
             MessageView.mostraWarning('Nessun dato trovato con i criteri di ricerca.');
         } else {
-            //PrestitiView.renderPrestiti(risultati);
             PrestitiView.renderPrestiti(risultati, CONTEXT);
         }
 
@@ -65,6 +69,29 @@ async function restituisciPrestito(idPrestito) {
 }
 
 
+function registraEventi() {
+
+    document
+        .getElementById('btnRicerca')
+        .addEventListener('click', ricercaPrestiti);
+
+    document
+        .getElementById('btnPulisci')
+        .addEventListener('click', resetRicerca);
+
+    document
+        .getElementById('tabellaPrestiti')
+        .addEventListener(
+            'click',
+            async (e) => {
+                if (!e.target.classList.contains('btnRestituisci')) {
+                    return;
+                }
+                const idPrestito = e.target.dataset.idPrestito;
+                await restituisciPrestito(idPrestito);
+            }
+        );
+}
 
 async function inizializzaPagina() {
 
@@ -84,38 +111,13 @@ async function inizializzaPagina() {
         }
     ]);
 
-    const user = await Auth.initPage();
-    CONTEXT.role = user?.ruolo || 'UTENTE';
-    CONTEXT.isAdmin = CONTEXT.role === 'BIBLIOTECARIO';
+    //true =richiede il login
+    const user = await Auth.initPage(true); 
 
-    //verificare se meglio piazzare altrove questa parte di codice
-    if (CONTEXT.isAdmin) {
-        document
-            .getElementById('filtroUtenteContainer')
-            .classList.remove('d-none');
-    }
-    //
+    await inizializzaContext(user);
+    PrestitiView.configuraPagina(CONTEXT.isAdmin);
+    registraEventi();
 
-    document
-        .getElementById('btnRicerca')
-        .addEventListener('click', ricercaPrestiti);
-    document
-        .getElementById('btnPulisci')
-        .addEventListener('click', resetRicerca);
-
-    document
-        .getElementById('tabellaPrestiti')
-        .addEventListener(
-            'click',
-            async (e) => {
-                if (!e.target.classList.contains('btnRestituisci')) {
-                    return;
-                }
-                const idPrestito =
-                    e.target.dataset.idPrestito;
-                await restituisciPrestito(idPrestito);
-            }
-        );
 }
 
 document.addEventListener(

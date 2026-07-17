@@ -31,7 +31,7 @@
                         <input type="text" id="autore" class="form-control" placeholder="Autore">
                     </div>
                     <!-- per bibliotecario-->
-                    <div class="col-md-3 d-none" id="filtroUtenteContainer">
+                    <div class="col-md-3 role-bibliotecario d-none">
                         <input type="text" id="utente" class="form-control" placeholder="Utente">
                     </div>
                    <!----> 
@@ -77,6 +77,8 @@
                                 <th>Data Prevista Fine Prestito</th>
                                 <th>Data Restituzione</th>
                                 <th>Stato prestito</th>
+                                <th class="role-bibliotecario d-none">Utente</th>
+                                <!--<th class="role-utente">Azioni</th>-->
                                 <th>Azioni</th>
                             </tr>
                         </thead>

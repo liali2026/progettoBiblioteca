@@ -1,20 +1,37 @@
 import { formattaData } from '../utils/dateUtils.js';
 
+function configuraPagina(isAdmin) {
+    //per bibliotecario
+    if (isAdmin) {
+        //visualizzo i campi in più per il bibliotecario
+        document
+            .querySelectorAll(".role-bibliotecario")
+            .forEach(campo => campo.classList.remove("d-none"));
+
+        //nascondo il campo 'Azioni' nella tabella
+        document
+            .querySelectorAll(".role-utente")
+            .forEach(campo => campo.classList.add("d-none"));
+    }
+}
+
 //renderPaginazione(data.total, page); -- DA FARE
 function renderPrestiti(prestiti, CONTEXT) {
 
     const tbody = document.getElementById('tabellaPrestiti');
+
     const box = document.getElementById('messaggioPagina');
+    box.classList.add('d-none');
 
     //per bibliotecario
     const isAdmin = CONTEXT?.isAdmin;
+    //console.log("isAdmin =", isAdmin, typeof isAdmin);
 
-    box.classList.add('d-none');
     tbody.innerHTML =
-         prestiti.map(m => {
+        prestiti.map(m => {
 
             const isRestituito = m.stato === 'RESTITUITO';
-
+            
             return `
             <tr>
                 <td>${m.titolo}</td>
@@ -24,18 +41,21 @@ function renderPrestiti(prestiti, CONTEXT) {
                 <td>${formattaData(m.data_fine)}</td>
                 <td>${m.data_restituzione ? formattaData(m.data_restituzione) : '-'}</td>
                 <td>${badgeStato(m.stato)}</td>
-                 <td>
-                    ${(!isRestituito && !isAdmin) ? `
+                ${isAdmin ? `
+                    <td>${m.email}</td>
+                ` : ''}
+                ${(!isRestituito /*&& !isAdmin*/) ? `
+                    <td>
                         <button
                             class="btn btn-sm btn-warning btnRestituisci"
                             data-id-prestito="${m.id_prestito}">
                             Restituisci
                         </button>
-                    ` : ''}
-                </td>
+                    </td>
+                   ` : ''}
             </tr>
          `;
-    }).join('');
+        }).join('');
 }
 
 function resetPrestiti() {
@@ -72,5 +92,6 @@ function badgeStato(stato) {
 export {
     renderPrestiti,
     resetPrestiti,
-    resetRicerca
+    resetRicerca,
+    configuraPagina
 }
