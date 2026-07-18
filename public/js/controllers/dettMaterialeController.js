@@ -151,9 +151,18 @@ async function confermaPrestito() {
 
         ModalPrestito.chiudi();
         await caricaMateriale();
-        MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
-                                    Codice prestito: <strong>${datiPrestito.idPrestito}</strong>
+        if (datiPrestito.esito == "PRESTITO") {
+            MessageView.mostraSuccesso(`Prestito registrato con successo.<br>
+                                    Codice prestito: <strong>${datiPrestito.id}</strong>
                                     `);
+        } else {
+            MessageView.mostraSuccesso(`
+            Tutte le copie sono attualmente occupate.<br>
+            La tua prenotazione è stata inserita in coda.<br>
+            Codice prenotazione:
+            <strong>${datiPrestito.id}</strong>
+                                      `);
+        }
 
     } catch (err) {
         //console.error(err);
@@ -195,7 +204,7 @@ async function aggiungiCopie() {
         const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
         View.mostraCopie(copie, CONTEXT);
         CONTEXT.copieCaricate = true;
- 
+
         await caricaMateriale();
         MessageView.mostraSuccesso(`Copie aggiunte correttamente.`);
 
@@ -221,7 +230,7 @@ async function cancellaCopie(idMateriale, idCopia) {
     } catch (err) {
         MessageView.mostraErrore(err.message);
     }
-    
+
 }
 //
 

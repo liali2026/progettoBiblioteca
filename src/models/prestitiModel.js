@@ -19,18 +19,27 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
             [idLibro]
         );
 
-        if (!copie[0].id_copia) {
-
-            throw new Error(
-                'Nessuna copia disponibile'
-            );
-        }
-
+        let result = [];
+        let esito = null;
         const idCopia = copie[0].id_copia;
 
-        /*
-         * Inserisce il prestito
-         */
+        //if (!copie[0].id_copia) {
+        if (!idCopia){
+
+            /*throw new Error(
+                'Nessuna copia disponibile'
+            );*/
+            //gestione delle prenotazioni
+            result  = await inserisciPrenotazione(idUtente, idLibro, durataMesi, conn);
+            esito ='PRENOTAZIONE';
+
+        } else {
+            result = await inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn);
+            esito = 'PRESTITO';
+        }
+
+
+        /*const idCopia = copie[0].id_copia;
         const [result] =
             await conn.query(
                 `
@@ -61,9 +70,6 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
                 ]
             );
 
-        /*
-         * Aggiorna la disponibilità
-         */
         await conn.query(
             `
             UPDATE copie
@@ -71,12 +77,13 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
             WHERE id_copia = ?
             `,
             [idCopia]
-        );
+        );*/
 
         await conn.commit();
 
         return {
-            idPrestito: result.insertId,
+            esito: esito,
+            id: result.insertId,
             idCopia
         };
 
@@ -88,6 +95,55 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
     } finally {
         await conn.end();
     }
+}
+
+async function inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn) {
+    /*
+        * Inserisce il prestito
+        */
+    const [result] =
+        await conn.query(
+            `
+                INSERT INTO prestiti
+                (
+                    id_utente,
+                    id_libro,
+                    id_copia,
+                    data_inizio,
+                    data_fine,
+                    stato
+                )
+                VALUES
+                (
+                    ?,
+                    ?,
+                    ?,
+                    NOW(),
+                    DATE_ADD(NOW(), INTERVAL ? MONTH),
+                    "ATTIVO"
+                )
+                `,
+            [
+                idUtente,
+                idLibro,
+                idCopia,
+                durataMesi
+            ]
+        );
+
+    /*
+     * Aggiorna la disponibilità
+     */
+    await conn.query(
+        `
+            UPDATE copie
+            SET stato = "PRESTITO"
+            WHERE id_copia = ?
+            `,
+        [idCopia]
+    );
+
+    return result;
 }
 
 async function ricercaPrestiti(idUtente, titolo, autore, stato) {
@@ -151,7 +207,7 @@ async function restituisciPrestito(idPrestito) {
             [idPrestito]
         );
 
-        console.log(prestito);
+        //console.log(prestito);
 
         if (!prestito[0].id_prestito) {
 
@@ -183,6 +239,14 @@ async function restituisciPrestito(idPrestito) {
                 [prestito[0].id_copia]
             );
 
+            //gestisco la prenotazione
+            await gestisciPrenotazione
+                (
+                    prestito[0].id_libro,
+                    prestito[0].id_copia,
+                    conn
+                );
+
 
         } else {
             throw new Error(
@@ -205,6 +269,80 @@ async function restituisciPrestito(idPrestito) {
 
     } finally {
         await conn.end();
+    }
+}
+
+//chiamata alla richiesta di un prestito, senza copie disponibili
+async function inserisciPrenotazione(idUtente, idLibro, durataPrestito, conn) {
+
+    const [rows] = await conn.query(
+        `SELECT count(*) as nrPrenotazioni
+           FROM prenotazioni 
+          WHERE id_utente = ?
+            AND id_libro = ?
+            AND st_prenotazione ='ATTESA'`,
+        [idUtente,
+            idLibro
+        ]
+    );
+
+    if (rows[0].nrPrenotazioni > 0) {
+        throw new Error("Esiste già una prenotazione per questo libro");
+    }
+
+    const [result] =
+        await conn.query(
+            `
+                INSERT INTO prenotazioni
+                (
+                    id_utente,
+                    id_libro,
+                    data_prenotazione,
+                    durata_prestito,
+                    st_prenotazione
+                )
+                VALUES
+                (
+                    ?,
+                    ?,
+                    NOW(),
+                    ?,
+                    "ATTESA"
+                )
+                `,
+            [
+                idUtente,
+                idLibro,
+                durataPrestito
+            ]
+        );
+
+    return result;
+
+}
+
+//chiamata alla restituzione di una copia, per gestire eventuali prenotazioni
+async function gestisciPrenotazione(idLibro, idCopia, conn) {
+
+    const [prenotazioni] = await conn.query(
+        `SELECT *
+           FROM prenotazioni 
+          WHERE id_libro = ?
+            AND st_prenotazione ='ATTIVA'
+            ORDER BY id_prenotazione`,
+        [idLibro]
+    );
+
+    const prenotazione = prenotazioni[0];
+    if (prenotazione) {
+        await inserisciPrestito
+            (
+                prenotazione.id_utente,
+                idLibro,
+                idCopia,
+                prenotazione.durata_prestito,
+                conn
+            );
     }
 }
 

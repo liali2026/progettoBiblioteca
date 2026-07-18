@@ -14,15 +14,15 @@ async function creaPrestito(idLibro, durataMesi) {
         }
     );
 
+    const risultato = await response.json();
+
     if (!response.ok) {
-        const errore = await response.json();
-        throw new Error(errore.errore);
+        throw new Error(risultato.message);
     }
 
-    return await response.json();
+    return risultato;
 }
 
-//async function ricercaPrestiti(titolo, autore, stato) {
 async function ricercaPrestiti(titolo, autore, stato, utente) {
 
     const response = await fetch(
@@ -40,12 +40,19 @@ async function ricercaPrestiti(titolo, autore, stato, utente) {
             })
         });
 
-    if (!response.ok) {
+    /*if (!response.ok) {
         const errore = await response.json();
         throw new Error(errore.errore);
     }
 
-    return await response.json();
+    return await response.json();*/
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
 }
 
 async function restituisciPrestito(idPrestito) {
@@ -62,12 +69,19 @@ async function restituisciPrestito(idPrestito) {
         }
     );
 
-    if (!response.ok) {
+    /*if (!response.ok) {
         const errore = await response.json();
         throw new Error(errore.errore);
     }
 
-    return await response.json();
+    return await response.json();*/
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+
+    return risultato;
 }
 export {
     creaPrestito,
