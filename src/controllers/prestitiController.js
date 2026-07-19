@@ -13,8 +13,7 @@ async function creaPrestito(req, res, next) {
         //res.status(201).json(risultato);
 
         res.status(201).json({
-            idPrestito: risultato.idPrestito,
-            messaggio: 'Prestito registrato correttamente'
+            id: risultato.id
         });
 
     } catch (err) {
@@ -25,7 +24,7 @@ async function creaPrestito(req, res, next) {
 async function ricercaPrestiti(req, res, next) {
     try {
 
-        const { titolo, autore, stato, idUtente } = req.body;
+        const { titolo, autore, stato, idUtente, tipo } = req.body;
 
         //occorre gestire il bibliotecario
         //const idUtente = req.session.user.id_utente; 
@@ -47,7 +46,8 @@ async function ricercaPrestiti(req, res, next) {
                                  utenteFiltro,
                                  titolo,
                                  autore, 
-                                 stato
+                                 stato,
+                                 tipo
                                 );
         res.json(prestiti);
 
@@ -70,8 +70,23 @@ async function restituisciPrestito(req, res, next) {
     }
 }
 
+async function getStati(req, res, next) {
+
+    try {
+
+        const stati =
+            await prestitiService.getStati();
+
+        res.json(stati);
+
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
-    restituisciPrestito
+    restituisciPrestito,
+    getStati
 };

@@ -7,7 +7,8 @@ import * as PrestitiView from '../views/prestitiView.js';
 
 let CONTEXT = {
     role: null,
-    isAdmin: false
+    isAdmin: false,
+    stati: null
 };
 
 function inizializzaContext(user) {
@@ -22,12 +23,14 @@ async function ricercaPrestiti() {
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
         const stato = document.getElementById('stato').value;
+        const tipo = document.getElementById('tipo').value;
+        
         //gestione del bibliotecario
         const utente = CONTEXT.isAdmin
             ? document.getElementById('utente')?.value?.trim()
             : null;
 
-        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente);
+        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente, tipo);
 
         console.log(risultati);
 
@@ -91,6 +94,17 @@ function registraEventi() {
                 await restituisciPrestito(idPrestito);
             }
         );
+
+    document
+    .getElementById("tipo")
+    .addEventListener("change", e => {
+
+        PrestitiView.popolaStati(
+            CONTEXT,
+            e.target.value
+        );
+
+    });
 }
 
 async function inizializzaPagina() {
@@ -115,7 +129,10 @@ async function inizializzaPagina() {
     const user = await Auth.initPage(true); 
 
     await inizializzaContext(user);
-    PrestitiView.configuraPagina(CONTEXT.isAdmin);
+    CONTEXT.stati = await PrestitiApi.getStati();
+
+    PrestitiView.configuraPagina(CONTEXT);
+
     registraEventi();
 
 }

@@ -11,7 +11,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
     return await prestitiModel.creaPrestito(idUtente, idLibro, durataMesi);
 }
 
-async function ricercaPrestiti(idUtente, titolo, autore, stato){
+async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
     //l'utente o è quello loggato o quello passato nella post
     /*if (!idUtente){
          throw new Error(
@@ -22,18 +22,49 @@ async function ricercaPrestiti(idUtente, titolo, autore, stato){
     if (stato === 'ALL') {
         stato = null;
     }
-    
-    return await prestitiModel.ricercaPrestiti(idUtente, titolo, autore, stato);
+
+    if (tipo === "ALL"){
+        tipo = null;
+    }
+
+    return await prestitiModel.ricercaPrestiti(idUtente, titolo, autore, stato, tipo);
 }
 
-async function restituisciPrestito(idPrestito){
+async function restituisciPrestito(idPrestito) {
 
     return await prestitiModel.restituisciPrestito(idPrestito);
 
 }
 
+async function getStati() {
+
+    const rows = await prestitiModel.getStati();
+
+    const risultato = {};
+
+    for (const row of rows) {
+
+        const chiave =
+            row.categoria
+                .replace("STATO_", "")
+                .toLowerCase();
+
+        if (!risultato[chiave]) {
+            risultato[chiave] = [];
+        }
+
+        risultato[chiave].push({
+            codice: row.codice,
+            descrizione: row.descrizione
+        });
+    }
+
+    return risultato;
+}
+
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
-    restituisciPrestito
+    restituisciPrestito,
+    getStati
 }

@@ -19,11 +19,10 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
             [idLibro]
         );
 
-        let result = [];
+        let result;
         let esito = null;
         const idCopia = copie[0].id_copia;
 
-        //if (!copie[0].id_copia) {
         if (!idCopia){
 
             /*throw new Error(
@@ -37,47 +36,6 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
             result = await inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn);
             esito = 'PRESTITO';
         }
-
-
-        /*const idCopia = copie[0].id_copia;
-        const [result] =
-            await conn.query(
-                `
-                INSERT INTO prestiti
-                (
-                    id_utente,
-                    id_libro,
-                    id_copia,
-                    data_inizio,
-                    data_fine,
-                    stato
-                )
-                VALUES
-                (
-                    ?,
-                    ?,
-                    ?,
-                    NOW(),
-                    DATE_ADD(NOW(), INTERVAL ? MONTH),
-                    "ATTIVO"
-                )
-                `,
-                [
-                    idUtente,
-                    idLibro,
-                    idCopia,
-                    durataMesi
-                ]
-            );
-
-        await conn.query(
-            `
-            UPDATE copie
-            SET stato = "PRESTITO"
-            WHERE id_copia = ?
-            `,
-            [idCopia]
-        );*/
 
         await conn.commit();
 
@@ -146,7 +104,7 @@ async function inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn) {
     return result;
 }
 
-async function ricercaPrestiti(idUtente, titolo, autore, stato) {
+async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
     const conn = await getConnection();
     try {
         /*let sql = `SELECT p.*, l.*
@@ -171,13 +129,18 @@ async function ricercaPrestiti(idUtente, titolo, autore, stato) {
         }
 
         if (autore) {
-            sql += ` AND autore like ?'`;
+            sql += ` AND autore like ?`;
             params.push(`%${autore}%`);
         }
 
         if (stato) {
             sql += ` AND stato like ?`;
             params.push(`%${stato}%`);
+        }
+
+        if (tipo) {
+            sql += ` AND tipo like ?`;
+            params.push(`%${tipo}%`);
         }
 
         //logQuery(sql, params);
@@ -328,7 +291,7 @@ async function gestisciPrenotazione(idLibro, idCopia, conn) {
         `SELECT *
            FROM prenotazioni 
           WHERE id_libro = ?
-            AND st_prenotazione ='ATTIVA'
+            AND st_prenotazione ='ATTESA'
             ORDER BY id_prenotazione`,
         [idLibro]
     );
@@ -343,11 +306,48 @@ async function gestisciPrenotazione(idLibro, idCopia, conn) {
                 prenotazione.durata_prestito,
                 conn
             );
+
+        await conn.query(
+            `UPDATE prenotazioni
+                SET st_prenotazione ='EVASA'
+              WHERE id_prenotazione = ?`,
+              [prenotazione.id_prenotazione]
+        );
     }
 }
+
+async function getStati() {
+
+    const conn = await getConnection();
+
+    try {
+
+        const [rows] = await conn.query(
+            `
+            SELECT categoria,
+                   codice,
+                   descrizione
+            FROM configurazioni
+            WHERE attivo = 1
+              AND categoria IN (
+                    'STATO_PRESTITO',
+                    'STATO_PRENOTAZIONE'
+              )
+            ORDER BY categoria, ordine
+            `
+        );
+
+        return rows;
+
+    } finally {
+        await conn.end();
+    }
+}
+
 
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
-    restituisciPrestito
+    restituisciPrestito,
+    getStati
 }

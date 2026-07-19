@@ -34,10 +34,23 @@
                     <div class="col-md-3 role-bibliotecario d-none">
                         <input type="text" id="utente" class="form-control" placeholder="Utente">
                     </div>
+                    <div class="col-md-3">
+                        <select id="tipo" class="form-select">
+                            <option value="ALL" selected>
+                                TUTTI
+                            </option>
+                            <option value="1">
+                                PRESTITI
+                            </option>
+                            <option value="2">
+                                PRENOTAZIONI
+                            </option>
+                        </select>
+                    </div>
                    <!----> 
                     <div class="col-md-3">
                         <select id="stato" class="form-select">
-                            <option value="ALL" selected>
+                            <!--<option value="ALL" selected>
                                 TUTTI
                             </option>
                             <option value="ATTIVO">
@@ -48,7 +61,7 @@
                             </option>
                             <option value="SCADUTO">
                                 SCADUTO
-                            </option>
+                            </option>-->
                         </select>
                         <!--<input type="text" id="stato" class="form-control" placeholder="Stato del prestito">-->
                     </div>

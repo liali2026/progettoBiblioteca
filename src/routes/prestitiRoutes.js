@@ -6,5 +6,6 @@ const router = express.Router();
 router.post('/creaPrestito', authenticate, prestitiController.creaPrestito);
 router.post('/ricercaPrestiti', prestitiController.ricercaPrestiti);
 router.post('/restituisciPrestito', authenticate, prestitiController.restituisciPrestito);
+router.get( "/config/stati", authenticate, prestitiController.getStati);
 
 module.exports = router;

@@ -1,8 +1,10 @@
 import { formattaData } from '../utils/dateUtils.js';
 
-function configuraPagina(isAdmin) {
+let STATI = [];
+
+function configuraPagina(CONTEXT) {
     //per bibliotecario
-    if (isAdmin) {
+    if (CONTEXT.isAdmin) {
         //visualizzo i campi in più per il bibliotecario
         document
             .querySelectorAll(".role-bibliotecario")
@@ -13,6 +15,41 @@ function configuraPagina(isAdmin) {
             .querySelectorAll(".role-utente")
             .forEach(campo => campo.classList.add("d-none"));
     }
+
+    popolaStati(CONTEXT);
+}
+
+function popolaStati(CONTEXT, tipo = "ALL") {
+
+    const select = document.getElementById("stato");
+
+    let stati = [];
+
+    switch (tipo) {
+
+        case '1'://"PRESTITO":
+            stati = CONTEXT.stati.prestito;
+            break;
+
+        case '2'://"PRENOTAZIONE":
+            stati = CONTEXT.stati.prenotazione;
+            break;
+
+        default:
+            stati = [
+                ...CONTEXT.stati.prestito,
+                ...CONTEXT.stati.prenotazione
+            ];
+    }
+
+    select.innerHTML = `
+        <option value="ALL">Tutti</option>
+        ${stati.map(s => `
+            <option value="${s.codice}">
+                ${s.descrizione}
+            </option>
+        `).join("")}
+    `;
 }
 
 //renderPaginazione(data.total, page); -- DA FARE
@@ -71,7 +108,8 @@ function resetRicerca() {
 
 }
 
-function badgeStato(stato) {
+
+/*function badgeStato(stato) {
 
     switch (stato) {
 
@@ -87,11 +125,56 @@ function badgeStato(stato) {
         default:
             return stato;
     }
+}*/
+
+function badgeStato(codice) {
+
+    const stato =
+        STATI.find(s => s.codice === codice);
+
+    if (!stato) {
+        return codice;
+    }
+
+    return `
+        <span class="badge ${classeBadge(codice)}">
+            ${stato.descrizione}
+        </span>
+    `;
 }
+
+function classeBadge(codice) {
+
+    switch (codice) {
+
+        case "ATTIVO":
+            return "bg-warning text-dark";
+
+        case "RESTITUITO":
+            return "bg-success";
+
+        case "SCADUTO":
+            return "bg-danger";
+
+        case "ATTESA":
+            return "bg-info text-dark";
+
+        case "EVASA":
+            return "bg-primary";
+
+        case "ANNULLATA":
+            return "bg-secondary";
+
+        default:
+            return "bg-light text-dark";
+    }
+}
+
 
 export {
     renderPrestiti,
     resetPrestiti,
     resetRicerca,
-    configuraPagina
+    configuraPagina,
+    popolaStati
 }

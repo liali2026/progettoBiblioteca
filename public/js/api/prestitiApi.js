@@ -23,7 +23,7 @@ async function creaPrestito(idLibro, durataMesi) {
     return risultato;
 }
 
-async function ricercaPrestiti(titolo, autore, stato, utente) {
+async function ricercaPrestiti(titolo, autore, stato, utente, tipo) {
 
     const response = await fetch(
         '/prestiti/ricercaPrestiti',
@@ -36,16 +36,11 @@ async function ricercaPrestiti(titolo, autore, stato, utente) {
                 titolo,
                 autore,
                 stato,
-                utente //aggiunta per bibliotecario
+                utente, //aggiunta per bibliotecario
+                tipo
             })
         });
 
-    /*if (!response.ok) {
-        const errore = await response.json();
-        throw new Error(errore.errore);
-    }
-
-    return await response.json();*/
     const risultato = await response.json();
 
     if (!response.ok) {
@@ -69,12 +64,6 @@ async function restituisciPrestito(idPrestito) {
         }
     );
 
-    /*if (!response.ok) {
-        const errore = await response.json();
-        throw new Error(errore.errore);
-    }
-
-    return await response.json();*/
     const risultato = await response.json();
 
     if (!response.ok) {
@@ -83,8 +72,21 @@ async function restituisciPrestito(idPrestito) {
 
     return risultato;
 }
+
+async function getStati() {
+
+    const response = await fetch(`/prestiti/config/stati`);
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
+}
+
 export {
     creaPrestito,
     ricercaPrestiti,
-    restituisciPrestito
+    restituisciPrestito,
+    getStati
 }
