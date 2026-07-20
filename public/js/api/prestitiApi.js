@@ -23,7 +23,7 @@ async function creaPrestito(idLibro, durataMesi) {
     return risultato;
 }
 
-async function ricercaPrestiti(titolo, autore, stato, utente, tipo) {
+async function ricercaPrestiti(titolo, autore, stato, utente, tipo, storico) {
 
     const response = await fetch(
         '/prestiti/ricercaPrestiti',
@@ -37,7 +37,8 @@ async function ricercaPrestiti(titolo, autore, stato, utente, tipo) {
                 autore,
                 stato,
                 utente, //aggiunta per bibliotecario
-                tipo
+                tipo, //gestione delle prenotazioni
+                storico
             })
         });
 

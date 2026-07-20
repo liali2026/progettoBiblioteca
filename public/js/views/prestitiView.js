@@ -19,13 +19,13 @@ function configuraPagina(CONTEXT) {
     popolaStati(CONTEXT);
 }
 
-function popolaStati(CONTEXT, tipo = "ALL") {
+function popolaStati(CONTEXT, tipoTabella = "ALL", storico = "ALL") {
 
-    const select = document.getElementById("stato");
+    const selectStato = document.getElementById("stato");
 
     let stati = [];
 
-    switch (tipo) {
+    switch (tipoTabella) {
 
         case '1'://"PRESTITO":
             stati = CONTEXT.stati.prestito;
@@ -42,8 +42,13 @@ function popolaStati(CONTEXT, tipo = "ALL") {
             ];
     }
 
-    select.innerHTML = `
-        <option value="ALL">Tutti</option>
+     // Filtro storico
+    if (storico !== "ALL") {
+        stati = stati.filter(s => String(s.storico) === storico);
+    }
+
+    selectStato.innerHTML = `
+        <option value="ALL">Tutti gli stati</option>
         ${stati.map(s => `
             <option value="${s.codice}">
                 ${s.descrizione}
@@ -104,6 +109,7 @@ function resetRicerca() {
     document.getElementById('titolo').value = '';
     document.getElementById('autore').value = '';
     document.getElementById('stato').value = 'ALL';
+    document.getElementById('tipo').value = 'ALL';
     resetPrestiti();
 
 }

@@ -23,14 +23,15 @@ async function ricercaPrestiti() {
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
         const stato = document.getElementById('stato').value;
-        const tipo = document.getElementById('tipo').value;
-        
+        const tipo = document.getElementById('tipo').value; //gestione delle prenotazioni
+        const storico = document.getElementById("storico").value; //gestione dello storico
+
         //gestione del bibliotecario
         const utente = CONTEXT.isAdmin
             ? document.getElementById('utente')?.value?.trim()
             : null;
 
-        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente, tipo);
+        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente, tipo, storico);
 
         console.log(risultati);
 
@@ -96,15 +97,32 @@ function registraEventi() {
         );
 
     document
-    .getElementById("tipo")
-    .addEventListener("change", e => {
+        .getElementById("tipo")
+        .addEventListener("change", e => {
 
-        PrestitiView.popolaStati(
-            CONTEXT,
-            e.target.value
-        );
+           /*PrestitiView.popolaStati(
+                CONTEXT,
+                e.target.value
+            );*/
+            aggiornaStati();
 
-    });
+        });
+
+    document
+        .getElementById("storico")
+        .addEventListener("change", e => {
+
+            aggiornaStati();
+
+        });
+}
+
+function aggiornaStati() {
+    PrestitiView.popolaStati(
+        CONTEXT,
+        document.getElementById("tipo").value,
+        document.getElementById("storico").value
+    );
 }
 
 async function inizializzaPagina() {
@@ -126,7 +144,7 @@ async function inizializzaPagina() {
     ]);
 
     //true =richiede il login
-    const user = await Auth.initPage(true); 
+    const user = await Auth.initPage(true);
 
     await inizializzaContext(user);
     CONTEXT.stati = await PrestitiApi.getStati();

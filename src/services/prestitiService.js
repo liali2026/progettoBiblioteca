@@ -11,7 +11,7 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
     return await prestitiModel.creaPrestito(idUtente, idLibro, durataMesi);
 }
 
-async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
+async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico) {
     //l'utente o è quello loggato o quello passato nella post
     /*if (!idUtente){
          throw new Error(
@@ -27,7 +27,11 @@ async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
         tipo = null;
     }
 
-    return await prestitiModel.ricercaPrestiti(idUtente, titolo, autore, stato, tipo);
+    if (storico === "ALL") {
+        storico = null; //li devo far vedere tutti, sia quelli in corso, sia quelli storici
+    }
+
+    return await prestitiModel.ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico);
 }
 
 async function restituisciPrestito(idPrestito) {
@@ -55,7 +59,8 @@ async function getStati() {
 
         risultato[chiave].push({
             codice: row.codice,
-            descrizione: row.descrizione
+            descrizione: row.descrizione,
+            storico: row.storico
         });
     }
 

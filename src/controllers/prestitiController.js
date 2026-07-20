@@ -24,7 +24,7 @@ async function creaPrestito(req, res, next) {
 async function ricercaPrestiti(req, res, next) {
     try {
 
-        const { titolo, autore, stato, idUtente, tipo } = req.body;
+        const { titolo, autore, stato, idUtente, tipo, storico} = req.body;
 
         //occorre gestire il bibliotecario
         //const idUtente = req.session.user.id_utente; 
@@ -40,14 +40,14 @@ async function ricercaPrestiti(req, res, next) {
             utenteFiltro = req.session.user.id_utente;
         }
 
-        
         const prestiti = await prestitiService.ricercaPrestiti
                                 (//idUtente,
                                  utenteFiltro,
                                  titolo,
                                  autore, 
                                  stato,
-                                 tipo
+                                 tipo,
+                                 storico
                                 );
         res.json(prestiti);
 

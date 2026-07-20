@@ -104,7 +104,7 @@ async function inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn) {
     return result;
 }
 
-async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
+async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico) {
     const conn = await getConnection();
     try {
         /*let sql = `SELECT p.*, l.*
@@ -138,9 +138,17 @@ async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo) {
             params.push(`%${stato}%`);
         }
 
+        //gestione di prestiti e prenotazioni
         if (tipo) {
-            sql += ` AND tipo like ?`;
-            params.push(`%${tipo}%`);
+            //sql += ` AND tipo like ?`;
+            sql += ` AND tipo = ?`;
+            params.push(`${tipo}`);
+        }
+
+        //gestione dello storico
+        if (storico){
+             sql += ` AND isStorico = ?`;
+            params.push(`${storico}`);
         }
 
         //logQuery(sql, params);
@@ -326,7 +334,8 @@ async function getStati() {
             `
             SELECT categoria,
                    codice,
-                   descrizione
+                   descrizione,
+                   storico
             FROM configurazioni
             WHERE attivo = 1
               AND categoria IN (
