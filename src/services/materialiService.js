@@ -2,8 +2,11 @@ const materialiModel = require('../models/materialiModel');
 const Validation = require('../utils/validationUtils.js');
 
 //GESTIONE MATERIALE
-async function search(titolo, autore) {
-    return await materialiModel.search(titolo, autore);
+async function search(titolo, autore, anno, idGenere, soloDisponibili) {
+    if (idGenere === 'ALL'){
+        idGenere = null;
+    }
+    return await materialiModel.search(titolo, autore, anno, idGenere, soloDisponibili);
 }
 
 async function findById(id) {

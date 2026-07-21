@@ -3,9 +3,12 @@ const materialiService = require('../services/materialiService');
 async function search(req, res, next) {
 
     try {
-        const { titolo, autore } = req.query;
-
-        const materiali = await materialiService.search(titolo, autore);
+        //const { titolo, autore } = req.query;
+        const { titolo, autore, anno, idGenere } = req.query;
+        const soloDisponibili = req.query.soloDisponibili === "true";
+        
+        //const materiali = await materialiService.search(titolo, autore);
+        const materiali = await materialiService.search(titolo, autore, anno, idGenere, soloDisponibili);
         res.json(materiali);
 
     } catch (err) {

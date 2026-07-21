@@ -1,17 +1,9 @@
 const getConnection = require('../config/db');
+const { logQuery } = require('../utils/dbLogger');
 
-async function search(titolo, autore) {
+async function search(titolo, autore, anno, idGenere, soloDisponibili) {
     const conn = await getConnection();
     try {
-
-        /*let sql = `
-            SELECT l.*, COUNT(c.id_copia) AS copie_disponibili
-            FROM libri l
-            LEFT JOIN copie c 
-            ON l.id_libro = c.id_libro
-            AND c.stato = 'DISPONIBILE'
-            WHERE l.attivo = 1
-        `;*/
 
         let sql = `
                   SELECT *
@@ -31,7 +23,22 @@ async function search(titolo, autore) {
             params.push(`%${autore}%`);
         }
 
-        //sql += ` GROUP BY l.id_libro`;
+        if (anno) {
+            sql += ` AND anno_pubblicazione = ?`;
+            params.push(`${anno}`);
+        }
+
+        if (idGenere) {
+            sql += ` AND id_genere LIKE ?`;
+            params.push(`%${idGenere}%`);
+        }
+
+        console.log(soloDisponibili);
+        if (soloDisponibili){
+            sql += ` AND nr_copie_disponibili > 0`;
+        }
+
+        logQuery(sql, params);
 
         const [materiali] = await conn.query(sql, params);
 

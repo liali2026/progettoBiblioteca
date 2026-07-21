@@ -60,14 +60,38 @@ function resetRicerca() {
 
     document.getElementById('titolo').value = '';
     document.getElementById('autore').value = '';
+    document.getElementById('anno').value = '';
+    document.getElementById('genere').value = '';
+    document.getElementById("soloDisponibili").checked = false;
+
     resetCatalogo();
 
     // reset paginazione + ricerca --DA FARE
     //cercaMateriali(1);
 }
 
+///VERIFICARE FUNZIONE DUPLICATA, presente anche nel dettMateriale!!!!
+function caricaGeneri(generi) {
+
+    const select = document.getElementById("genere");
+
+    select.innerHTML = `
+        <!--<option value="" selected disabled>-->
+        <option value="" selected>
+            Qualsiasi genere
+        </option>
+        ${generi.map(g => `
+            <option value="${g.id_genere}">
+                ${g.descrizione}
+            </option>
+        `).join("")}
+    `;
+}
+
+
 export {
     renderCatalogo,
     resetCatalogo,
-    resetRicerca
+    resetRicerca,
+    caricaGeneri
 }

@@ -14,8 +14,13 @@ async function ricercaMateriali() {
 
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
+        //aggiunta di altri campi di ricerca
+        const anno = document.getElementById('anno').value.trim();
+        const idGenere = document.getElementById('genere').value;
+        const soloDisponibili = document.getElementById("soloDisponibili").checked;
 
-        const risultati = await MaterialiApi.ricercabyAutoreTitolo(titolo, autore);
+        //const risultati = await MaterialiApi.ricercabyAutoreTitolo(titolo, autore);
+        const risultati = await MaterialiApi.ricercaMateriali(titolo, autore, anno, idGenere, soloDisponibili);
 
         if (!risultati || risultati.length === 0) {
 
@@ -79,6 +84,12 @@ async function inizializzaPagina() {
     const user = await Auth.initPage();
     CONTEXT.role = user?.ruolo ?? "UTENTE";
     CONTEXT.isAdmin = CONTEXT.role === "BIBLIOTECARIO";
+
+    //gestione dei generi
+    const generi = await MaterialiApi.getAllGeneri();
+    MaterialiView.caricaGeneri(generi);
+    //
+
 
     if (CONTEXT.isAdmin) {
         document

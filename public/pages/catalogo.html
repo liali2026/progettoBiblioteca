@@ -30,11 +30,27 @@
             <div class="card-body">
                 <h5 class="card-title">Ricerca</h5>
                 <div class="row">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <input type="text" id="titolo" class="form-control" placeholder="Titolo">
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <input type="text" id="autore" class="form-control" placeholder="Autore">
+                    </div>
+                    <div class="col-md-4">
+                        <select id="genere" class="form-select">
+                            <!-- OPTION CARICATE TRAMITE JS-->
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="soloDisponibili">
+                            <label class="form-check-label" for="soloDisponibili">
+                                Solo materiali con copie disponibili
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <input id="anno" class="form-control" placeholder="Anno di pubblicazione">
                     </div>
                     <div class="col-md-2 d-flex gap-2">
                         <button id="btnRicerca" class="btn btn-primary w-100">Cerca</button>

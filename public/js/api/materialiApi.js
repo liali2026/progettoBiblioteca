@@ -17,7 +17,7 @@ async function ricercaById(idLibro) {
     return risultato;
 }
 
-async function ricercabyAutoreTitolo(titolo, autore) {
+/*async function ricercabyAutoreTitolo(titolo, autore) {
     const params = new URLSearchParams();
     if (titolo) {
         params.append('titolo', titolo);
@@ -29,11 +29,38 @@ async function ricercabyAutoreTitolo(titolo, autore) {
 
     const response = await fetch(`/materiali?${params.toString()}`);
 
-    /*if (!response.ok) {
-        throw new Error('Errore server database: verificare che sia attivo');
+    const risultato = await response.json();
+
+    if (!response.ok) {
+        throw new Error(risultato.message);
+    }
+    return risultato;
+}*/
+
+async function ricercaMateriali(titolo, autore, anno, idGenere, soloDisponibili) {
+    const params = new URLSearchParams();
+    if (titolo) {
+        params.append('titolo', titolo);
     }
 
-    return await response.json();*/
+    if (autore) {
+        params.append('autore', autore);
+    }
+
+    if (anno) {
+        params.append('anno', anno);
+    }
+
+    if (idGenere) {
+        params.append('idGenere', idGenere);
+    }
+
+    if (soloDisponibili) {
+        params.append('soloDisponibili', soloDisponibili);
+    }
+
+    const response = await fetch(`/materiali?${params.toString()}`);
+
     const risultato = await response.json();
 
     if (!response.ok) {
@@ -130,15 +157,16 @@ async function getCopie(idMateriale) {
 
 async function addCopie(idMateriale, nrCopie) {
 
-     const response = await fetch(
+    const response = await fetch(
         `/materiali/admin/${idMateriale}/copies`,
         {
             method: "POST",
-            headers: {'Content-Type':'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(
-                {idMateriale: idMateriale, 
-                 nrCopie: nrCopie
-            })
+                {
+                    idMateriale: idMateriale,
+                    nrCopie: nrCopie
+                })
         }
     );
 
@@ -153,15 +181,16 @@ async function addCopie(idMateriale, nrCopie) {
 
 async function deleteCopia(idMateriale, idCopia) {
 
-     const response = await fetch(
+    const response = await fetch(
         `/materiali/admin/${idMateriale}/copies/${idCopia}`,
         {
             method: "DELETE",
-            headers: {'Content-Type':'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(
-                {idMateriale: idMateriale, 
-                 idCopia: idCopia
-            })
+                {
+                    idMateriale: idMateriale,
+                    idCopia: idCopia
+                })
         }
     );
 
@@ -177,7 +206,8 @@ async function deleteCopia(idMateriale, idCopia) {
 
 export {
     ricercaById,
-    ricercabyAutoreTitolo,
+    //ricercabyAutoreTitolo,
+    ricercaMateriali,
     insertItem,
     updateItem,
     deleteItem,
