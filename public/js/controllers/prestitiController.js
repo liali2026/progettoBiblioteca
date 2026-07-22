@@ -146,7 +146,7 @@ async function inizializzaPagina() {
     //true =richiede il login
     const user = await Auth.initPage(true);
 
-    await inizializzaContext(user);
+    inizializzaContext(user);
     CONTEXT.stati = await PrestitiApi.getStati();
 
     PrestitiView.configuraPagina(CONTEXT);

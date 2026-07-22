@@ -88,10 +88,21 @@ function caricaGeneri(generi) {
     `;
 }
 
+function configuraPagina(context) {
+
+    //per bibliotecario
+    if (context.isAdmin) {
+        document
+            .getElementById("btnNuovoMateriale")
+            .classList.remove("d-none");
+    }
+
+    caricaGeneri(context.generi);
+}
 
 export {
     renderCatalogo,
     resetCatalogo,
     resetRicerca,
-    caricaGeneri
+    configuraPagina
 }
