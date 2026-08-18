@@ -1,6 +1,6 @@
 function isValidISBN13(isbn) {
 
-    isbn = isbn.replaceAll("-", "");
+    isbn = String(isbn || '').replaceAll("-", "");
 
     //controllo che siano 13 numeri con regex (inizio stringa + 13 numeri + fine stringa)
     if (!/^\d{13}$/.test(isbn))
@@ -38,7 +38,7 @@ function isValidPublicationYear(year) {
 
     const annoCorrente = new Date().getFullYear();
 
-    return anno > 0 && anno <= annoCorrente;
+    return anno >= 1450 && anno <= annoCorrente;
 }
 
 function isRequired(value) {

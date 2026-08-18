@@ -2,41 +2,39 @@ const prestitiModel = require('../models/prestitiModel');
 
 async function creaPrestito(idUtente, idLibro, durataMesi) {
 
-    if (durataMesi < 1 || durataMesi > 3) {
+    if (!Number.isInteger(Number(durataMesi))
+        || Number(durataMesi) < 1
+        || Number(durataMesi) > 3) {
         throw new Error(
             'Durata non valida'
         );
     }
 
-    return await prestitiModel.creaPrestito(idUtente, idLibro, durataMesi);
+    return prestitiModel.creaPrestito(
+        Number(idUtente),
+        Number(idLibro),
+        Number(durataMesi)
+    );
 }
 
-async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico) {
-    //l'utente o è quello loggato o quello passato nella post
-    /*if (!idUtente){
-         throw new Error(
-            'Utente non loggato'
-        );
-    }*/
-
-    if (stato === 'ALL') {
-        stato = null;
-    }
-
-    if (tipo === "ALL"){
-        tipo = null;
-    }
-
-    if (storico === "ALL") {
-        storico = null; //li devo far vedere tutti, sia quelli in corso, sia quelli storici
-    }
-
-    return await prestitiModel.ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico);
+async function ricercaPrestiti(filters) {
+    return prestitiModel.ricercaPrestiti({
+        ...filters,
+        stato: filters.stato === 'ALL' ? null : filters.stato,
+        tipo: filters.tipo === 'ALL' ? null : filters.tipo,
+        storico: filters.storico === 'ALL' ? null : filters.storico
+    });
 }
 
-async function restituisciPrestito(idPrestito) {
+async function restituisciPrestito(idPrestito, utente) {
 
-    return await prestitiModel.restituisciPrestito(idPrestito);
+    if (!Number.isInteger(Number(idPrestito))) {
+        throw new Error('Identificativo prestito non valido');
+    }
+    return prestitiModel.restituisciPrestito(
+        Number(idPrestito),
+        utente
+    );
 
 }
 

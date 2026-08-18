@@ -1,87 +1,42 @@
 const prestitiService = require('../services/prestitiService');
 
-async function creaPrestito(req, res, next) {
-    try {
-
-        const risultato =
-            await prestitiService.creaPrestito
-                (req.session.user.id_utente,
-                    req.body.idLibro,
-                    req.body.durataMesi
-                );
-
-        //res.status(201).json(risultato);
-
-        res.status(201).json({
-            id: risultato.id
-        });
-
-    } catch (err) {
-        next(err);
-    }
+async function creaPrestito(req, res) {
+    const risultato = await prestitiService.creaPrestito(
+        req.session.user.id_utente,
+        req.body.idLibro,
+        req.body.durataMesi
+    );
+    res.status(201).json(risultato);
 }
 
-async function ricercaPrestiti(req, res, next) {
-    try {
+async function ricercaPrestiti(req, res) {
+    const isBibliotecario =
+        req.session.user.ruolo === 'BIBLIOTECARIO';
 
-        const { titolo, autore, stato, idUtente, tipo, storico} = req.body;
+    const filters = {
+        ...req.body,
+        idUtente: isBibliotecario
+            ? null
+            : req.session.user.id_utente,
+        utente: isBibliotecario
+            ? req.body.utente
+            : null
+    };
 
-        //occorre gestire il bibliotecario
-        //const idUtente = req.session.user.id_utente; 
-
-        const isBibliotecario = req.session.user.ruolo === 'BIBLIOTECARIO';
-        let utenteFiltro = null;
-
-        if (isBibliotecario) {
-            // il bibliotecario può filtrare per utente
-            utenteFiltro = idUtente || null;
-        } else {
-            // utente normale può vedere solo i suoi prestiti
-            utenteFiltro = req.session.user.id_utente;
-        }
-
-        const prestiti = await prestitiService.ricercaPrestiti
-                                (//idUtente,
-                                 utenteFiltro,
-                                 titolo,
-                                 autore, 
-                                 stato,
-                                 tipo,
-                                 storico
-                                );
-        res.json(prestiti);
-
-    } catch (err) {
-        next(err);
-    }
+    res.json(await prestitiService.ricercaPrestiti(filters));
 }
 
-async function restituisciPrestito(req, res, next) {
-    try {
-
-        const { idPrestito } = req.body;
-
-        const risultato = await prestitiService.restituisciPrestito(idPrestito);
-                            
-        res.json(risultato);
-
-    } catch (err) {
-        next(err);
-    }
+async function restituisciPrestito(req, res) {
+    res.json(
+        await prestitiService.restituisciPrestito(
+            req.body.idPrestito,
+            req.session.user
+        )
+    );
 }
 
-async function getStati(req, res, next) {
-
-    try {
-
-        const stati =
-            await prestitiService.getStati();
-
-        res.json(stati);
-
-    } catch (err) {
-        next(err);
-    }
+async function getStati(req, res) {
+    res.json(await prestitiService.getStati());
 }
 
 module.exports = {

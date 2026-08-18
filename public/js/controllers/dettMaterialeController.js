@@ -1,13 +1,17 @@
 import * as Auth from '../services/authService.js';
 import * as Util from '../utils/validationUtils.js';
 
-import * as MaterialiApi from '../api/materialiApi.js';
-import * as PrestitiApi from '../api/prestitiApi.js';
+import {
+    materiali as MaterialiApi,
+    prestiti as PrestitiApi
+} from '../api.js';
 
 import * as CommonLayoutView from '../components/commonLayout.js';
 import * as MessageView from '../components/message.js';
-import * as ModalPrestito from '../components/prestitoModal.js';
-import * as CopieModal from '../components/copieModal.js';
+import {
+    prestitoModal as ModalPrestito,
+    copieModal as CopieModal
+} from '../components/modals.js';
 
 import * as View from '../views/dettaglioMaterialeView.js';
 
@@ -23,6 +27,9 @@ function inizializzaContext() {
     const params = new URLSearchParams(window.location.search);
 
     CONTEXT.mode = params.get("mode") || "view";
+    if (!['view', 'edit', 'new'].includes(CONTEXT.mode)) {
+        CONTEXT.mode = 'view';
+    }
     CONTEXT.idLibro = params.get("id");
 }
 
@@ -36,7 +43,7 @@ async function caricaMateriale() {
             MessageView.mostraErrore('Identificativo materiale non valido.');
             return;
         }
-        CONTEXT.materiale = await MaterialiApi.ricercaById(idMateriale);
+        CONTEXT.materiale = await MaterialiApi.findById(idMateriale);
 
         View.mostraMateriale(CONTEXT.materiale, CONTEXT.materiale.copie_disponibili > 0);
 
@@ -51,7 +58,10 @@ async function salvaMateriale(operazione = "insert") {
         const formData = new FormData();
 
         const materiale = View.getMaterialeForm();
-        Util.validaMateriale(materiale);
+        Util.validaMateriale(
+            materiale,
+            operazione === 'insert'
+        );
 
         if (operazione === "update") {
             materiale.id_libro = CONTEXT.idLibro;
@@ -72,8 +82,8 @@ async function salvaMateriale(operazione = "insert") {
 
         const risultato =
             await (operazione === "insert"
-                ? MaterialiApi.insertItem(formData)
-                : MaterialiApi.updateItem(formData));
+                ? MaterialiApi.insert(formData)
+                : MaterialiApi.update(CONTEXT.idLibro, formData));
 
         sessionStorage.setItem(
             "successMessage",
@@ -82,8 +92,11 @@ async function salvaMateriale(operazione = "insert") {
                 : "Materiale aggiornato correttamente."
         );
 
+        /*window.location.href =
+            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;*/
+
         window.location.href =
-            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;
+            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}&mode=edit`;
 
     } catch (err) {
 
@@ -145,9 +158,9 @@ async function confermaPrestito() {
     try {
 
         const idMateriale = CONTEXT.materiale.id_libro;
-        const durata = ModalPrestito.getDurataPrestito();
+        const durata = ModalPrestito.getDurata();
 
-        const datiPrestito = await PrestitiApi.creaPrestito(idMateriale, durata);
+        const datiPrestito = await PrestitiApi.create(idMateriale, durata);
 
         ModalPrestito.chiudi();
         await caricaMateriale();
@@ -181,7 +194,7 @@ async function mostraCopie() {
     let copie = [];
     try {
 
-        copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+        copie = await MaterialiApi.copie(CONTEXT.idLibro);
         CONTEXT.copieCaricate = true;
     } catch (err) {
         MessageView.mostraErrore(err.message);
@@ -191,7 +204,7 @@ async function mostraCopie() {
 
 async function aggiungiCopie() {
     try {
-        const nrCopie = CopieModal.getNumeroCopie();
+        const nrCopie = CopieModal.getNumero();
 
         await MaterialiApi.addCopie(
             CONTEXT.idLibro,
@@ -201,7 +214,7 @@ async function aggiungiCopie() {
         CopieModal.chiudi();
 
         //await mostraCopie();
-        const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
+        const copie = await MaterialiApi.copie(CONTEXT.idLibro);
         View.mostraCopie(copie, CONTEXT);
         CONTEXT.copieCaricate = true;
 
@@ -219,7 +232,7 @@ async function cancellaCopie(idMateriale, idCopia) {
     try {
 
         const risultato =
-            await MaterialiApi.deleteCopia(idMateriale, idCopia);
+            await MaterialiApi.removeCopia(idMateriale, idCopia);
 
         await caricaMateriale();
         await mostraCopie();
@@ -322,30 +335,9 @@ function registraEventi() {
                 if (!confirm("Confermi l'eliminazione del materiale?")) {
                     return;
                 }
-                //try {
                 const idMateriale = e.target.dataset.idMateriale;
                 const idCopia = e.target.dataset.idCopia;
-                cancellaCopie(idMateriale, idCopia);
-                //console.log(id);
-                /*const risultato =
-                    await MaterialiApi.deleteCopia(idMateriale, idCopia);
-
-                //DA SISTEMARE!!
-                const copie = await MaterialiApi.getCopie(CONTEXT.idLibro);
-                View.mostraCopie(copie, CONTEXT);
-                CONTEXT.copieCaricate = true;
-
-                await caricaMateriale();
-                MessageView.mostraSuccesso(
-                    risultato.messaggio
-                );
-
-            } catch (err) {
-                await caricaMateriale();
-                View.mostraCopie(copie, CONTEXT);
-                MessageView.mostraErrore(err.message);
-
-            }*/
+                await cancellaCopie(idMateriale, idCopia);
             }
 
         });
@@ -353,7 +345,7 @@ function registraEventi() {
 
 async function inizializzaPagina() {
 
-    CommonLayoutView.renderNavbar('catalogo'); // da verificare il parametro
+    CommonLayoutView.renderNavbar('catalogo');
     CommonLayoutView.renderBreadcrumb([
         {
             label: "Home",
@@ -369,14 +361,31 @@ async function inizializzaPagina() {
         }
     ]);
 
-    await Auth.initPage(false);
-
     inizializzaContext();
+
+    const protectedMode = CONTEXT.mode === 'new'
+        || CONTEXT.mode === 'edit';
+    const user = await Auth.initPage(protectedMode, true);
+
+    if (protectedMode && user?.ruolo !== 'BIBLIOTECARIO') {
+        MessageView.mostraErrore(
+            'Questa funzione è riservata al bibliotecario.'
+        );
+        return;
+    }
+
     View.configuraPagina(CONTEXT.mode);
 
     //gestione dei generi
-    const generi = await MaterialiApi.getAllGeneri();
-    View.caricaGeneri(generi);
+    const generi = await MaterialiApi.generi();
+    CommonLayoutView.renderGeneri(
+        'genere',
+        generi,
+        {
+            placeholder: 'Seleziona il genere',
+            disabled: true
+        }
+    );
     //
 
     if (CONTEXT.mode === "view" || CONTEXT.mode === "edit") {

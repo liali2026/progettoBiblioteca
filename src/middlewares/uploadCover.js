@@ -1,6 +1,10 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require('fs');
+const { randomUUID } = require('crypto');
 const config = require("../config/env");
+
+fs.mkdirSync(config.upload.dir, { recursive: true });
 
 const storage = multer.diskStorage({
 
@@ -15,12 +19,12 @@ const storage = multer.diskStorage({
 
     filename: function(req, file, cb) {
 
-        const nome =
-            Date.now() +
-            "_" +
-            file.originalname;
-
-        cb(null, nome);
+        const extensions = {
+            'image/jpeg': '.jpg',
+            'image/png': '.png',
+            'image/webp': '.webp'
+        };
+        cb(null, `${randomUUID()}${extensions[file.mimetype]}`);
     }
 
 });

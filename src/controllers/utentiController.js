@@ -1,81 +1,70 @@
-// controller: gestisce request e response
 const utentiService = require('../services/utentiService');
 
-async function registrazione(req, res, next) {
+async function registrazione(req, res) {
+    const {
+        email,
+        password,
+        nome,
+        cognome
+    } = req.body;
 
-    try {
+    const utente = await utentiService.registrazione(
+        email,
+        password,
+        nome,
+        cognome
+    );
 
-        //recupero i dati dal body (registrazione con una POST)
-        const { email, password, nome, cognome } = req.body;
-
-        const utente = await utentiService.registrazione(email, password, nome, cognome);
-
-        // è necessario fare il login dopo la registrazione ...
-        //req.session.isAuthenticated = true;
-        req.session.user = {
-            id_utente: utente.id_utente,
-            ruolo: utente.ruolo,
-            email: utente.email
-        };
-
-        res.status(201).json(utente);
-
-    } catch (err) {
-
-        next(err);
-
-    }
-
+    await regenerateSession(req);
+    req.session.user = sessionUser(utente);
+    res.status(201).json(req.session.user);
 }
 
-async function login(req, res, next) {
+async function login(req, res) {
+    const utente = await utentiService.login(
+        req.body.email,
+        req.body.password
+    );
 
-    try {
-        const { email, password } = req.body;
+    await regenerateSession(req);
 
-        const utente = await utentiService.login(email, password);
-
-        //req.session.isAuthenticated = true;
-        req.session.user = {
-            id_utente: utente.id_utente,
-            ruolo: utente.ruolo,
-            email: utente.email
-        };
-
-        res.status(201).json(utente);
-    } catch (err) {
-        next(err);
-    }
-
+    req.session.user = sessionUser(utente);
+    res.json(req.session.user);
 }
 
-async function me(req, res, next) {
+function regenerateSession(req) {
+    return new Promise((resolve, reject) => {
+        req.session.regenerate(error =>
+            error ? reject(error) : resolve()
+        );
+    });
+}
 
-    try {
-        if (!req.session || !req.session.user) {
-            return res.status(401).json({
-                errore: 'Utente non autenticato'
-            });
-        }
-
-        res.json(req.session.user);
-
-    } catch(err) {
-        next(err);
+function me(req, res) {
+    if (!req.session?.user) {
+        return res.status(401).json({
+            message: 'Utente non autenticato'
+        });
     }
+    res.json(req.session.user);
 }
 
 function logout(req, res, next) {
-
-    req.session.destroy(
-        (err) => {
-            if (err) {
-                return next(err);
-            }
-
-            res.json({messaggio:'Logout effettuato'});
+    req.session.destroy(error => {
+        if (error) {
+            return next(error);
         }
-    );
+        res.clearCookie('connect.sid');
+        res.json({ messaggio: 'Logout effettuato' });
+    });
+}
+
+function sessionUser(user) {
+    return {
+        id_utente: user.id_utente,
+        ruolo: user.ruolo,
+        email: user.email
+    };
 }
 
 module.exports = {

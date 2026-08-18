@@ -1,4 +1,8 @@
 {
+  "name": "progetto-biblioteca",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Catalogo, prestiti e prenotazioni per una biblioteca",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "dotenv": "^17.4.2",

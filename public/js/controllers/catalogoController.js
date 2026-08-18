@@ -1,5 +1,5 @@
 import * as Auth from '../services/authService.js';
-import * as MaterialiApi from '../api/materialiApi.js';
+import { materiali as MaterialiApi } from '../api.js';
 import * as MaterialiView from '../views/catalogoView.js';
 import * as CommonLayoutView from '../components/commonLayout.js';
 import * as MessageView from '../components/message.js';
@@ -20,11 +20,19 @@ async function ricercaMateriali() {
 
         const titolo = document.getElementById('titolo').value.toLowerCase().trim();
         const autore = document.getElementById('autore').value.toLowerCase().trim();
+        const isbn = document.getElementById('isbn').value.toLowerCase().trim();
         const anno = document.getElementById('anno').value.trim();
         const idGenere = document.getElementById('genere').value;
         const soloDisponibili = document.getElementById("soloDisponibili").checked;
 
-        const risultati = await MaterialiApi.ricercaMateriali(titolo, autore, anno, idGenere, soloDisponibili);
+        const risultati = await MaterialiApi.search({
+            titolo,
+            autore,
+            isbn,
+            anno,
+            idGenere,
+            soloDisponibili
+        });
 
         if (!risultati || risultati.length === 0) {
             MaterialiView.resetCatalogo();
@@ -62,7 +70,7 @@ async function eliminaMateriale(idLibro) {
     }
 
     try {
-        const risultato = await MaterialiApi.deleteItem(idLibro);
+        const risultato = await MaterialiApi.remove(idLibro);
         await ricercaMateriali();
         MessageView.mostraSuccesso(risultato.messaggio);
     } catch (err) {
@@ -90,12 +98,6 @@ async function gestisciClickTabella(e) {
 
 function registraEventi() {
     if (CONTEXT.isAdmin) {
-        /*document
-            .getElementById('btnNuovoMateriale')
-            .addEventListener('click', () => {
-                window.location.href =
-                    `/pages/dettaglio-materiale.html?mode=new`;
-            });*/
         document
             .getElementById("btnNuovoMateriale")
             .addEventListener("click", inserisciMateriale);
@@ -111,40 +113,6 @@ function registraEventi() {
     document
         .getElementById("tabellaMateriali")
         .addEventListener("click", gestisciClickTabella);
-
-    /*document
-        .getElementById("tabellaMateriali")
-        .addEventListener("click", async (e) => {
-
-            if (e.target.classList.contains("btnModifica")) {
-                const id = e.target.dataset.idLibro;
-                window.location.href =
-                    `/pages/dettaglio-materiale.html?id=${id}&mode=edit`;
-            }
-
-            if (e.target.classList.contains("btnElimina")) {
-                if (!confirm("Confermi l'eliminazione del materiale?")) {
-                    return;
-                }
-                try {
-                    const id = e.target.dataset.idLibro;
-                    //console.log(id);
-                    const risultato = await MaterialiApi.deleteItem(id);
-
-                    await ricercaMateriali();
-
-                    MessageView.mostraSuccesso(
-                        risultato.messaggio
-                    );
-
-                } catch (err) {
-
-                    MessageView.mostraErrore(err.message);
-
-                }
-            }
-
-        });*/
 }
 
 
@@ -185,7 +153,7 @@ async function inizializzaPagina() {
     const user = await Auth.initPage();
 
     inizializzaContext(user);
-    CONTEXT.generi = await MaterialiApi.getAllGeneri();
+    CONTEXT.generi = await MaterialiApi.generi();
 
     MaterialiView.configuraPagina(CONTEXT);
 

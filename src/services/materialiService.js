@@ -2,20 +2,24 @@ const materialiModel = require('../models/materialiModel');
 const Validation = require('../utils/validationUtils.js');
 
 //GESTIONE MATERIALE
-async function search(titolo, autore, anno, idGenere, soloDisponibili) {
-    if (idGenere === 'ALL'){
-        idGenere = null;
+async function search(filters) {
+    if (filters.idGenere === 'ALL') {
+        filters.idGenere = null;
     }
-    return await materialiModel.search(titolo, autore, anno, idGenere, soloDisponibili);
+    return materialiModel.search(filters);
 }
 
 async function findById(id) {
-    return await materialiModel.findById(id);
+    const materiale = await materialiModel.findById(id);
+    if (!materiale) {
+        throw new Error('Materiale non trovato');
+    }
+    return materiale;
 }
 
 async function insertItem(materiale) {
-    validaMateriale(materiale);
-    return await materialiModel.insertItem(materiale);
+    validaMateriale(materiale, true);
+    return materialiModel.insertItem(materiale);
 }
 
 async function updateItem(materiale) {
@@ -24,16 +28,16 @@ async function updateItem(materiale) {
         throw new Error("Identificativo materiale mancante");
     }
 
-    validaMateriale(materiale);
-    return await materialiModel.updateItem(materiale);
+    validaMateriale(materiale, false);
+    return materialiModel.updateItem(materiale);
 }
 async function deleteItem(id) {
-    return await materialiModel.deleteItem(id);
+    return materialiModel.deleteItem(id);
 }
 
-function validaMateriale(materiale) {
+function validaMateriale(materiale, requireCopies) {
 
-    const errori = controllaDatiMateriale(materiale);
+    const errori = controllaDatiMateriale(materiale, requireCopies);
     if (errori.length === 0) {
         return;
     }
@@ -44,7 +48,7 @@ function validaMateriale(materiale) {
     throw errore;
 }
 
-function controllaDatiMateriale(materiale) {
+function controllaDatiMateriale(materiale, requireCopies) {
     const errori = [];
 
     if (!Validation.isRequired(materiale.titolo)) {
@@ -85,11 +89,11 @@ function controllaDatiMateriale(materiale) {
     if (!Validation.isValidPublicationYear(materiale.annoPubblicazione)) {
         errori.push({
             campo: "annoPubblicazione",
-            messaggio: "Anno di pubblicazione deve essere maggiore del 1450 e non deve essere nel futuro."
+            messaggio: "L'anno di pubblicazione deve essere almeno 1450 e non futuro."
         });
     }
 
-    if (!Validation.isPositiveInteger(materiale.nrCopie)) {
+    if (requireCopies && !Validation.isPositiveInteger(materiale.nrCopie)) {
         errori.push({
             campo: "nrCopie",
             messaggio: "Il numero copie deve essere maggiore di zero."
@@ -100,17 +104,19 @@ function controllaDatiMateriale(materiale) {
 }
 
 async function getAllGeneri() {
-    return await materialiModel.getAllGeneri();
+    return materialiModel.getAllGeneri();
 }
 
 //GESTIONE COPIE
 async function getCopie(id) {
-    return await materialiModel.getCopie(id);
+    return materialiModel.getCopie(id);
 }
 
 async function addCopie(id, nrCopie) {
-    //CONTROLLI DA INSERIRE QUI
-    return await materialiModel.addCopie(id, nrCopie);
+    if (!Validation.isPositiveInteger(nrCopie)) {
+        throw new Error('Il numero di copie deve essere maggiore di zero.');
+    }
+    return materialiModel.addCopie(id, nrCopie);
 }
 
 async function deleteCopia(idMateriale, idCopia) {

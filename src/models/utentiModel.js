@@ -1,30 +1,24 @@
 // gestione dei dati su database
-const getConnection = require('../config/db');
+const { withConnection } = require('../config/db');
 
 async function findByUsername(email) {
-    const conn = await getConnection();
-    try {
+    return withConnection(async connection => {
         const [utenti] =
-            await conn.query(
+            await connection.query(
                 'SELECT * FROM utenti WHERE email = ?', [email]
             );
 
         return utenti[0];
-
-    } finally {
-        await conn.end();
-    }
+    });
 }
 
 async function create( email, password, name, surname) 
 {
-    const conn = await getConnection();
-    //il bibliotecaro sarà inserito dall'amministratore del database direttamente sul DB
     const role = "UTENTE";
 
-    try {
+    return withConnection(async connection => {
         const [result] =
-            await conn.query(
+            await connection.query(
                 `
                 INSERT INTO utenti
                 (
@@ -52,9 +46,7 @@ async function create( email, password, name, surname)
         };
         
 
-    } finally {
-        await conn.end();
-    }
+    });
 
 }
 

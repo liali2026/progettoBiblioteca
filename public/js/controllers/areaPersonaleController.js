@@ -36,7 +36,10 @@ async function inizializzaPagina() {
         }
     ]);
     //await Auth.initPage(false);
-    const user = await Auth.initPage(false);
+    const user = await Auth.initPage(true);
+    if (!user) {
+        return;
+    }
     const isAdmin = user.ruolo === "BIBLIOTECARIO";
 
 

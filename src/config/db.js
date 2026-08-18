@@ -1,18 +1,40 @@
 const mysql = require('mysql2/promise');
-const config = require("./env");
+const config = require('./env');
 
-/*async function getConnection() {
-    return await mysql.createConnection({
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-    })
-};*/
+const pool = mysql.createPool({
+    ...config.db,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
-async function getConnection() {
-    return await mysql.createConnection(config.db);
+async function withConnection(callback) {
+    const connection = await pool.getConnection();
+
+    try {
+        return await callback(connection);
+    } finally {
+        connection.release();
+    }
 }
 
-module.exports = getConnection;
+async function withTransaction(callback) {
+    return withConnection(async connection => {
+        await connection.beginTransaction();
+
+        try {
+            const result = await callback(connection);
+            await connection.commit();
+            return result;
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
+    });
+}
+
+module.exports = {
+    pool,
+    withConnection,
+    withTransaction
+};

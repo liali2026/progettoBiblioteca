@@ -1,40 +1,45 @@
-const getDatabaseError = require('../utils/databaseErrorHandler');
-
 function errorHandler(err, req, res, next) {
-
-    console.log(err);
-
     const dbError = getDatabaseError(err);
-
     if (dbError) {
-        console.log("errorHandler - errore dal database");
         return res.status(dbError.status).json({
             message: dbError.message
         });
     }
 
-    // errore di validazione
     if (err.dettagli) {
-        console.log("errorHandler - errore di validazione");
         return res.status(400).json({
             message: err.message,
             dettagli: err.dettagli
         });
     }
 
-    // errore applicativo generico
-    if (err.message) {
-        console.log("errorHandler - errore applicativo generico");
-        return res.status(400).json({
-            message: err.message
-        });
+    const status = err.status || (err.code ? 500 : 400);
+
+    if (status >= 500) {
+        console.error(err);
     }
 
-    //errore inatteso
-    return res.status(500).json({
-        message: 'Errore interno del server'
+    return res.status(status).json({
+        message: status >= 500
+            ? 'Errore interno del server'
+            : err.message
     });
+}
 
+function getDatabaseError(err) {
+    const errors = {
+        ER_DUP_ENTRY: [409, 'Dato già presente'],
+        ECONNREFUSED: [503, 'Database non disponibile'],
+        ER_ACCESS_DENIED_ERROR: [500, 'Credenziali database errate'],
+        ER_BAD_DB_ERROR: [500, 'Database inesistente'],
+        ENOTFOUND: [500, 'Host del database non trovato'],
+        ETIMEDOUT: [504, 'Timeout durante la connessione al database']
+    };
+
+    const match = errors[err.code];
+    return match
+        ? { status: match[0], message: match[1] }
+        : null;
 }
 
 module.exports = errorHandler;

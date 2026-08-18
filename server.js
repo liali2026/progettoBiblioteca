@@ -6,7 +6,6 @@ const config = require("./src/config/env");
 const express = require('express');
 const session = require('express-session');
 
-const getConnection = require('./src/config/db.js');
 const utentiRoutes = require('./src/routes/utentiRoutes.js');
 const materialiRoutes = require('./src/routes/materialiRoutes.js');
 const prestitiRoutes = require('./src/routes/prestitiRoutes.js');

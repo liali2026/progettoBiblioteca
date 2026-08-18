@@ -1,8 +1,12 @@
-import { formattaData } from '../utils/dateUtils.js';
+import { escapeHtml } from '../components/commonLayout.js';
 
 let STATI = [];
 
 function configuraPagina(CONTEXT) {
+    STATI = [
+        ...(CONTEXT.stati.prestito || []),
+        ...(CONTEXT.stati.prenotazione || [])
+    ];
     //per bibliotecario
     if (CONTEXT.isAdmin) {
         //visualizzo i campi in più per il bibliotecario
@@ -72,21 +76,22 @@ function renderPrestiti(prestiti, CONTEXT) {
     tbody.innerHTML =
         prestiti.map(m => {
 
-            const isRestituito = m.stato === 'RESTITUITO';
+            const canReturn = ['ATTIVO', 'SCADUTO'].includes(m.stato)
+                && m.id_prestito;
             
             return `
             <tr>
-                <td>${m.titolo}</td>
-                <td>${m.autore}</td>
-                <td>${m.genere ?? '-'}</td>
+                <td>${escapeHtml(m.titolo)}</td>
+                <td>${escapeHtml(m.autore)}</td>
+                <td>${escapeHtml(m.genere ?? '-')}</td>
                 <td>${formattaData(m.data_inizio)}</td>
                 <td>${formattaData(m.data_fine)}</td>
                 <td>${m.data_restituzione ? formattaData(m.data_restituzione) : '-'}</td>
                 <td>${badgeStato(m.stato)}</td>
                 ${isAdmin ? `
-                    <td>${m.email}</td>
+                    <td>${escapeHtml(m.email)}</td>
                 ` : ''}
-                ${(!isRestituito /*&& !isAdmin*/) ? `
+                ${canReturn ? `
                     <td>
                         <button
                             class="btn btn-sm btn-warning btnRestituisci"
@@ -94,7 +99,7 @@ function renderPrestiti(prestiti, CONTEXT) {
                             Restituisci
                         </button>
                     </td>
-                   ` : ''}
+                   ` : '<td>-</td>'}
             </tr>
          `;
         }).join('');
@@ -110,28 +115,10 @@ function resetRicerca() {
     document.getElementById('autore').value = '';
     document.getElementById('stato').value = 'ALL';
     document.getElementById('tipo').value = 'ALL';
+    document.getElementById('storico').value = 'ALL';
     resetPrestiti();
 
 }
-
-
-/*function badgeStato(stato) {
-
-    switch (stato) {
-
-        case 'SCADUTO':
-            return '<span class="badge bg-danger">SCADUTO</span>';
-
-        case 'RESTITUITO':
-            return '<span class="badge bg-success">RESTITUITO</span>';
-
-        case 'ATTIVO':
-            return '<span class="badge bg-warning text-dark">IN PRESTITO</span>';
-
-        default:
-            return stato;
-    }
-}*/
 
 function badgeStato(codice) {
 
@@ -144,7 +131,7 @@ function badgeStato(codice) {
 
     return `
         <span class="badge ${classeBadge(codice)}">
-            ${stato.descrizione}
+            ${escapeHtml(stato.descrizione)}
         </span>
     `;
 }
@@ -183,4 +170,10 @@ export {
     resetRicerca,
     configuraPagina,
     popolaStati
+}
+
+function formattaData(data) {
+    return data
+        ? new Date(data).toLocaleDateString('it-IT')
+        : '';
 }

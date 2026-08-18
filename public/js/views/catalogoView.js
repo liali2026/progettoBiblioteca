@@ -1,7 +1,7 @@
-/**
- * GESTIONE DELLA catalogo.html
- * */
-//renderPaginazione(data.total, page); -- DA FARE
+import {
+    escapeHtml,
+    renderGeneri
+} from '../components/commonLayout.js';
 function renderCatalogo(materiali, context) {
 
     const tbody = document.getElementById('tabellaMateriali');
@@ -11,9 +11,11 @@ function renderCatalogo(materiali, context) {
     tbody.innerHTML =
         materiali.map(m => `
             <tr>
-                <td>${m.titolo}</td>
-                <td>${m.autore}</td>
-                <td>${m.genere ?? '-'}</td>
+                <td>${escapeHtml(m.titolo)}</td>
+                <td>${escapeHtml(m.autore)}</td>
+                <td>${escapeHtml(m.genere ?? '-')}</td>
+                <td>${escapeHtml(m.anno_pubblicazione)}</td>
+                <td>${escapeHtml(m.isbn)}</td>
                 <td>${m.nr_copie_disponibili}</td>
                 <td>
                     ${renderAzioni(m, context)}
@@ -34,7 +36,7 @@ function renderAzioni(materiale, context) {
 
     if (context.isAdmin) {
 
-        html += `
+        html = `
             <button
                 class="btn btn-sm btn-warning btnModifica"
                 data-id-libro="${materiale.id_libro}">
@@ -66,26 +68,6 @@ function resetRicerca() {
 
     resetCatalogo();
 
-    // reset paginazione + ricerca --DA FARE
-    //cercaMateriali(1);
-}
-
-///VERIFICARE FUNZIONE DUPLICATA, presente anche nel dettMateriale!!!!
-function caricaGeneri(generi) {
-
-    const select = document.getElementById("genere");
-
-    select.innerHTML = `
-        <!--<option value="" selected disabled>-->
-        <option value="" selected>
-            Qualsiasi genere
-        </option>
-        ${generi.map(g => `
-            <option value="${g.id_genere}">
-                ${g.descrizione}
-            </option>
-        `).join("")}
-    `;
 }
 
 function configuraPagina(context) {
@@ -97,7 +79,7 @@ function configuraPagina(context) {
             .classList.remove("d-none");
     }
 
-    caricaGeneri(context.generi);
+    renderGeneri('genere', context.generi);
 }
 
 export {

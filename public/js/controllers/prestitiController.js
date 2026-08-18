@@ -2,7 +2,7 @@ import * as Auth from '../services/authService.js';
 import * as CommonLayoutView from '../components/commonLayout.js';
 import * as MessageView from '../components/message.js';
 
-import * as PrestitiApi from '../api/prestitiApi.js';
+import { prestiti as PrestitiApi } from '../api.js';
 import * as PrestitiView from '../views/prestitiView.js';
 
 let CONTEXT = {
@@ -31,9 +31,14 @@ async function ricercaPrestiti() {
             ? document.getElementById('utente')?.value?.trim()
             : null;
 
-        const risultati = await PrestitiApi.ricercaPrestiti(titolo, autore, stato, utente, tipo, storico);
-
-        console.log(risultati);
+        const risultati = await PrestitiApi.search({
+            titolo,
+            autore,
+            stato,
+            utente,
+            tipo,
+            storico
+        });
 
         if (!risultati || risultati.length === 0) {
             PrestitiView.resetPrestiti();
@@ -58,7 +63,7 @@ function resetRicerca() {
 async function restituisciPrestito(idPrestito) {
     try {
 
-        const risultato = await PrestitiApi.restituisciPrestito(idPrestito);
+        const risultato = await PrestitiApi.restituisci(idPrestito);
 
         await ricercaPrestiti();
         //MessageView.mostraSuccesso("Operazione di restituzione eseguita con successo");
@@ -147,7 +152,7 @@ async function inizializzaPagina() {
     const user = await Auth.initPage(true);
 
     inizializzaContext(user);
-    CONTEXT.stati = await PrestitiApi.getStati();
+    CONTEXT.stati = await PrestitiApi.stati();
 
     PrestitiView.configuraPagina(CONTEXT);
 

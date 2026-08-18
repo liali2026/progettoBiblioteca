@@ -1,194 +1,102 @@
-const getConnection = require('../config/db');
-const { logQuery } = require('../utils/dbLogger');
+const {
+    withConnection,
+    withTransaction
+} = require('../config/db');
 
-async function search(titolo, autore, anno, idGenere, soloDisponibili) {
-    const conn = await getConnection();
-    try {
+async function search({
+    titolo,
+    autore,
+    isbn,
+    anno,
+    idGenere,
+    soloDisponibili
+}) {
+    const filters = [];
+    const params = [];
 
-        let sql = `
-                  SELECT *
-                    FROM vista_catalogo_libri
-                   WHERE 1=1
-                `
+    addLikeFilter(filters, params, 'titolo', titolo);
+    addLikeFilter(filters, params, 'autore', autore);
 
-        const params = [];
-
-        if (titolo) {
-            sql += ` AND titolo LIKE ?`;
-            params.push(`%${titolo}%`);
-        }
-
-        if (autore) {
-            sql += ` AND autore LIKE ?`;
-            params.push(`%${autore}%`);
-        }
-
-        if (anno) {
-            sql += ` AND anno_pubblicazione = ?`;
-            params.push(`${anno}`);
-        }
-
-        if (idGenere) {
-            sql += ` AND id_genere LIKE ?`;
-            params.push(`%${idGenere}%`);
-        }
-
-        console.log(soloDisponibili);
-        if (soloDisponibili){
-            sql += ` AND nr_copie_disponibili > 0`;
-        }
-
-        logQuery(sql, params);
-
-        const [materiali] = await conn.query(sql, params);
-
-        return materiali;
-
-    } finally {
-        await conn.end();
-    }
-}
-
-
-async function findById(id) {
-    const conn = await getConnection();
-    try {
-
-        let sql = `
-                  SELECT *
-                    FROM vista_catalogo_libri
-                   WHERE 1=1
-                `;
-
-        const params = [];
-
-        if (id) {
-            sql += ` AND id_libro = ?`;
-            params.push(`${id}`);
-        }
-
-        //sql += ` GROUP BY l.id_libro`;
-
-        const [materiali] = await conn.query(sql, params);
-
-        return materiali[0];
-
-    } finally {
-        await conn.end();
-    }
-}
-
-
-async function insertLibro(conn, materiale) {
-
-    const [result] = await conn.query(
-        `
-        INSERT INTO libri(
-            titolo,
-            autore,
-            id_genere,
-            isbn,
-            anno_pubblicazione,
-            casa_editrice,
-            descrizione,
-            copertina
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?,?)
-        `,
-        [
-            materiale.titolo,
-            materiale.autore,
-            materiale.idGenere,
-            materiale.isbn,
-            materiale.annoPubblicazione,
-            materiale.casaEditrice,
-            materiale.descrizione,
-            materiale.copertina
-        ]
-    );
-
-    return result.insertId;
-}
-
-async function insertCopie(conn, idLibro, nrCopie) {
-
-    if (Number.isNaN(nrCopie) || nrCopie < 0) {
-        throw new Error("Numero copie non valido.");
+    if (isbn){
+        filters.push('isbn = ?');
+        params.push(isbn);
     }
 
-    const [rows] = await conn.query(
-        `
-        select COALESCE(max(id_copia),0) as maxCopia
-          from copie
-         where id_libro = ?
-        `,
-        [idLibro]);
+    if (anno) {
+        filters.push('anno_pubblicazione = ?');
+        params.push(anno);
+    }
 
-    let nrMaxCopia = rows[0].maxCopia;
+    if (idGenere) {
+        filters.push('id_genere = ?');
+        params.push(idGenere);
+    }
 
-    for (let i = 0; i < nrCopie; i++) {
+    if (soloDisponibili) {
+        filters.push('nr_copie_disponibili > 0');
+    }
 
-        nrMaxCopia++;
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+    //console.log("where = " + where);
 
-        await conn.query(
-            `
-            INSERT INTO copie(
-                id_copia,
-                id_libro,
-                stato
-            )
-            VALUES (?, ?, 'DISPONIBILE')
-            `,
-            [nrMaxCopia,
-                idLibro]
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM vista_catalogo_libri
+               ${where}
+              ORDER BY titolo, autore`,
+            params
         );
-    }
+        return rows;
+    });
+}
+
+async function findById(idLibro) {
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM vista_catalogo_libri
+              WHERE id_libro = ?`,
+            [idLibro]
+        );
+        return rows[0];
+    });
 }
 
 async function insertItem(materiale) {
-
-    const conn = await getConnection();
-    try {
-        await conn.beginTransaction();
-
-        //inserimento dati del libro
-        const idLibro = await insertLibro(conn, materiale);
-
-        //inserimento delle copie
-        await insertCopie(
-            conn,
-            idLibro,
-            materiale.nrCopie
+    return withTransaction(async connection => {
+        const [result] = await connection.query(
+            `INSERT INTO libri (
+                titolo,
+                autore,
+                id_genere,
+                isbn,
+                anno_pubblicazione,
+                casa_editrice,
+                descrizione,
+                copertina
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                materiale.titolo,
+                materiale.autore,
+                materiale.idGenere,
+                materiale.isbn,
+                materiale.annoPubblicazione,
+                materiale.casaEditrice,
+                materiale.descrizione,
+                materiale.copertina
+            ]
         );
 
-        await conn.commit();
-
-        return {
-            idLibro
-        };
-
-    } catch (err) {
-
-        await conn.rollback();
-        throw err;
-
-    } finally {
-
-        await conn.end();
-
-    }
+        await insertCopie(connection, result.insertId, materiale.nrCopie);
+        return { idLibro: result.insertId };
+    });
 }
 
-
 async function updateItem(materiale) {
-
-    const conn = await getConnection();
-    try {
-
-        const [result] =
-            await conn.query(
-                `
-                UPDATE libri
+    return withConnection(async connection => {
+        const [result] = await connection.query(
+            `UPDATE libri
                 SET titolo = ?,
                     autore = ?,
                     id_genere = ?,
@@ -197,261 +105,210 @@ async function updateItem(materiale) {
                     casa_editrice = ?,
                     descrizione = ?,
                     copertina = COALESCE(?, copertina)
-                WHERE id_libro = ?
-                  AND attivo = 1
-                `,
-                [
-                    materiale.titolo,
-                    materiale.autore,
-                    materiale.idGenere,
-                    materiale.isbn,
-                    materiale.annoPubblicazione,
-                    materiale.casaEditrice,
-                    materiale.descrizione,
-                    materiale.copertina,
-                    materiale.idLibro
-                ]
-            );
+              WHERE id_libro = ?
+                AND attivo = 1`,
+            [
+                materiale.titolo,
+                materiale.autore,
+                materiale.idGenere,
+                materiale.isbn,
+                materiale.annoPubblicazione,
+                materiale.casaEditrice,
+                materiale.descrizione,
+                materiale.copertina,
+                materiale.idLibro
+            ]
+        );
 
-        if (result.affectedRows === 0) {
-            throw new Error("Materiale non trovato");
-        }
-
+        ensureAffected(result, 'Materiale non trovato');
         return {
             idLibro: materiale.idLibro,
             righeAggiornate: result.affectedRows
         };
-
-    } finally {
-        await conn.end();
-    }
+    });
 }
 
-async function deleteItem(idMateriale) {
-    const conn = await getConnection();
-    //console.log("idMateriale " + idMateriale);
-    try {
-        await conn.beginTransaction();
-
-        const [materiale] = await conn.query(
-            `
-            SELECT id_libro
-            FROM libri
-            WHERE id_libro = ?
-              AND attivo = 1
-            `,
-            [idMateriale]
+async function deleteItem(idLibro) {
+    return withTransaction(async connection => {
+        const [materials] = await connection.query(
+            `SELECT id_libro
+               FROM libri
+              WHERE id_libro = ?
+                AND attivo = 1
+              FOR UPDATE`,
+            [idLibro]
         );
 
-        if (materiale.length === 0) {
-            throw new Error("Materiale non trovato");
+        if (!materials.length) {
+            throw new Error('Materiale non trovato');
         }
 
-        // controllo della presenza di copie in prestito
-        const [prestiti] = await conn.query(
-            `
-                        SELECT COUNT(*) AS totale
-                        FROM prestiti p
-                        JOIN copie c ON p.id_copia = c.id_copia
-                        WHERE c.id_libro = ?
-                          AND p.stato in ('ATTIVO','SCADUTO')
-                        `, [idMateriale]
+        const [activeLoans] = await connection.query(
+            `SELECT COUNT(*) AS totale
+               FROM prestiti
+              WHERE id_libro = ?
+                AND stato IN ('ATTIVO', 'SCADUTO')`,
+            [idLibro]
         );
 
-        if (prestiti[0].totale > 0) {
+        if (activeLoans[0].totale > 0) {
             throw new Error(
-                "Impossibile eliminare il materiale: esistono prestiti associati."
+                'Impossibile eliminare il materiale: esistono prestiti associati.'
             );
         }
 
-        //cancellazione delle copie associate al libro
-        /*await conn.query(
-            `
-                DELETE FROM copie
-                WHERE id_libro = ?
-                `,
-            [idMateriale]
+        const [waitingReservations] = await connection.query(
+            `SELECT COUNT(*) AS totale
+               FROM prenotazioni
+              WHERE id_libro = ?
+                AND st_prenotazione = 'ATTESA'`,
+            [idLibro]
         );
 
-        const [result] =
-            await conn.query(
-                `
-                DELETE FROM libri
-                WHERE id_libro = ?
-                `,
-                [idMateriale]
-            );*/
-
-
-        //cancellazione logica, per mantenere anche i dati di storico
-        // se cancello un libro, allora cancello tutte le sue copie
-        const [resultCopies] =
-            await conn.query(
-                `
-                UPDATE copie
-                   SET attivo = 0
-                WHERE id_libro = ?
-                `,
-                [idMateriale]
+        if (waitingReservations[0].totale > 0) {
+            throw new Error(
+                'Impossibile eliminare il materiale: esistono prenotazioni in attesa.'
             );
-
-        const [result] =
-            await conn.query(
-                `
-                UPDATE libri
-                   SET attivo = 0
-                WHERE id_libro = ?
-                `,
-                [idMateriale]
-            );
-
-
-        if (result.affectedRows === 0) {
-            throw new Error("Materiale non trovato");
         }
 
-        await conn.commit();
+        await connection.query(
+            `UPDATE copie
+                SET attivo = 0
+              WHERE id_libro = ?`,
+            [idLibro]
+        );
 
+        const [result] = await connection.query(
+            `UPDATE libri
+                SET attivo = 0
+              WHERE id_libro = ?
+                AND attivo = 1`,
+            [idLibro]
+        );
+
+        ensureAffected(result, 'Materiale non trovato');
         return {
-            idLibro: idMateriale,
+            idLibro,
             righeCancellate: result.affectedRows
         };
-
-    } catch (err) {
-
-        await conn.rollback();
-        throw err;
-
-    } finally {
-        await conn.end();
-    }
+    });
 }
 
 async function getAllGeneri() {
-
-    const conn = await getConnection();
-    try {
-
-        const [generi] = await conn.query(`
-            SELECT *
-            FROM generi
-            ORDER BY descrizione
-        `);
-
-        return generi;
-    } finally {
-        await conn.end();
-    }
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM generi
+              ORDER BY descrizione`
+        );
+        return rows;
+    });
 }
 
-async function getCopie(idMateriale) {
-
-    const conn = await getConnection();
-    try {
-
-        const [copie] = await conn.query(`
-            SELECT *
-            FROM vista_copie
-            WHERE id_libro = ?
-            ORDER BY id_copia
-        `, [idMateriale]);
-
-        if (copie.length === 0) {
-            throw new Error("Nessuna copia trovata");
-        }
-
-        return copie;
-    } finally {
-        await conn.end();
-    }
+async function getCopie(idLibro) {
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM vista_copie
+              WHERE id_libro = ?
+              ORDER BY id_copia`,
+            [idLibro]
+        );
+        return rows;
+    });
 }
 
-async function addCopie(idMateriale, nrCopie = 1) {
-
-    const conn = await getConnection();
-    try {
-
-        const [materiale] = await conn.query(
-            `
-            SELECT id_libro
-            FROM libri
-            WHERE id_libro = ?
-              AND attivo = 1
-            `,
-            [idMateriale]
+async function addCopie(idLibro, nrCopie) {
+    return withTransaction(async connection => {
+        const [materials] = await connection.query(
+            `SELECT id_libro
+               FROM libri
+              WHERE id_libro = ?
+                AND attivo = 1
+              FOR UPDATE`,
+            [idLibro]
         );
 
-        if (materiale.length === 0) {
-            throw new Error("Materiale non trovato");
+        if (!materials.length) {
+            throw new Error('Materiale non trovato');
         }
 
-        await insertCopie(conn, idMateriale, nrCopie);
-
+        await insertCopie(connection, idLibro, nrCopie);
         return {
-            idLibro: idMateriale,
+            idLibro,
             righeInserite: nrCopie
         };
-
-    } finally {
-        await conn.end();
-    }
+    });
 }
 
-async function findCopia(idMateriale, idCopia){
-    const conn = await getConnection();
-    try {
-        const [copia] =
-            await conn.query(
-                `
-                SELECT * 
-                  FROM vista_copie
-                WHERE id_libro = ?
-                  AND id_copia = ?
-                `,
-                [idMateriale,
-                    idCopia
-                ]
-            );
-
-        return copia[0];
-
-    } finally {
-        await conn.end();
-    }
+async function findCopia(idLibro, idCopia) {
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM vista_copie
+              WHERE id_libro = ?
+                AND id_copia = ?`,
+            [idLibro, idCopia]
+        );
+        return rows[0];
+    });
 }
 
-async function deleteCopia(idMateriale, idCopia ) {
-    const conn = await getConnection();
-    try {
-        const [result] =
-            await conn.query(
-                `
-                UPDATE copie
-                   SET attivo = 0
-                WHERE id_libro = ?
-                  AND id_copia = ?
-                  AND attivo = 1
-                `,
-                [idMateriale,
-                    idCopia
-                ]
-            );
+async function deleteCopia(idLibro, idCopia) {
+    return withConnection(async connection => {
+        const [result] = await connection.query(
+            `UPDATE copie
+                SET attivo = 0
+              WHERE id_libro = ?
+                AND id_copia = ?
+                AND attivo = 1`,
+            [idLibro, idCopia]
+        );
 
-
-        if (result.affectedRows === 0) {
-            throw new Error("Copia non trovata");
-        }
-
+        ensureAffected(result, 'Copia non trovata');
         return {
-            idLibro: idMateriale,
-            idCopia: idCopia,
+            idLibro,
+            idCopia,
             righeCancellate: result.affectedRows
         };
+    });
+}
 
-    } finally {
-        await conn.end();
+async function insertCopie(connection, idLibro, nrCopie) {
+    const count = Number(nrCopie);
+    if (!Number.isInteger(count) || count < 1) {
+        throw new Error('Numero copie non valido.');
     }
 
+    const [rows] = await connection.query(
+        `SELECT COALESCE(MAX(id_copia), 0) AS maxCopia
+           FROM copie
+          WHERE id_libro = ?`,
+        [idLibro]
+    );
+
+    const values = Array.from(
+        { length: count },
+        (_, index) => [rows[0].maxCopia + index + 1, idLibro, 'DISPONIBILE']
+    );
+
+    await connection.query(
+        `INSERT INTO copie (id_copia, id_libro, stato) VALUES ?`,
+        [values]
+    );
+}
+
+function addLikeFilter(filters, params, column, value) {
+    if (value) {
+        filters.push(`${column} LIKE ?`);
+        params.push(`%${value}%`);
+    }
+}
+
+function ensureAffected(result, message) {
+    if (!result.affectedRows) {
+        throw new Error(message);
+    }
 }
 
 module.exports = {
@@ -462,7 +319,7 @@ module.exports = {
     deleteItem,
     getAllGeneri,
     getCopie,
-    findCopia,
     addCopie,
+    findCopia,
     deleteCopia
-}
+};

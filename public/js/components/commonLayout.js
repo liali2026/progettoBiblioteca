@@ -52,16 +52,35 @@ function renderBreadcrumb(items =[]) {
     document.getElementById("breadcrumb").innerHTML = html;
 }
 
-/*function renderLayout({
-    activePage,
-    breadcrumb
-}) {
+function renderGeneri(
+    selectId,
+    generi,
+    {
+        placeholder = 'Qualsiasi genere',
+        disabled = false
+    } = {}
+) {
+    document.getElementById(selectId).innerHTML = `
+        <option value="" selected ${disabled ? 'disabled' : ''}>
+            ${placeholder}
+        </option>
+        ${generi.map(genere => `
+            <option value="${genere.id_genere}">
+                ${genere.descrizione}
+            </option>
+        `).join('')}
+    `;
+}
 
-    renderNavbar(activePage);
-    renderBreadcrumb(breadcrumb);
-}*/
+function escapeHtml(value) {
+    const element = document.createElement('div');
+    element.textContent = value ?? '';
+    return element.innerHTML;
+}
 
 export {
     renderNavbar,
-    renderBreadcrumb
+    renderBreadcrumb,
+    renderGeneri,
+    escapeHtml
 }

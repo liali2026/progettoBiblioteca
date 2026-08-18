@@ -79,31 +79,6 @@ function aggiornaCopertina(materiale) {
         : "/images/book-placeholder.png";
 }
 
-function caricaGeneri(generi) {
-
-    const select = document.getElementById("genere");
-
-    select.innerHTML = `
-        <option value="" selected disabled>
-            Seleziona il genere
-        </option>
-        ${generi.map(g => `
-            <option value="${g.id_genere}">
-                ${g.descrizione}
-            </option>
-        `).join("")}
-    `;
-}
-
-/*function configuraPrestito(materiale) {
-
-    document
-        .getElementById("prestitoModal")
-        .dataset.idLibro =
-        materiale.id_libro;
-}*/
-
-
 function configuraPagina(mode) {
 
     const cfg = CONFIG[mode];
@@ -302,21 +277,6 @@ function renderAzioni(copia, context) {
 
     return html;
 }
-/*
-function aggiornaPulsanteCopie(aperto) {
-
-    const btn =
-        document.getElementById("btnGestisciCopie");
-
-    btn.classList.toggle("btn-primary", !aperto);
-    btn.classList.toggle("btn-secondary", aperto);
-
-    btn.textContent =
-        aperto
-            ? "Nascondi copie"
-            : "Gestisci copie";
-}*/
-
 function aggiornaPulsanteCollapse(
     idBottone,
     aperto,
@@ -347,7 +307,6 @@ export {
     mostraMateriale,
     configuraPagina,
     getMaterialeForm,
-    caricaGeneri,
     mostraErrori,
     pulisciErrori,
     getFileCopertina,

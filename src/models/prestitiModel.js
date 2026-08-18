@@ -1,362 +1,306 @@
-const getConnection = require('../config/db');
-const { logQuery } = require('../utils/dbLogger');
+const {
+    withConnection,
+    withTransaction
+} = require('../config/db');
 
 async function creaPrestito(idUtente, idLibro, durataMesi) {
-
-    const conn = await getConnection();
-
-    try {
-        await conn.beginTransaction();
-
-        /*
-         * Recupera una copia disponibile
-         */
-        const [copie] = await conn.query(
-            `SELECT min(id_copia) as id_copia
-                FROM copie 
-                where id_libro = ?
-                and stato ="DISPONIBILE";`,
+    return withTransaction(async connection => {
+        const [books] = await connection.query(
+            `SELECT id_libro
+               FROM libri
+              WHERE id_libro = ?
+                AND attivo = 1`,
             [idLibro]
         );
 
-        let result;
-        let esito = null;
-        const idCopia = copie[0].id_copia;
-
-        if (!idCopia){
-
-            /*throw new Error(
-                'Nessuna copia disponibile'
-            );*/
-            //gestione delle prenotazioni
-            result  = await inserisciPrenotazione(idUtente, idLibro, durataMesi, conn);
-            esito ='PRENOTAZIONE';
-
-        } else {
-            result = await inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn);
-            esito = 'PRESTITO';
+        if (!books.length) {
+            throw new Error('Libro non trovato');
         }
 
-        await conn.commit();
+        const [copies] = await connection.query(
+            `SELECT id_copia
+               FROM copie
+              WHERE id_libro = ?
+                AND stato = 'DISPONIBILE'
+                AND attivo = 1
+              ORDER BY id_copia
+              LIMIT 1
+              FOR UPDATE`,
+            [idLibro]
+        );
+
+        if (!copies.length) {
+            const result = await inserisciPrenotazione(
+                connection,
+                idUtente,
+                idLibro,
+                durataMesi
+            );
+            return {
+                esito: 'PRENOTAZIONE',
+                id: result.insertId,
+                idCopia: null
+            };
+        }
+
+        const idCopia = copies[0].id_copia;
+        const result = await inserisciPrestito(
+            connection,
+            idUtente,
+            idLibro,
+            idCopia,
+            durataMesi
+        );
 
         return {
-            esito: esito,
+            esito: 'PRESTITO',
             id: result.insertId,
             idCopia
         };
+    });
+}
 
-    } catch (err) {
+async function ricercaPrestiti({
+    idUtente,
+    utente,
+    titolo,
+    autore,
+    stato,
+    tipo,
+    storico
+}) {
+    const filters = [];
+    const params = [];
 
-        await conn.rollback();
-        throw err;
-
-    } finally {
-        await conn.end();
+    if (idUtente) {
+        filters.push('id_utente = ?');
+        params.push(idUtente);
     }
-}
 
-async function inserisciPrestito(idUtente, idLibro, idCopia, durataMesi, conn) {
-    /*
-        * Inserisce il prestito
-        */
-    const [result] =
-        await conn.query(
-            `
-                INSERT INTO prestiti
-                (
-                    id_utente,
-                    id_libro,
-                    id_copia,
-                    data_inizio,
-                    data_fine,
-                    stato
-                )
-                VALUES
-                (
-                    ?,
-                    ?,
-                    ?,
-                    NOW(),
-                    DATE_ADD(NOW(), INTERVAL ? MONTH),
-                    "ATTIVO"
-                )
-                `,
-            [
-                idUtente,
-                idLibro,
-                idCopia,
-                durataMesi
-            ]
-        );
+    addLikeFilter(filters, params, 'email', utente);
+    addLikeFilter(filters, params, 'titolo', titolo);
+    addLikeFilter(filters, params, 'autore', autore);
 
-    /*
-     * Aggiorna la disponibilità
-     */
-    await conn.query(
-        `
-            UPDATE copie
-            SET stato = "PRESTITO"
-            WHERE id_copia = ?
-            `,
-        [idCopia]
-    );
-
-    return result;
-}
-
-async function ricercaPrestiti(idUtente, titolo, autore, stato, tipo, storico) {
-    const conn = await getConnection();
-    try {
-        /*let sql = `SELECT p.*, l.*
-                     FROM prestiti p, copie c, libri l
-                    WHERE p.id_copia = c.id_copia
-                      AND c.id_libro = l.id_libro`;*/
-        let sql = `SELECT *
-                     FROM vista_prestiti
-                     WHERE 1=1`
-
-        const params = [];
-
-        //ATTENZIONE! DA MODIFICARE DATO CHE NON PUò ESSERE NULLO (?)
-        if (idUtente) {
-            sql += ` AND id_utente = ?`;
-            params.push(idUtente);
-        }
-
-        if (titolo) {
-            sql += ` AND titolo like ?`;
-            params.push(`%${titolo}%`);
-        }
-
-        if (autore) {
-            sql += ` AND autore like ?`;
-            params.push(`%${autore}%`);
-        }
-
-        if (stato) {
-            sql += ` AND stato like ?`;
-            params.push(`%${stato}%`);
-        }
-
-        //gestione di prestiti e prenotazioni
-        if (tipo) {
-            //sql += ` AND tipo like ?`;
-            sql += ` AND tipo = ?`;
-            params.push(`${tipo}`);
-        }
-
-        //gestione dello storico
-        if (storico){
-             sql += ` AND isStorico = ?`;
-            params.push(`${storico}`);
-        }
-
-        //logQuery(sql, params);
-
-        const [prestiti] = await conn.query(sql, params);
-
-        //console.log(prestiti);
-        return prestiti;
-
-    } finally {
-        await conn.end();
+    if (stato) {
+        filters.push('stato = ?');
+        params.push(stato);
     }
-}
 
-async function restituisciPrestito(idPrestito) {
+    if (tipo) {
+        filters.push('tipo = ?');
+        params.push(tipo);
+    }
 
-    const conn = await getConnection();
+    if (storico !== null && storico !== undefined) {
+        filters.push('isStorico = ?');
+        params.push(storico);
+    }
 
-    try {
-        await conn.beginTransaction();
+    const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
 
-
-        const [prestito] = await conn.query(
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
             `SELECT *
-               FROM prestiti 
-              WHERE id_prestito = ?;`,
+               FROM vista_prestiti
+               ${where}
+              ORDER BY data_inizio DESC`,
+            params
+        );
+        return rows;
+    });
+}
+
+async function restituisciPrestito(idPrestito, utente) {
+    return withTransaction(async connection => {
+        const [loans] = await connection.query(
+            `SELECT *
+               FROM prestiti
+              WHERE id_prestito = ?
+              FOR UPDATE`,
             [idPrestito]
         );
 
-        //console.log(prestito);
-
-        if (!prestito[0].id_prestito) {
-
-            throw new Error(
-                'Nessun prestito trovato per il materiale scelto'
-            );
+        const loan = loans[0];
+        if (!loan) {
+            throw new Error('Nessun prestito trovato');
         }
 
-        if (prestito[0].data_restituzione === null) {
-
-            // aggiorno lo stato e la data di restituzione
-            await conn.query(
-                `
-                UPDATE prestiti
-                   SET stato ="RESTITUITO",
-                       data_restituzione = sysdate()
-                 WHERE id_prestito = ?
-                 `,
-                [prestito[0].id_prestito]
-            )
-
-            // aggiorno la disponibilità della copia associata al prestito
-            await conn.query(
-                `
-                UPDATE copie
-                   SET stato = "DISPONIBILE"
-                WHERE id_copia = ?
-                `,
-                [prestito[0].id_copia]
+        if (utente.ruolo !== 'BIBLIOTECARIO'
+            && Number(loan.id_utente) !== Number(utente.id_utente)) {
+            const error = new Error(
+                'Non puoi restituire un prestito di un altro utente'
             );
-
-            //gestisco la prenotazione
-            await gestisciPrenotazione
-                (
-                    prestito[0].id_libro,
-                    prestito[0].id_copia,
-                    conn
-                );
-
-
-        } else {
-            throw new Error(
-                'Prestito già chiuso'
-            );
+            error.status = 403;
+            throw error;
         }
 
-        await conn.commit();
+        if (loan.data_restituzione !== null) {
+            throw new Error('Prestito già chiuso');
+        }
+
+        await connection.query(
+            `UPDATE prestiti
+                SET stato = 'RESTITUITO',
+                    data_restituzione = NOW()
+              WHERE id_prestito = ?`,
+            [idPrestito]
+        );
+
+        await connection.query(
+            `UPDATE copie
+                SET stato = 'DISPONIBILE'
+              WHERE id_libro = ?
+                AND id_copia = ?`,
+            [loan.id_libro, loan.id_copia]
+        );
+
+        const nuovaAssegnazione = await assegnaPrimaPrenotazione(
+            connection,
+            loan.id_libro,
+            loan.id_copia
+        );
 
         return {
-            idPrestito: prestito[0].id_prestito,
-            idCopia: prestito[0].id_copia,
+            idPrestito,
+            idCopia: loan.id_copia,
+            nuovaAssegnazione,
             messaggio: 'Prestito restituito correttamente'
         };
-
-    } catch (err) {
-
-        await conn.rollback();
-        throw err;
-
-    } finally {
-        await conn.end();
-    }
-}
-
-//chiamata alla richiesta di un prestito, senza copie disponibili
-async function inserisciPrenotazione(idUtente, idLibro, durataPrestito, conn) {
-
-    const [rows] = await conn.query(
-        `SELECT count(*) as nrPrenotazioni
-           FROM prenotazioni 
-          WHERE id_utente = ?
-            AND id_libro = ?
-            AND st_prenotazione ='ATTESA'`,
-        [idUtente,
-            idLibro
-        ]
-    );
-
-    if (rows[0].nrPrenotazioni > 0) {
-        throw new Error("Esiste già una prenotazione per questo libro");
-    }
-
-    const [result] =
-        await conn.query(
-            `
-                INSERT INTO prenotazioni
-                (
-                    id_utente,
-                    id_libro,
-                    data_prenotazione,
-                    durata_prestito,
-                    st_prenotazione
-                )
-                VALUES
-                (
-                    ?,
-                    ?,
-                    NOW(),
-                    ?,
-                    "ATTESA"
-                )
-                `,
-            [
-                idUtente,
-                idLibro,
-                durataPrestito
-            ]
-        );
-
-    return result;
-
-}
-
-//chiamata alla restituzione di una copia, per gestire eventuali prenotazioni
-async function gestisciPrenotazione(idLibro, idCopia, conn) {
-
-    const [prenotazioni] = await conn.query(
-        `SELECT *
-           FROM prenotazioni 
-          WHERE id_libro = ?
-            AND st_prenotazione ='ATTESA'
-            ORDER BY id_prenotazione`,
-        [idLibro]
-    );
-
-    const prenotazione = prenotazioni[0];
-    if (prenotazione) {
-        await inserisciPrestito
-            (
-                prenotazione.id_utente,
-                idLibro,
-                idCopia,
-                prenotazione.durata_prestito,
-                conn
-            );
-
-        await conn.query(
-            `UPDATE prenotazioni
-                SET st_prenotazione ='EVASA'
-              WHERE id_prenotazione = ?`,
-              [prenotazione.id_prenotazione]
-        );
-    }
+    });
 }
 
 async function getStati() {
-
-    const conn = await getConnection();
-
-    try {
-
-        const [rows] = await conn.query(
-            `
-            SELECT categoria,
-                   codice,
-                   descrizione,
-                   storico
-            FROM configurazioni
-            WHERE attivo = 1
-              AND categoria IN (
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT categoria,
+                    codice,
+                    descrizione,
+                    storico
+               FROM configurazioni
+              WHERE attivo = 1
+                AND categoria IN (
                     'STATO_PRESTITO',
                     'STATO_PRENOTAZIONE'
-              )
-            ORDER BY categoria, ordine
-            `
+                )
+              ORDER BY categoria, ordine`
         );
-
         return rows;
-
-    } finally {
-        await conn.end();
-    }
+    });
 }
 
+async function inserisciPrestito(
+    connection,
+    idUtente,
+    idLibro,
+    idCopia,
+    durataMesi
+) {
+    const [result] = await connection.query(
+        `INSERT INTO prestiti (
+            id_utente,
+            id_libro,
+            id_copia,
+            data_inizio,
+            data_fine,
+            stato
+        ) VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MONTH), 'ATTIVO')`,
+        [idUtente, idLibro, idCopia, durataMesi]
+    );
+
+    await connection.query(
+        `UPDATE copie
+            SET stato = 'PRESTITO'
+          WHERE id_libro = ?
+            AND id_copia = ?`,
+        [idLibro, idCopia]
+    );
+
+    return result;
+}
+
+async function inserisciPrenotazione(
+    connection,
+    idUtente,
+    idLibro,
+    durataMesi
+) {
+    const [existing] = await connection.query(
+        `SELECT id_prenotazione
+           FROM prenotazioni
+          WHERE id_utente = ?
+            AND id_libro = ?
+            AND st_prenotazione = 'ATTESA'
+          LIMIT 1
+          FOR UPDATE`,
+        [idUtente, idLibro]
+    );
+
+    if (existing.length) {
+        throw new Error('Esiste già una prenotazione per questo libro');
+    }
+
+    const [result] = await connection.query(
+        `INSERT INTO prenotazioni (
+            id_utente,
+            id_libro,
+            data_prenotazione,
+            durata_prestito,
+            st_prenotazione
+        ) VALUES (?, ?, NOW(), ?, 'ATTESA')`,
+        [idUtente, idLibro, durataMesi]
+    );
+    return result;
+}
+
+async function assegnaPrimaPrenotazione(connection, idLibro, idCopia) {
+    const [reservations] = await connection.query(
+        `SELECT *
+           FROM prenotazioni
+          WHERE id_libro = ?
+            AND st_prenotazione = 'ATTESA'
+          ORDER BY data_prenotazione, id_prenotazione
+          LIMIT 1
+          FOR UPDATE`,
+        [idLibro]
+    );
+
+    const reservation = reservations[0];
+    if (!reservation) {
+        return null;
+    }
+
+    const loan = await inserisciPrestito(
+        connection,
+        reservation.id_utente,
+        idLibro,
+        idCopia,
+        reservation.durata_prestito
+    );
+
+    await connection.query(
+        `UPDATE prenotazioni
+            SET st_prenotazione = 'EVASA'
+          WHERE id_prenotazione = ?`,
+        [reservation.id_prenotazione]
+    );
+
+    return {
+        idPrenotazione: reservation.id_prenotazione,
+        idPrestito: loan.insertId,
+        idUtente: reservation.id_utente
+    };
+}
+
+function addLikeFilter(filters, params, column, value) {
+    if (value) {
+        filters.push(`${column} LIKE ?`);
+        params.push(`%${value}%`);
+    }
+}
 
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
     getStati
-}
+};
