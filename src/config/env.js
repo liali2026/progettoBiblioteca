@@ -9,7 +9,8 @@ const requiredEnv = [
     "DB_NAME",
     "SESSION_SECRET",
     "UPLOAD_DIR",
-    "SERVER_PORT"
+    "SERVER_PORT",
+    "PRESTITO_GIORNI_PREAVVISO"
 ];
 
 for (const variable of requiredEnv) {
@@ -43,5 +44,17 @@ module.exports = {
             process.cwd(),
             process.env.UPLOAD_DIR
         )
+    },
+
+    prestiti: {
+        giorniPreavviso: Number(process.env.PRESTITO_GIORNI_PREAVVISO || 7)
+    },
+    
+    mail: {
+        host: process.env.MAIL_HOST,
+        port: Number(process.env.MAIL_PORT),
+        secure: process.env.MAIL_SECURE === 'true',
+        user: process.env.MAIL_USER,
+        password: process.env.MAIL_PASSWORD
     }
 };

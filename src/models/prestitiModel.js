@@ -298,9 +298,77 @@ function addLikeFilter(filters, params, column, value) {
     }
 }
 
+async function aggiornaPrestitiScaduti() {
+    return withConnection(async connection => {
+
+        const [result] = await connection.query(
+            `UPDATE prestiti
+                SET stato = 'SCADUTO'
+              WHERE stato = 'ATTIVO'
+                AND data_fine < CURDATE()`
+        );
+
+        return result.affectedRows;
+    });
+}
+
+async function trovaPrestitiDaNotificare(giorniPreavviso) {
+
+    return withConnection(async connection => {
+
+        const [rows] = await connection.query(
+            `SELECT
+                p.id_prestito,
+                p.id_utente,
+                p.id_libro,
+                p.data_inizio,
+                p.data_fine,
+                u.email,
+                u.nome,
+                u.cognome,
+                l.titolo
+             FROM prestiti p
+             JOIN utenti u
+               ON u.id_utente = p.id_utente
+             JOIN libri l
+               ON l.id_libro = p.id_libro
+             WHERE p.stato = 'ATTIVO'
+               AND p.data_fine <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+               AND NOT EXISTS (
+                   SELECT 1
+                   FROM notifiche_prestiti n
+                   WHERE n.id_prestito = p.id_prestito
+                     AND n.tipo = 'SCADENZA_PRESTITO'
+               )
+             ORDER BY p.data_fine`,
+            [giorniPreavviso]
+        );
+
+        return rows;
+    });
+}
+
+async function registraNotifica(idPrestito, tipo) {
+
+    return withConnection(async connection => {
+
+        const [result] = await connection.query(
+            `INSERT INTO notifiche_prestiti
+                (id_prestito, tipo, data_invio)
+             VALUES (?, ?, NOW())`,
+            [idPrestito, tipo]
+        );
+
+        return result;
+    });
+}
+
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
-    getStati
+    getStati,
+    aggiornaPrestitiScaduti,
+    trovaPrestitiDaNotificare,
+    registraNotifica
 };

@@ -10,6 +10,8 @@ const utentiRoutes = require('./src/routes/utentiRoutes.js');
 const materialiRoutes = require('./src/routes/materialiRoutes.js');
 const prestitiRoutes = require('./src/routes/prestitiRoutes.js');
 const errorHandler = require('./src/middlewares/errorHandler.js');
+// per la gestione della scadenza dei prestiti
+const { avviaPrestitiJob } = require('./src/jobs/prestitiJob.js');
 
 const app = express();
 
@@ -30,6 +32,9 @@ app.use('/prestiti', prestitiRoutes);
 
 //ultimo da registrare
 app.use(errorHandler);
+
+// avvio dei job automatici
+avviaPrestitiJob();
 
 app.listen(config.server.port, () => {
     console.log('server avviato');

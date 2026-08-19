@@ -25,15 +25,7 @@ function renderCatalogo(materiali, context) {
 }
 
 function renderAzioni(materiale, context) {
-
-    let html = `
-        <a
-            href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
-            class="btn btn-sm btn-primary">
-            Dettagli
-        </a>
-    `;
-
+    let html ="";
     if (context.isAdmin) {
 
         html = `
@@ -49,6 +41,14 @@ function renderAzioni(materiale, context) {
                 Elimina
             </button>
         `;
+    } else {
+        let html = `
+        <a
+            href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
+            class="btn btn-sm btn-primary">
+            Dettagli
+        </a>
+    `;
     }
 
     return html;

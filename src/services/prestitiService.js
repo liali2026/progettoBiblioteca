@@ -1,4 +1,5 @@
 const prestitiModel = require('../models/prestitiModel');
+const emailService = require('./emailService');
 
 async function creaPrestito(idUtente, idLibro, durataMesi) {
 
@@ -65,9 +66,73 @@ async function getStati() {
     return risultato;
 }
 
+async function controllaScadenze() {
+
+    const numeroScaduti =
+        await prestitiModel.aggiornaPrestitiScaduti();
+
+    console.log(
+        `Controllo scadenze completato. Prestiti aggiornati: ${numeroScaduti}`
+    );
+
+    return numeroScaduti;
+}
+
+async function controllaPrestitiInScadenza(giorniPreavviso) {
+
+    const prestiti =
+        await prestitiModel.trovaPrestitiDaNotificare(
+            giorniPreavviso
+        );
+
+    for (const prestito of prestiti) {
+
+        // Per ora simuliamo l'invio
+        console.log(
+            `Prestito ${prestito.id_prestito} ` +
+            `di ${prestito.nome} ${prestito.cognome} ` +
+            `in scadenza il ${prestito.data_fine}`
+        );
+    }
+    /*for (const prestito of prestiti) {
+
+    try {
+
+        await emailService.inviaNotificaScadenza(prestito);
+
+        await prestitiModel.registraNotifica(
+            prestito.id_prestito,
+            'SCADENZA_PRESTITO'
+        );
+
+    } catch (err) {
+
+        console.error(
+            `Errore invio notifica prestito ${prestito.id_prestito}:`,
+            err
+        );
+
+    }
+}*/
+}
+
+async function testEmail() {
+
+    await emailService.inviaEmail({
+        destinatario: 'annalisa.liguori@tiscali.it',
+        oggetto: 'Test biblioteca',
+        testo: 'Questa è una mail di prova inviata dal server della biblioteca.'
+    });
+
+    console.log('Email inviata correttamente');
+}
+
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
-    getStati
+    getStati,
+    controllaScadenze,
+    controllaPrestitiInScadenza,
+    testEmail
 }
