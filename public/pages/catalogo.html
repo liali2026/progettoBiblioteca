@@ -26,66 +26,62 @@
             </button>
         </div>
         <!-- RICERCA -->
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title mb-3">Ricerca</h5>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Ricerca</h5>
 
-        <div class="row g-3">
+                <div class="row g-3">
 
-            <!-- Prima riga -->
-            <div class="col-md-4">
-                <input type="text" id="titolo" class="form-control" placeholder="Titolo">
-            </div>
+                    <!-- Prima riga -->
+                    <div class="col-md-4">
+                        <input type="text" id="titolo" class="form-control" placeholder="Titolo">
+                    </div>
 
-            <div class="col-md-4">
-                <input type="text" id="autore" class="form-control" placeholder="Autore">
-            </div>
+                    <div class="col-md-4">
+                        <input type="text" id="autore" class="form-control" placeholder="Autore">
+                    </div>
 
-            <div class="col-md-4">
-                <input type="text" id="isbn" class="form-control" placeholder="ISBN">
-            </div>
+                    <div class="col-md-4">
+                        <input type="text" id="isbn" class="form-control" placeholder="ISBN">
+                    </div>
 
-            <!-- Seconda riga -->
-            <div class="col-md-4">
-                <input type="number" id="anno" class="form-control" placeholder="Anno di pubblicazione">
-            </div>
+                    <!-- Seconda riga -->
+                    <div class="col-md-4">
+                        <input type="number" id="anno" class="form-control" placeholder="Anno di pubblicazione">
+                    </div>
 
-            <div class="col-md-4">
-                <select id="genere" class="form-select">
-                    <!-- OPTION CARICATE TRAMITE JS -->
-                </select>
-            </div>
+                    <div class="col-md-4">
+                        <select id="genere" class="form-select">
+                            <!-- OPTION CARICATE TRAMITE JS -->
+                        </select>
+                    </div>
 
-            <div class="col-md-4 d-flex align-items-center">
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="checkbox"
-                           id="soloDisponibili">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="soloDisponibili">
 
-                    <label class="form-check-label" for="soloDisponibili">
-                        Solo materiali con copie disponibili
-                    </label>
+                            <label class="form-check-label" for="soloDisponibili">
+                                Solo materiali con copie disponibili
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Terza riga: pulsanti -->
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <button id="btnPulisci" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Reset
+                        </button>
+
+                        <button id="btnRicerca" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                            Cerca
+                        </button>
+                    </div>
+
                 </div>
             </div>
-
-            <!-- Terza riga: pulsanti -->
-            <div class="col-12 d-flex justify-content-end gap-2">
-                <button id="btnPulisci"
-                        class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                    Reset
-                </button>
-
-                <button id="btnRicerca"
-                        class="btn btn-primary">
-                    <i class="bi bi-search"></i>
-                    Cerca
-                </button>
-            </div>
-
         </div>
-    </div>
-</div>
 
         <!-- TABELLA RISULTATI -->
         <div id="messaggioPagina" class="alert d-none"></div>

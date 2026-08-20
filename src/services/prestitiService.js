@@ -66,7 +66,7 @@ async function getStati() {
     return risultato;
 }
 
-async function controllaScadenze() {
+async function controllaScaduti() {
 
     const numeroScaduti =
         await prestitiModel.aggiornaPrestitiScaduti();
@@ -87,44 +87,51 @@ async function controllaPrestitiInScadenza(giorniPreavviso) {
 
     for (const prestito of prestiti) {
 
-        // Per ora simuliamo l'invio
-        console.log(
-            `Prestito ${prestito.id_prestito} ` +
-            `di ${prestito.nome} ${prestito.cognome} ` +
-            `in scadenza il ${prestito.data_fine}`
-        );
+        try {
+
+            await inviaNotificaScadenza(prestito);
+
+            await prestitiModel.registraNotifica(
+                prestito.id_prestito,
+                'SCADENZA_PRESTITO'
+            );
+
+        } catch (err) {
+
+            console.error(
+                `Errore invio notifica prestito ${prestito.id_prestito}:`,
+                err
+            );
+
+        }
     }
-    /*for (const prestito of prestiti) {
-
-    try {
-
-        await emailService.inviaNotificaScadenza(prestito);
-
-        await prestitiModel.registraNotifica(
-            prestito.id_prestito,
-            'SCADENZA_PRESTITO'
-        );
-
-    } catch (err) {
-
-        console.error(
-            `Errore invio notifica prestito ${prestito.id_prestito}:`,
-            err
-        );
-
-    }
-}*/
 }
 
-async function testEmail() {
+async function inviaNotificaScadenza(prestito) {
+
+    const testo = generaTestoNotificaScadenza(prestito);
 
     await emailService.inviaEmail({
-        destinatario: 'annalisa.liguori@tiscali.it',
-        oggetto: 'Test biblioteca',
-        testo: 'Questa è una mail di prova inviata dal server della biblioteca.'
+        destinatario: prestito.email,
+        oggetto: `Prestito in scadenza: ${prestito.titolo}`,
+        testo
     });
+}
 
-    console.log('Email inviata correttamente');
+function generaTestoNotificaScadenza(prestito) {
+    const dataScadenza = new Date(prestito.data_fine).toLocaleDateString('it-IT'); 
+
+    return `
+Gentile ${prestito.nome} ${prestito.cognome},
+
+il prestito del materiale "${prestito.titolo}"
+è in scadenza il ${dataScadenza}.
+
+Ti ricordiamo di restituire il materiale entro la data indicata.
+
+Cordiali saluti,
+Biblioteca
+`.trim();
 }
 
 module.exports = {
@@ -132,7 +139,6 @@ module.exports = {
     ricercaPrestiti,
     restituisciPrestito,
     getStati,
-    controllaScadenze,
-    controllaPrestitiInScadenza,
-    testEmail
+    controllaScaduti,
+    controllaPrestitiInScadenza
 }

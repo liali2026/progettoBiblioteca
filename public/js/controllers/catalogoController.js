@@ -118,49 +118,60 @@ function registraEventi() {
 
 async function inizializzaPagina() {
 
-    CommonLayoutView.renderNavbar('catalogo');
-    // posso arrivarci direttamente dalla home (index.html)
-    // oppure da area-personale.html
-    const from = new URLSearchParams(window.location.search).get('from');
-    if (from === 'area-personale') {
-        CommonLayoutView.renderBreadcrumb([
-            {
-                label: "Home",
-                href: "/"
-            },
-            {
-                label: "Area personale",
-                href: "/pages/area-personale.html"
-            },
-            {
-                label: "Catalogo",
-                active: true
-            }
-        ]);
-    } else {
-        CommonLayoutView.renderBreadcrumb([
-            {
-                label: "Home",
-                href: "/"
-            },
-            {
-                label: "Catalogo",
-                active: true
-            }
-        ]);
+    try {
+        CommonLayoutView.renderNavbar('catalogo');
+        // posso arrivarci direttamente dalla home (index.html)
+        // oppure da area-personale.html
+        const from = new URLSearchParams(window.location.search).get('from');
+        if (from === 'area-personale') {
+            CommonLayoutView.renderBreadcrumb([
+                {
+                    label: "Home",
+                    href: "/"
+                },
+                {
+                    label: "Area personale",
+                    href: "/pages/area-personale.html"
+                },
+                {
+                    label: "Catalogo",
+                    active: true
+                }
+            ]);
+        } else {
+            CommonLayoutView.renderBreadcrumb([
+                {
+                    label: "Home",
+                    href: "/"
+                },
+                {
+                    label: "Catalogo",
+                    active: true
+                }
+            ]);
+        }
+
+        const user = await Auth.initPage();
+
+        inizializzaContext(user);
+        CONTEXT.generi = await MaterialiApi.generi();
+
+        MaterialiView.configuraPagina(CONTEXT);
+
+        registraEventi();
+
+    } catch (err) {
+
+        console.error(err);
+
+        MessageView.mostraErrore(
+            err.message || "Errore durante il caricamento della pagina."
+        );
     }
-
-    const user = await Auth.initPage();
-
-    inizializzaContext(user);
-    CONTEXT.generi = await MaterialiApi.generi();
-
-    MaterialiView.configuraPagina(CONTEXT);
-
-    registraEventi();
 }
 
 document.addEventListener(
     'DOMContentLoaded',
     inizializzaPagina
 );
+

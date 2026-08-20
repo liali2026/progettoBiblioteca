@@ -23,7 +23,7 @@
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Ricerca</h5>
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-4">
                         <input type="text" id="titolo" class="form-control" placeholder="Titolo">
                     </div>
@@ -63,23 +63,18 @@
                    <!----> 
                     <div class="col-md-4">
                         <select id="stato" class="form-select">
-                            <!--<option value="ALL" selected>
-                                TUTTI
-                            </option>
-                            <option value="ATTIVO">
-                                ATTIVO
-                            </option>
-                            <option value="RESTITUITO">
-                                RESTITUITO
-                            </option>
-                            <option value="SCADUTO">
-                                SCADUTO
-                            </option>-->
                         </select>
                     </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button id="btnRicerca" class="btn btn-primary w-100">Cerca</button>
-                        <button id="btnPulisci" class="btn btn-outline-secondary w-100">Reset</button>
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <button id="btnPulisci" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Reset
+                        </button>
+
+                        <button id="btnRicerca" class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                            Cerca
+                        </button>
                     </div>
                 </div>
             </div>

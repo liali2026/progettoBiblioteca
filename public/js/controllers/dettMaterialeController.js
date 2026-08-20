@@ -344,60 +344,70 @@ function registraEventi() {
 }
 
 async function inizializzaPagina() {
+    try {
 
-    CommonLayoutView.renderNavbar('catalogo');
-    CommonLayoutView.renderBreadcrumb([
-        {
-            label: "Home",
-            href: "/"
-        },
-        {
-            label: "Catalogo",
-            href: "/pages/catalogo.html"
-        },
-        {
-            label: "Dettaglio materiale",
-            active: true
+        CommonLayoutView.renderNavbar('catalogo');
+        CommonLayoutView.renderBreadcrumb([
+            {
+                label: "Home",
+                href: "/"
+            },
+            {
+                label: "Catalogo",
+                href: "/pages/catalogo.html"
+            },
+            {
+                label: "Dettaglio materiale",
+                active: true
+            }
+        ]);
+
+        inizializzaContext();
+
+        const protectedMode = CONTEXT.mode === 'new'
+            || CONTEXT.mode === 'edit';
+        const user = await Auth.initPage(protectedMode, true);
+
+        if (protectedMode && user?.ruolo !== 'BIBLIOTECARIO') {
+            MessageView.mostraErrore(
+                'Questa funzione è riservata al bibliotecario.'
+            );
+            return;
         }
-    ]);
 
-    inizializzaContext();
+        View.configuraPagina(CONTEXT.mode);
 
-    const protectedMode = CONTEXT.mode === 'new'
-        || CONTEXT.mode === 'edit';
-    const user = await Auth.initPage(protectedMode, true);
-
-    if (protectedMode && user?.ruolo !== 'BIBLIOTECARIO') {
-        MessageView.mostraErrore(
-            'Questa funzione è riservata al bibliotecario.'
+        //gestione dei generi
+        const generi = await MaterialiApi.generi();
+        CommonLayoutView.renderGeneri(
+            'genere',
+            generi,
+            {
+                placeholder: 'Seleziona il genere',
+                disabled: true
+            }
         );
-        return;
-    }
+        //
 
-    View.configuraPagina(CONTEXT.mode);
-
-    //gestione dei generi
-    const generi = await MaterialiApi.generi();
-    CommonLayoutView.renderGeneri(
-        'genere',
-        generi,
-        {
-            placeholder: 'Seleziona il genere',
-            disabled: true
+        if (CONTEXT.mode === "view" || CONTEXT.mode === "edit") {
+            await caricaMateriale();
         }
-    );
-    //
 
-    if (CONTEXT.mode === "view" || CONTEXT.mode === "edit") {
-        await caricaMateriale();
+        mostraMessaggiPendenti();
+
+        ModalPrestito.inizializza();
+        CopieModal.inizializza();
+
+        registraEventi();
+        
+    } catch (err) {
+
+        console.error(err);
+
+        MessageView.mostraErrore(
+            err.message || "Errore durante il caricamento della pagina."
+        );
     }
-
-    mostraMessaggiPendenti();
-
-    ModalPrestito.inizializza();
-    CopieModal.inizializza();
-
-    registraEventi();
 }
 
 

@@ -10,20 +10,10 @@ function avviaPrestitiJob() {
     //cron.schedule('* * * * *', async () => {
     cron.schedule('0 2 * * *', async () => {
 
-        /* try {
-         console.log('TEST EMAIL');
-         await prestitiService.testEmail();
-         } catch (err) {
-             console.error(
-                 'Errore nel controllo delle notifiche:',
-                 err
-             );
-         }*/
-
         console.log('JOB PRESTITI: avvio controllo');
 
         try {
-            await prestitiService.controllaScadenze();
+            await prestitiService.controllaScaduti();
             console.log('Controllo scadenze completato');
         } catch (err) {
             console.error(
