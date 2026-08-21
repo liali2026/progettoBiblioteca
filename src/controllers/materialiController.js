@@ -7,7 +7,8 @@ async function search(req, res) {
         isbn: req.query.isbn,
         anno: req.query.anno,
         idGenere: req.query.idGenere,
-        soloDisponibili: req.query.soloDisponibili === 'true'
+        //soloDisponibili: req.query.soloDisponibili === 'true'
+        soloDisponibili: req.query.soloDisponibili
     });
     res.json(materiali);
 }

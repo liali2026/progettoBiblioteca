@@ -20,7 +20,7 @@ function configuraPagina(CONTEXT) {
             .forEach(campo => campo.classList.add("d-none"));
     }
 
-    popolaStati(CONTEXT);
+    popolaStati(CONTEXT, "1", "ALL" ); //popolo inizialmente con PRESTITI sia in corso sia restituiti
 }
 
 function popolaStati(CONTEXT, tipoTabella = "ALL", storico = "ALL") {

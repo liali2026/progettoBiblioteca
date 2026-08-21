@@ -17,7 +17,7 @@ async function search({
     addLikeFilter(filters, params, 'titolo', titolo);
     addLikeFilter(filters, params, 'autore', autore);
 
-    if (isbn){
+    if (isbn) {
         filters.push('isbn = ?');
         params.push(isbn);
     }
@@ -33,7 +33,11 @@ async function search({
     }
 
     if (soloDisponibili) {
-        filters.push('nr_copie_disponibili > 0');
+        console.log(soloDisponibili);
+        if (soloDisponibili === "1")
+            filters.push('nr_copie_disponibili > 0');
+        else 
+            filters.push('nr_copie_disponibili = 0');
     }
 
     const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';

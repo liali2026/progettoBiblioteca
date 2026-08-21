@@ -18,7 +18,7 @@
 
     <!-- CONTENUTO -->
     <div class="container mt-4">
-        <h1 class="mb-4">Prestiti</h1>
+        <h1 class="mb-4">Prestiti e Prenotazioni</h1>
         <!-- RICERCA -->
         <div class="card mb-4">
             <div class="card-body">
@@ -36,14 +36,14 @@
                     </div>
                     <div class="col-md-4">
                         <select id="tipo" class="form-select">
-                            <option value="ALL" selected>
-                                Tutti i tipi
-                            </option>
-                            <option value="1">
+                            <option value="1" selected>
                                 PRESTITI
                             </option>
                             <option value="2">
                                 PRENOTAZIONI
+                            </option>
+                            <option value="ALL" >
+                                Prestiti e prenotazioni
                             </option>
                         </select>
                     </div>
@@ -56,7 +56,7 @@
                                 In corso
                             </option>
                             <option value="1">
-                                Storico
+                                Storici
                             </option>
                         </select>
                     </div>
@@ -84,7 +84,7 @@
         <div id="messaggioPagina" class="alert d-none"></div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Prestiti</h5>
+                <h5 class="card-title">Dettagli</h5>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead>
@@ -110,7 +110,6 @@
         </div>
     </div>
 
-    <!--<script type="module" src="/js/prestiti.js"></script>-->
     <script type="module" src="/js/controllers/prestitiController.js"></script>
 
 </body>

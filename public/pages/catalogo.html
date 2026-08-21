@@ -56,7 +56,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-center">
+                    <!--<div class="col-md-4 d-flex align-items-center">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="soloDisponibili">
 
@@ -64,8 +64,20 @@
                                 Solo materiali con copie disponibili
                             </label>
                         </div>
+                    </div>-->
+                    <div class="col-md-4 d-flex align-items-center">
+                        <select id="soloDisponibili" class="form-select">
+                            <option value="ALL" selected>
+                                Qualsiasi disponibilità
+                            </option>
+                            <option value="0">
+                                Nessuna copia
+                            </option>
+                            <option value="1">
+                                Solo disponibili
+                            </option>
+                        </select>
                     </div>
-
                     <!-- Terza riga: pulsanti -->
                     <div class="col-12 d-flex justify-content-end gap-2">
                         <button id="btnPulisci" class="btn btn-outline-secondary">

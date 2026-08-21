@@ -6,6 +6,9 @@ async function search(filters) {
     if (filters.idGenere === 'ALL') {
         filters.idGenere = null;
     }
+    if (filters.soloDisponibili === 'ALL') {
+        filters.soloDisponibili = null;
+    }
     return materialiModel.search(filters);
 }
 

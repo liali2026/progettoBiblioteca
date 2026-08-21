@@ -23,7 +23,8 @@ async function ricercaMateriali() {
         const isbn = document.getElementById('isbn').value.toLowerCase().trim();
         const anno = document.getElementById('anno').value.trim();
         const idGenere = document.getElementById('genere').value;
-        const soloDisponibili = document.getElementById("soloDisponibili").checked;
+        //const soloDisponibili = document.getElementById("soloDisponibili").checked;
+        const soloDisponibili = document.getElementById("soloDisponibili").value;
 
         const risultati = await MaterialiApi.search({
             titolo,
