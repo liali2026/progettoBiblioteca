@@ -369,6 +369,7 @@ module.exports = {
     restituisciPrestito,
     getStati,
     aggiornaPrestitiScaduti,
+    assegnaPrimaPrenotazione,
     trovaPrestitiDaNotificare,
     registraNotifica
 };

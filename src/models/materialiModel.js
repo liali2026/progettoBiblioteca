@@ -3,6 +3,8 @@ const {
     withTransaction
 } = require('../config/db');
 
+const {assegnaPrimaPrenotazione} = require('./prestitiModel.js');
+
 async function search({
     titolo,
     autore,
@@ -33,7 +35,6 @@ async function search({
     }
 
     if (soloDisponibili) {
-        console.log(soloDisponibili);
         if (soloDisponibili === "1")
             filters.push('nr_copie_disponibili > 0');
         else 
@@ -41,7 +42,6 @@ async function search({
     }
 
     const where = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
-    //console.log("where = " + where);
 
     return withConnection(async connection => {
         const [rows] = await connection.query(
@@ -238,12 +238,57 @@ async function addCopie(idLibro, nrCopie) {
         }
 
         await insertCopie(connection, idLibro, nrCopie);
+
         return {
             idLibro,
             righeInserite: nrCopie
         };
     });
 }
+
+/*async function addCopie(idLibro, nrCopie) {
+
+    const risultato = await withTransaction(async connection => {
+
+        const [materials] = await connection.query(
+            `SELECT id_libro
+               FROM libri
+              WHERE id_libro = ?
+                AND attivo = 1
+              FOR UPDATE`,
+            [idLibro]
+        );
+
+        if (!materials.length) {
+            throw new Error('Materiale non trovato');
+        }
+
+        const assegnazioni = await insertCopie(
+            connection,
+            idLibro,
+            nrCopie
+        );
+
+        return {
+            idLibro,
+            righeInserite: Number(nrCopie),
+            assegnazioni
+        };
+    });
+
+    // A questo punto la transazione è stata COMMITTATA
+    for (const assegnazione of risultato.assegnazioni) {
+        try {
+            await inviaNotificaPrenotazione(assegnazione);
+        } catch (err) {
+            console.error(
+                `Errore nell'invio della notifica per la prenotazione ${assegnazione.idPrenotazione}:`,
+                err
+            );
+        }
+    }
+    return risultato;
+}*/
 
 async function findCopia(idLibro, idCopia) {
     return withConnection(async connection => {
@@ -284,6 +329,7 @@ async function insertCopie(connection, idLibro, nrCopie) {
         throw new Error('Numero copie non valido.');
     }
 
+    //trovo max(id_copia) e, se nessun record, allora 0
     const [rows] = await connection.query(
         `SELECT COALESCE(MAX(id_copia), 0) AS maxCopia
            FROM copie
@@ -291,6 +337,9 @@ async function insertCopie(connection, idLibro, nrCopie) {
         [idLibro]
     );
 
+    //creazione di un array di lunghezza = nrCopie,
+    //ogni elemento del record contiene i dati che dovrò inserire dopo
+    //id_copia viene calcolato contestualmente
     const values = Array.from(
         { length: count },
         (_, index) => [rows[0].maxCopia + index + 1, idLibro, 'DISPONIBILE']
@@ -300,6 +349,23 @@ async function insertCopie(connection, idLibro, nrCopie) {
         `INSERT INTO copie (id_copia, id_libro, stato) VALUES ?`,
         [values]
     );
+
+    //gestione delle eventuali prenotazioni in attesa di essere evase
+    // Cerco eventuali prenotazioni da assegnare
+    const assegnazioni = [];
+    for (const [idCopia] of values) {
+
+        const nuovaAssegnazione = await assegnaPrimaPrenotazione(
+            connection,
+            idLibro,
+            idCopia
+        );
+
+        if (nuovaAssegnazione) {
+            assegnazioni.push(nuovaAssegnazione);
+        }
+    }
+    return assegnazioni;
 }
 
 function addLikeFilter(filters, params, column, value) {

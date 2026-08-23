@@ -66,7 +66,7 @@ async function restituisciPrestito(idPrestito) {
         const risultato = await PrestitiApi.restituisci(idPrestito);
 
         await ricercaPrestiti();
-        //MessageView.mostraSuccesso("Operazione di restituzione eseguita con successo");
+        
         MessageView.mostraSuccesso(
             `Prestito n. <strong>${risultato.idPrestito}</strong>: ${risultato.messaggio}`
         );

@@ -71,7 +71,6 @@ function renderPrestiti(prestiti, CONTEXT) {
 
     //per bibliotecario
     const isAdmin = CONTEXT?.isAdmin;
-    //console.log("isAdmin =", isAdmin, typeof isAdmin);
 
     tbody.innerHTML =
         prestiti.map(m => {
@@ -113,9 +112,10 @@ function resetRicerca() {
 
     document.getElementById('titolo').value = '';
     document.getElementById('autore').value = '';
-    document.getElementById('stato').value = 'ALL';
-    document.getElementById('tipo').value = 'ALL';
+    document.getElementById('utente').value = '';
+    document.getElementById('tipo').value = '1'; //resetto sui prestiti
     document.getElementById('storico').value = 'ALL';
+    document.getElementById('stato').value = 'ALL';
     resetPrestiti();
 
 }

@@ -25,10 +25,18 @@ function renderCatalogo(materiali, context) {
 }
 
 function renderAzioni(materiale, context) {
-    let html ="";
+    //let html ="";
+    let html = `
+        <a
+            href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
+            class="btn btn-sm btn-primary">
+            Dettagli
+        </a>
+    `;
+
     if (context.isAdmin) {
 
-        html = `
+        html += `
             <button
                 class="btn btn-sm btn-warning btnModifica"
                 data-id-libro="${materiale.id_libro}">
@@ -41,14 +49,14 @@ function renderAzioni(materiale, context) {
                 Elimina
             </button>
         `;
-    } else {
+    /*} else {
         html = `
         <a
             href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
             class="btn btn-sm btn-primary">
             Dettagli
         </a>
-    `;
+    `;*/
     }
 
     return html;
@@ -64,7 +72,8 @@ function resetRicerca() {
     document.getElementById('autore').value = '';
     document.getElementById('anno').value = '';
     document.getElementById('genere').value = '';
-    document.getElementById("soloDisponibili").checked = false;
+    document.getElementById('isbn').value = '';
+    document.getElementById("soloDisponibili").value = 'ALL';
 
     resetCatalogo();
 
