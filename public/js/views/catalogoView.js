@@ -42,7 +42,7 @@ function renderAzioni(materiale, context) {
             </button>
         `;
     } else {
-        let html = `
+        html = `
         <a
             href="/pages/dettaglio-materiale.html?id=${materiale.id_libro}"
             class="btn btn-sm btn-primary">
