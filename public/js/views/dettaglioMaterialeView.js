@@ -252,11 +252,14 @@ async function mostraCopie(copie, context) {
                 <td>${m.id_copia}</td>
                 <td>${m.stato}</td>
                 <td>${m.email ?? '-'}</td>
+                <td>${formattaData(m.data_inizio)}</td>
+                <td>${formattaData(m.data_fine)}</td>
                 <td>
                     ${renderAzioni(m, context)}
                 </td>
             </tr>
         `).join('');
+
 }
 
 function renderAzioni(copia, context) {
@@ -300,6 +303,12 @@ function mostraDescrizione(mostra) {
     document
         .getElementById("descrizioneContainer")
         .classList.toggle("d-none", !mostra);
+}
+
+function formattaData(data) {
+    return data
+        ? new Date(data).toLocaleDateString('it-IT')
+        : '';
 }
 
 

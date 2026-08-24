@@ -284,6 +284,13 @@ async function assegnaPrimaPrenotazione(connection, idLibro, idCopia) {
         [reservation.id_prenotazione]
     );
 
+    // Creo la notifica da elaborare successivamente dal job
+    await registraNotificaConConnection(
+        connection,
+        loan.insertId,
+        'PRENOTAZIONE_EVASA'
+    );
+
     return {
         idPrenotazione: reservation.id_prenotazione,
         idPrestito: loan.insertId,
@@ -312,7 +319,7 @@ async function aggiornaPrestitiScaduti() {
     });
 }
 
-async function trovaPrestitiDaNotificare(giorniPreavviso) {
+async function trovaPrestitiInScadenza(giorniPreavviso) {
 
     return withConnection(async connection => {
 
@@ -348,19 +355,98 @@ async function trovaPrestitiDaNotificare(giorniPreavviso) {
     });
 }
 
-async function registraNotifica(idPrestito, tipo) {
+
+async function trovaPrenotazioniEvase() {
 
     return withConnection(async connection => {
+
+        const [rows] = await connection.query(
+            `SELECT
+                p.id_prestito,
+                p.id_utente,
+                p.id_libro,
+                p.data_inizio,
+                p.data_fine,
+                u.email,
+                u.nome,
+                u.cognome,
+                l.titolo
+             FROM prestiti p
+             JOIN utenti u
+               ON u.id_utente = p.id_utente
+             JOIN libri l
+               ON l.id_libro = p.id_libro
+             WHERE p.stato = 'ATTIVO'
+               AND EXISTS (
+                   SELECT 1
+                   FROM notifiche_prestiti n
+                   WHERE n.id_prestito = p.id_prestito
+                     AND n.tipo = 'PRENOTAZIONE_EVASA'
+                     AND n.data_invio is null
+               )
+             ORDER BY p.id_prestito`
+        );
+
+        return rows;
+    });
+}
+
+async function registraNotifica(idPrestito, tipo, dataInvio = null) {
+
+    return withConnection(async connection => {
+
+        return registraNotificaConConnection(
+            connection,
+            idPrestito,
+            tipo,
+            dataInvio
+        );
+
+    });
+}
+
+
+async function registraNotificaConConnection(
+    connection,
+    idPrestito,
+    tipo,
+    dataInvio = null
+) {
+
+    if (dataInvio === null) {
 
         const [result] = await connection.query(
             `INSERT INTO notifiche_prestiti
                 (id_prestito, tipo, data_invio)
-             VALUES (?, ?, NOW())`,
+             VALUES (?, ?, NULL)`,
             [idPrestito, tipo]
         );
 
         return result;
-    });
+    }
+
+    const [result] = await connection.query(
+        `UPDATE notifiche_prestiti
+            SET data_invio = ?
+          WHERE id_prestito = ?
+            AND tipo = ?
+            AND data_invio IS NULL`,
+        [dataInvio, idPrestito, tipo]
+    );
+
+    if (result.affectedRows === 0) {
+
+        const [insertResult] = await connection.query(
+            `INSERT INTO notifiche_prestiti
+                (id_prestito, tipo, data_invio)
+             VALUES (?, ?, ?)`,
+            [idPrestito, tipo, dataInvio]
+        );
+
+        return insertResult;
+    }
+
+    return result;
 }
 
 module.exports = {
@@ -370,6 +456,7 @@ module.exports = {
     getStati,
     aggiornaPrestitiScaduti,
     assegnaPrimaPrenotazione,
-    trovaPrestitiDaNotificare,
+    trovaPrestitiInScadenza,
+    trovaPrenotazioniEvase,
     registraNotifica
 };

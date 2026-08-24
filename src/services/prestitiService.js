@@ -78,28 +78,43 @@ async function controllaScaduti() {
     return numeroScaduti;
 }
 
-async function controllaPrestitiInScadenza(giorniPreavviso) {
+async function controllaPrestitiDaNotificare(tipo, giorniPreavviso) {
 
-    const prestiti =
-        await prestitiModel.trovaPrestitiDaNotificare(
-            giorniPreavviso
-        );
+    let prestiti = [];
+    switch (tipo) {
+
+        case 'SCADENZA_PRESTITO':
+            prestiti =
+                await prestitiModel.trovaPrestitiInScadenza(
+                    giorniPreavviso
+                );
+            break;
+
+        case 'PRENOTAZIONE_EVASA':
+            prestiti = 
+            await prestitiModel.trovaPrenotazioniEvase();
+            break;
+
+        default:
+            throw new Error(`Tipo di notifica non supportato: ${tipo}`);
+    }
 
     for (const prestito of prestiti) {
 
         try {
 
-            await inviaNotificaScadenza(prestito);
+            await inviaNotifica(prestito, tipo);
 
             await prestitiModel.registraNotifica(
                 prestito.id_prestito,
-                'SCADENZA_PRESTITO'
+                tipo,
+                new Date()
             );
 
         } catch (err) {
 
             console.error(
-                `Errore invio notifica prestito ${prestito.id_prestito}:`,
+                `Errore invio notifica ${tipo} ${prestito.id_prestito}:`,
                 err
             );
 
@@ -107,19 +122,36 @@ async function controllaPrestitiInScadenza(giorniPreavviso) {
     }
 }
 
-async function inviaNotificaScadenza(prestito) {
+async function inviaNotifica(prestito, tipo) {
 
-    const testo = generaTestoNotificaScadenza(prestito);
+    let testo;
+    let oggetto;
+
+    switch (tipo) {
+
+        case 'SCADENZA_PRESTITO':
+            testo = generaTestoNotificaScadenza(prestito);
+            oggetto = `Prestito in scadenza: ${prestito.titolo}`;
+            break;
+
+        case 'PRENOTAZIONE_EVASA':
+            testo = generaTestoNotificaPrenotazioneEvasa(prestito);
+            oggetto = `Prenotazione evasa: ${prestito.titolo}`;
+            break;
+
+        default:
+            throw new Error(`Tipo di notifica non supportato: ${tipo}`);
+    }
 
     await emailService.inviaEmail({
         destinatario: prestito.email,
-        oggetto: `Prestito in scadenza: ${prestito.titolo}`,
+        oggetto,
         testo
     });
 }
 
 function generaTestoNotificaScadenza(prestito) {
-    const dataScadenza = new Date(prestito.data_fine).toLocaleDateString('it-IT'); 
+    const dataScadenza = new Date(prestito.data_fine).toLocaleDateString('it-IT');
 
     return `
 Gentile ${prestito.nome} ${prestito.cognome},
@@ -134,11 +166,27 @@ Biblioteca
 `.trim();
 }
 
+function generaTestoNotificaPrenotazioneEvasa(prestito) {
+    const dataScadenza = new Date(prestito.data_fine).toLocaleDateString('it-IT');
+
+    return `
+Gentile ${prestito.nome} ${prestito.cognome},
+
+a seguito della tua precedente prenotazione è stato creato un prestito a tuo nome per "${prestito.titolo}".
+Il prestito inizia da oggi ed è in scadenza il ${dataScadenza}.
+
+Ti ricordiamo di restituire il materiale entro la data indicata oppure di cancellare il prestito, se non più interessato.
+
+Cordiali saluti,
+Biblioteca
+`.trim();
+}
+
 module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
     getStati,
     controllaScaduti,
-    controllaPrestitiInScadenza
+    controllaPrestitiDaNotificare
 }

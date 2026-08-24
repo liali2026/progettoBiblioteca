@@ -3,7 +3,7 @@ const {
     withTransaction
 } = require('../config/db');
 
-const {assegnaPrimaPrenotazione} = require('./prestitiModel.js');
+const { assegnaPrimaPrenotazione } = require('./prestitiModel.js');
 
 async function search({
     titolo,
@@ -37,7 +37,7 @@ async function search({
     if (soloDisponibili) {
         if (soloDisponibili === "1")
             filters.push('nr_copie_disponibili > 0');
-        else 
+        else
             filters.push('nr_copie_disponibili = 0');
     }
 
@@ -246,50 +246,6 @@ async function addCopie(idLibro, nrCopie) {
     });
 }
 
-/*async function addCopie(idLibro, nrCopie) {
-
-    const risultato = await withTransaction(async connection => {
-
-        const [materials] = await connection.query(
-            `SELECT id_libro
-               FROM libri
-              WHERE id_libro = ?
-                AND attivo = 1
-              FOR UPDATE`,
-            [idLibro]
-        );
-
-        if (!materials.length) {
-            throw new Error('Materiale non trovato');
-        }
-
-        const assegnazioni = await insertCopie(
-            connection,
-            idLibro,
-            nrCopie
-        );
-
-        return {
-            idLibro,
-            righeInserite: Number(nrCopie),
-            assegnazioni
-        };
-    });
-
-    // A questo punto la transazione è stata COMMITTATA
-    for (const assegnazione of risultato.assegnazioni) {
-        try {
-            await inviaNotificaPrenotazione(assegnazione);
-        } catch (err) {
-            console.error(
-                `Errore nell'invio della notifica per la prenotazione ${assegnazione.idPrenotazione}:`,
-                err
-            );
-        }
-    }
-    return risultato;
-}*/
-
 async function findCopia(idLibro, idCopia) {
     return withConnection(async connection => {
         const [rows] = await connection.query(
@@ -352,20 +308,14 @@ async function insertCopie(connection, idLibro, nrCopie) {
 
     //gestione delle eventuali prenotazioni in attesa di essere evase
     // Cerco eventuali prenotazioni da assegnare
-    const assegnazioni = [];
     for (const [idCopia] of values) {
 
-        const nuovaAssegnazione = await assegnaPrimaPrenotazione(
+        await assegnaPrimaPrenotazione(
             connection,
             idLibro,
             idCopia
         );
-
-        if (nuovaAssegnazione) {
-            assegnazioni.push(nuovaAssegnazione);
-        }
     }
-    return assegnazioni;
 }
 
 function addLikeFilter(filters, params, column, value) {
