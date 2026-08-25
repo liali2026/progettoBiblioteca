@@ -17,6 +17,23 @@ async function creaPrestito(idUtente, idLibro, durataMesi) {
             throw new Error('Libro non trovato');
         }
 
+        //controllo esistenza di prestiti già in corso per lo stesso libro
+        const [existing] = await connection.query(
+            `SELECT id_prestito
+                FROM vista_prestiti
+                WHERE id_utente = ?
+                    AND id_libro = ?
+                    AND stato in ('ATTIVO','SCADUTO')
+                LIMIT 1
+                FOR UPDATE`,
+            [idUtente, idLibro]
+        );
+
+        if (existing.length) {
+            throw new Error('Esiste già un prestito attivo per questo libro');
+        }
+        //
+
         const [copies] = await connection.query(
             `SELECT id_copia
                FROM copie
@@ -103,7 +120,7 @@ async function ricercaPrestiti({
             `SELECT *
                FROM vista_prestiti
                ${where}
-              ORDER BY data_inizio DESC`,
+              ORDER BY data_inizio DESC, id_prestito DESC`,
             params
         );
         return rows;
@@ -195,6 +212,7 @@ async function inserisciPrestito(
     idCopia,
     durataMesi
 ) {
+
     const [result] = await connection.query(
         `INSERT INTO prestiti (
             id_utente,
@@ -252,6 +270,52 @@ async function inserisciPrenotazione(
     return result;
 }
 
+async function annullaPrenotazione(idPrenotazione, utente) {
+    return withTransaction(async connection => {
+        const [reservations] = await connection.query(
+            `SELECT *
+               FROM prenotazioni
+              WHERE id_prenotazione = ?
+                AND st_prenotazione = 'ATTESA'
+              LIMIT 1
+              FOR UPDATE`,
+            [idPrenotazione]
+        );
+
+        const reservation = reservations[0]
+        if (!reservation) {
+            throw new Error('Prenotazione non trovata');
+        }
+
+        if (utente.ruolo !== 'BIBLIOTECARIO'
+            && Number(reservation.id_utente) !== Number(utente.id_utente)) {
+            const error = new Error(
+                'Non puoi annullare una prenotazione di un altro utente'
+            );
+            error.status = 403;
+            throw error;
+        }
+
+        const [result] = await connection.query(
+            `UPDATE prenotazioni
+            SET st_prenotazione = 'ANNULLATA',
+                data_chiusura = NOW()
+          WHERE id_prenotazione = ?
+            AND st_prenotazione = 'ATTESA'`,
+            [idPrenotazione]
+        );
+
+        if (!result.affectedRows) {
+            throw new Error("Impossibile annullare la prenotazione");
+        }
+        return {
+            idPrenotazione: idPrenotazione,
+            righeAggiornate: result.affectedRows,
+            messaggio: 'Prenotazione annullata correttamente'
+        };
+    });
+}
+
 async function assegnaPrimaPrenotazione(connection, idLibro, idCopia) {
     const [reservations] = await connection.query(
         `SELECT *
@@ -279,7 +343,8 @@ async function assegnaPrimaPrenotazione(connection, idLibro, idCopia) {
 
     await connection.query(
         `UPDATE prenotazioni
-            SET st_prenotazione = 'EVASA'
+            SET st_prenotazione = 'EVASA',
+                data_chiusura = NOW()
           WHERE id_prenotazione = ?`,
         [reservation.id_prenotazione]
     );
@@ -453,6 +518,7 @@ module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
+    annullaPrenotazione,
     getStati,
     aggiornaPrestitiScaduti,
     assegnaPrimaPrenotazione,

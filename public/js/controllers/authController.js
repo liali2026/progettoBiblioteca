@@ -22,8 +22,42 @@ loginForm?.addEventListener('submit', async event => {
     }
 });
 
+function validaPassword(password) {
+
+    if (password.length < 8) {
+        return 'La password deve contenere almeno 8 caratteri.';
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        return 'La password deve contenere almeno una lettera maiuscola.';
+    }
+
+    if (!/[a-z]/.test(password)) {
+        return 'La password deve contenere almeno una lettera minuscola.';
+    }
+
+    if (!/[0-9]/.test(password)) {
+        return 'La password deve contenere almeno un numero.';
+    }
+
+    if (!/[^A-Za-z0-9]/.test(password)) {
+        return 'La password deve contenere almeno un carattere speciale.';
+    }
+
+    return null;
+}
+
 registerForm?.addEventListener('submit', async event => {
     event.preventDefault();
+
+    //controlli anche lato client della password (gli stessi controlli sono replicati sul server)
+    const password = document.getElementById('password').value;
+    const errorePassword = validaPassword(password);
+
+    if (errorePassword) {
+        showError(errorePassword);
+        return;
+    }
 
     try {
         await auth.register({

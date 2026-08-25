@@ -12,6 +12,11 @@ router.post(
     authenticate,
     prestitiController.restituisciPrestito
 );
+router.post(
+    '/annullaPrenotazione',
+    authenticate,
+    prestitiController.annullaPrenotazione
+);
 router.get( "/config/stati", authenticate, prestitiController.getStati);
 
 module.exports = router;

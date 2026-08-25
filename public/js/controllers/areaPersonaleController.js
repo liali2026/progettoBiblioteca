@@ -57,13 +57,13 @@ async function inizializzaPagina() {
 
     configuraCard("prestiti", {
         admin: isAdmin,
-        titolo: isAdmin ? "Prestiti" : "I miei prestiti",
+        titolo: isAdmin ? "Prestiti e prenotazioni" : "I miei prestiti e prenotazioni",
         testo: isAdmin
-            ? "Consulta tutti i prestiti presenti nel sistema."
-            : "Visualizza i prestiti attivi e quelli già conclusi.",
+            ? "Consulta tutti i prestiti e prenotazioni presenti nel sistema."
+            : "Visualizza i prestiti e prenotazioni attivi e quelli già conclusi.",
         href: "/pages/prestiti.html",
         bottone: isAdmin
-            ? "Visualizza prestiti"
+            ? "Visualizza prestiti e prenotazioni"
             : "Visualizza"
     });
 

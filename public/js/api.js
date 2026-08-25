@@ -132,6 +132,13 @@ const prestiti = {
         );
     },
 
+    annullaPrenotazione(idPrenotazione) {
+        return request(
+            '/prestiti/annullaPrenotazione',
+            jsonOptions('POST', { idPrenotazione })
+        );
+    },
+
     stati() {
         return request('/prestiti/config/stati');
     }

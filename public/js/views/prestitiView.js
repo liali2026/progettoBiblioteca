@@ -20,7 +20,7 @@ function configuraPagina(CONTEXT) {
             .forEach(campo => campo.classList.add("d-none"));
     }
 
-    popolaStati(CONTEXT, "1", "ALL" ); //popolo inizialmente con PRESTITI sia in corso sia restituiti
+    popolaStati(CONTEXT, "1", "ALL"); //popolo inizialmente con PRESTITI sia in corso sia restituiti
 }
 
 function popolaStati(CONTEXT, tipoTabella = "ALL", storico = "ALL") {
@@ -46,7 +46,7 @@ function popolaStati(CONTEXT, tipoTabella = "ALL", storico = "ALL") {
             ];
     }
 
-     // Filtro storico
+    // Filtro storico
     if (storico !== "ALL") {
         stati = stati.filter(s => String(s.storico) === storico);
     }
@@ -61,7 +61,6 @@ function popolaStati(CONTEXT, tipoTabella = "ALL", storico = "ALL") {
     `;
 }
 
-//renderPaginazione(data.total, page); -- DA FARE
 function renderPrestiti(prestiti, CONTEXT) {
 
     const tbody = document.getElementById('tabellaPrestiti');
@@ -69,43 +68,158 @@ function renderPrestiti(prestiti, CONTEXT) {
     const box = document.getElementById('messaggioPagina');
     box.classList.add('d-none');
 
-    //per bibliotecario
     const isAdmin = CONTEXT?.isAdmin;
 
-    tbody.innerHTML =
-        prestiti.map(m => {
+    // Aggiorno la testata nello stesso momento in cui
+    // aggiorno i dati della tabella
+    const tipo = document.getElementById("tipo").value;
+    renderTestata(CONTEXT, tipo);
 
-            const canReturn = ['ATTIVO', 'SCADUTO'].includes(m.stato)
+    tbody.innerHTML = prestiti.map(m => {
+
+        let colonneSpecifiche = "";
+        let azioni = '<td>-</td>';
+
+        if (Number(m.tipo) === 1) {
+            // PRESTITO
+            const canReturn =
+                ['ATTIVO', 'SCADUTO'].includes(m.stato)
                 && m.id_prestito;
-            
-            return `
-            <tr>
-                <td>${escapeHtml(m.titolo)}</td>
-                <td>${escapeHtml(m.autore)}</td>
-                <td>${escapeHtml(m.genere ?? '-')}</td>
+
+            if (canReturn) {
+                azioni = `
+                        <td>
+                            <button
+                                class="btn btn-sm btn-warning btnRestituisci"
+                                data-id-prestito="${m.id_prestito}">
+                                Restituisci
+                            </button>
+                        </td>
+                    `;
+            }
+
+            colonneSpecifiche = `
                 <td>${formattaData(m.data_inizio)}</td>
                 <td>${formattaData(m.data_fine)}</td>
-                <td>${m.data_restituzione ? formattaData(m.data_restituzione) : '-'}</td>
-                <td>${badgeStato(m.stato)}</td>
-                ${isAdmin ? `
-                    <td>${escapeHtml(m.email)}</td>
-                ` : ''}
-                ${canReturn ? `
-                    <td>
-                        <button
-                            class="btn btn-sm btn-warning btnRestituisci"
-                            data-id-prestito="${m.id_prestito}">
-                            Restituisci
-                        </button>
-                    </td>
-                   ` : '<td>-</td>'}
-            </tr>
-         `;
-        }).join('');
+                <td>
+                    ${m.data_restituzione
+                    ? formattaData(m.data_restituzione)
+                    : '-'}
+                </td>
+                
+            `;
+
+        } else {
+
+            // PRENOTAZIONE
+            const canCancel =
+                m.stato === 'ATTESA'
+                && m.id_prestito;
+
+            if (canCancel) {
+                azioni = `
+                        <td>
+                            <button
+                                class="btn btn-sm btn-danger btnAnnullaPrenotazione"
+                                data-id-prenotazione="${m.id_prestito}">
+                                Annulla
+                            </button>
+                        </td>
+                        `;
+            }
+            colonneSpecifiche = `
+                <td>${formattaData(m.data_inizio)}</td>
+                <td>
+                    ${m.data_restituzione
+                    ? formattaData(m.data_restituzione)
+                    : '-'}
+                </td>
+            `;
+        }
+        return `
+                <tr>
+                    <td>${escapeHtml(m.titolo)}</td>
+                    <td>${escapeHtml(m.autore)}</td>
+                    <td>${escapeHtml(m.genere ?? '-')}</td>
+                    ${colonneSpecifiche}
+                    <td>${badgeStato(m.stato)}</td>
+                    ${isAdmin ? `
+                        <td>${escapeHtml(m.email)}</td>
+                    ` : ''}
+                    ${azioni}
+                </tr>
+            `;
+
+    }).join('');
 }
 
-function resetPrestiti() {
+function renderTestata(CONTEXT, tipo) {
+
+    const thead = document.getElementById("testataPrestiti");
+    const titolo = document.getElementById("titoloDettagli");
+
+    const isAdmin = CONTEXT?.isAdmin;
+
+    let html = `
+        <tr>
+            <th>Titolo</th>
+            <th>Autore</th>
+            <th>Genere</th>
+    `;
+
+    if (tipo === "1") {
+
+        // PRESTITI
+        titolo.textContent = "Prestiti";
+
+        html += `
+            <th>Data Inizio Prestito</th>
+            <th>Data Prevista Fine Prestito</th>
+            <th>Data Restituzione</th>
+            <th>Stato Prestito</th>
+        `;
+
+    } else if (tipo === "2") {
+
+        // PRENOTAZIONI
+        titolo.textContent = "Prenotazioni";
+        html += `
+            <th>Data Prenotazione</th>
+            <th>Data Chiusura</th>
+            <th>Stato Prenotazione</th>
+        `;
+
+    }/* else {
+
+        // PRESTITI + PRENOTAZIONI
+        titolo.textContent = "Prestiti e Prenotazioni";
+        html += `
+            <th>Data Inizio Prestito/Prenotazione</th>
+            <th>Data Fine Prestito</th>
+            <th>Data Restituzione</th>
+            <th>Stato</th>
+        `;
+    }*/
+
+    if (isAdmin) {
+        html += `
+            <th>Utente</th>
+        `;
+    }
+
+    html += `
+            <th>Azioni</th>
+        </tr>
+    `;
+
+    thead.innerHTML = html;
+}
+
+function resetPrestiti(CONTEXT) {
     document.getElementById('tabellaPrestiti').innerHTML = '';
+    //devo resettare anche i titoli delle colonne
+    const tipo = document.getElementById("tipo").value;
+    renderTestata(CONTEXT, tipo);
 }
 
 function resetRicerca() {

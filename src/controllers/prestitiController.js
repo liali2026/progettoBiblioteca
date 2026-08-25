@@ -35,6 +35,15 @@ async function restituisciPrestito(req, res) {
     );
 }
 
+async function annullaPrenotazione(req, res) {
+    res.json(
+        await prestitiService.annullaPrenotazione(
+            req.body.idPrenotazione,
+            req.session.user
+        )
+    );
+}
+
 async function getStati(req, res) {
     res.json(await prestitiService.getStati());
 }
@@ -43,5 +52,6 @@ module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
+    annullaPrenotazione,
     getStati
 };

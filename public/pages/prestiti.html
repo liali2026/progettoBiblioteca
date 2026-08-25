@@ -42,9 +42,9 @@
                             <option value="2">
                                 PRENOTAZIONI
                             </option>
-                            <option value="ALL" >
+                            <!--<option value="ALL" >
                                 Prestiti e prenotazioni
-                            </option>
+                            </option>-->
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -84,22 +84,11 @@
         <div id="messaggioPagina" class="alert d-none"></div>
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Dettagli</h5>
+                <h5 id="titoloDettagli" class="card-title">Dettagli</h5>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Titolo</th>
-                                <th>Autore</th>
-                                <th>Genere</th>
-                                <th>Data Inizio Prestito</th>
-                                <th>Data Prevista Fine Prestito</th>
-                                <th>Data Restituzione</th>
-                                <th>Stato prestito</th>
-                                <th class="role-bibliotecario d-none">Utente</th>
-                                <!--<th class="role-utente">Azioni</th>-->
-                                <th>Azioni</th>
-                            </tr>
+                        <thead id="testataPrestiti">
+                            <!-- popolata via JS-->
                         </thead>
                         <tbody id="tabellaPrestiti">
                             <!--popolata via JavaScript-->

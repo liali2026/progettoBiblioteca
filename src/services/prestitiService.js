@@ -39,6 +39,18 @@ async function restituisciPrestito(idPrestito, utente) {
 
 }
 
+async function annullaPrenotazione(idPrenotazione, utente) {
+
+    if (!Number.isInteger(Number(idPrenotazione))) {
+        throw new Error('Identificativo prenotazione non valido');
+    }
+    return prestitiModel.annullaPrenotazione(
+        Number(idPrenotazione),
+        utente
+    );
+
+}
+
 async function getStati() {
 
     const rows = await prestitiModel.getStati();
@@ -186,6 +198,7 @@ module.exports = {
     creaPrestito,
     ricercaPrestiti,
     restituisciPrestito,
+    annullaPrenotazione,
     getStati,
     controllaScaduti,
     controllaPrestitiDaNotificare

@@ -41,7 +41,7 @@ async function ricercaPrestiti() {
         });
 
         if (!risultati || risultati.length === 0) {
-            PrestitiView.resetPrestiti();
+            PrestitiView.resetPrestiti(CONTEXT);
             MessageView.mostraWarning('Nessun dato trovato con i criteri di ricerca.');
         } else {
             PrestitiView.renderPrestiti(risultati, CONTEXT);
@@ -66,7 +66,7 @@ async function restituisciPrestito(idPrestito) {
         const risultato = await PrestitiApi.restituisci(idPrestito);
 
         await ricercaPrestiti();
-        
+
         MessageView.mostraSuccesso(
             `Prestito n. <strong>${risultato.idPrestito}</strong>: ${risultato.messaggio}`
         );
@@ -74,6 +74,32 @@ async function restituisciPrestito(idPrestito) {
     } catch (err) {
         console.error(err);
         MessageView.mostraErrore(err.message);
+    }
+}
+
+async function annullaPrenotazione(idPrenotazione) {
+
+    if (!confirm("Confermi l'annullamento della prenotazione?")) {
+        return;
+    }
+
+    try {
+
+        const risultato =
+            await PrestitiApi.annullaPrenotazione(idPrenotazione);
+
+        await ricercaPrestiti();
+
+        MessageView.mostraSuccesso(
+            `Prenotazione n. <strong>${idPrenotazione}</strong>: 
+             ${risultato.messaggio}`
+        );
+
+    } catch (err) {
+
+        console.error(err);
+        MessageView.mostraErrore(err.message);
+
     }
 }
 
@@ -93,11 +119,24 @@ function registraEventi() {
         .addEventListener(
             'click',
             async (e) => {
-                if (!e.target.classList.contains('btnRestituisci')) {
+                
+                if (e.target.classList.contains('btnRestituisci')) {
+
+                    const idPrestito =
+                        e.target.dataset.idPrestito;
+
+                    await restituisciPrestito(idPrestito);
+
                     return;
                 }
-                const idPrestito = e.target.dataset.idPrestito;
-                await restituisciPrestito(idPrestito);
+
+                if (e.target.classList.contains('btnAnnullaPrenotazione')) {
+
+                    const idPrenotazione =
+                        e.target.dataset.idPrenotazione;
+
+                    await annullaPrenotazione(idPrenotazione);
+                }
             }
         );
 
@@ -105,10 +144,10 @@ function registraEventi() {
         .getElementById("tipo")
         .addEventListener("change", e => {
 
-           /*PrestitiView.popolaStati(
-                CONTEXT,
-                e.target.value
-            );*/
+            /*PrestitiView.popolaStati(
+                 CONTEXT,
+                 e.target.value
+             );*/
             aggiornaStati();
 
         });
