@@ -36,10 +36,35 @@ const CONFIG = {
 
 function mostraMateriale(materiale) {
     popolaForm(materiale);
-    //mostraDisponibilita(disponibile);
     aggiornaCopertina(materiale);
+    //gestione controllo del bottone di richiesta prestito/restituzione
+    configuraBottonePrestito(materiale); 
 }
 
+//gestione controllo del bottone di richiesta prestito/restituzione
+function configuraBottonePrestito(materiale) { 
+
+    const btn = document.getElementById("btnPrestito");
+
+    if (materiale.prestito_utente) {
+
+        btn.textContent = "Restituisci libro";
+        btn.dataset.azione = "restituisci";
+
+        return;
+    }
+
+    if (materiale.nr_copie_disponibili > 0) {
+
+        btn.textContent = "Richiedi prestito";
+        btn.dataset.azione = "prestito";
+
+    } else {
+
+        btn.textContent = "Richiedi prenotazione";
+        btn.dataset.azione = "prenotazione";
+    }
+}
 
 function popolaForm(materiale) {
 
@@ -265,8 +290,8 @@ async function mostraCopie(copie, context) {
 function renderAzioni(copia, context) {
 
     let html = "";
-    
-    if (context.mode ==="edit") {
+
+    if (context.mode === "edit") {
 
         html += `
             <button

@@ -55,7 +55,8 @@ async function search({
     });
 }
 
-async function findById(idLibro) {
+//gestione controllo del bottone di richiesta prestito/restituzione
+/*async function findById(idLibro) {
     return withConnection(async connection => {
         const [rows] = await connection.query(
             `SELECT *
@@ -64,6 +65,44 @@ async function findById(idLibro) {
             [idLibro]
         );
         return rows[0];
+    });
+}*/
+
+async function findById(idLibro, idUtente = null) {
+
+    return withConnection(async connection => {
+        const [rows] = await connection.query(
+            `SELECT *
+               FROM vista_catalogo_libri
+              WHERE id_libro = ?`,
+            [idLibro]
+        );
+
+        const materiale = rows[0];
+
+        if (!materiale) {
+            return null;
+        }
+
+        if (!idUtente) {
+            return materiale;
+        }
+
+        const [prestiti] = await connection.query(
+            `SELECT id_prestito, stato
+               FROM prestiti
+              WHERE id_utente = ?
+                AND id_libro = ?
+                AND stato IN ('ATTIVO', 'SCADUTO')`,
+            [idUtente, idLibro]
+        );
+
+        materiale.prestito_utente =
+            prestiti.length > 0
+                ? prestiti[0]
+                : null;
+
+        return materiale;
     });
 }
 

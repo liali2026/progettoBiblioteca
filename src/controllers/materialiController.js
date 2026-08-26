@@ -12,8 +12,16 @@ async function search(req, res) {
     res.json(materiali);
 }
 
-async function findById(req, res) {
+/*async function findById(req, res) {
     const materiale = await materialiService.findById(req.params.id);
+    res.json(materiale);
+}*/
+
+//gestione controllo del bottone di richiesta prestito/restituzione
+async function findById(req, res) {
+    const materiale = await materialiService.findById(
+        req.params.id,
+        req.session?.user?.id_utente);
     res.json(materiale);
 }
 

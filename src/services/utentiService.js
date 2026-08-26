@@ -42,8 +42,6 @@ async function registrazione(email, password, name, surname, role) {
         throw new Error('Tutti i campi sono obbligatori');
     }
     
-    validaPassword(password);
-
     const normalizedEmail = String(email).trim().toLowerCase();
     const utenteEsistente = await utentiModel.findByUsername(normalizedEmail);
     if (utenteEsistente) {
@@ -51,6 +49,8 @@ async function registrazione(email, password, name, surname, role) {
             'Utente già esistente: usa la funzione di Login!'
         );
     }
+
+    validaPassword(password);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     return utentiModel.create(

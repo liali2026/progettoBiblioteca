@@ -19,7 +19,8 @@ const CONTEXT = {
     mode: "view",
     idLibro: null,
     materiale: null,
-    copieCaricate: false
+    copieCaricate: false,
+    user: null //gestione controllo del bottone di richiesta prestito/restituzione
 };
 
 function inizializzaContext() {
@@ -45,7 +46,8 @@ async function caricaMateriale() {
         }
         CONTEXT.materiale = await MaterialiApi.findById(idMateriale);
 
-        View.mostraMateriale(CONTEXT.materiale, CONTEXT.materiale.copie_disponibili > 0);
+        //View.mostraMateriale(CONTEXT.materiale, CONTEXT.materiale.copie_disponibili > 0);
+        View.mostraMateriale(CONTEXT.materiale); //gestione controllo del bottone di richiesta prestito/restituzione
 
     } catch (err) {
         console.error(err);
@@ -91,9 +93,6 @@ async function salvaMateriale(operazione = "insert") {
                 ? "Materiale inserito correttamente."
                 : "Materiale aggiornato correttamente."
         );
-
-        /*window.location.href =
-            `/pages/dettaglio-materiale.html?id=${risultato.idLibro}`;*/
 
         window.location.href =
             `/pages/dettaglio-materiale.html?id=${risultato.idLibro}&mode=edit`;
@@ -247,14 +246,73 @@ async function cancellaCopie(idMateriale, idCopia) {
 }
 //
 
+//gestione controllo del bottone di richiesta prestito/restituzione
+async function gestisciAzionePrestito() {
+
+    const btn = document.getElementById("btnPrestito");
+    const azione = btn.dataset.azione;
+
+    switch (azione) {
+
+        case "prestito":
+            await apriModalPrestito(CONTEXT.materiale);
+            break;
+
+        case "prenotazione":
+            await apriModalPrestito(CONTEXT.materiale);
+            break;
+
+        case "restituisci":
+            await restituisciLibro();
+            break;
+    }
+}
+
+//gestione controllo del bottone di richiesta prestito/restituzione
+async function restituisciLibro() {
+    //richiesta di conferma
+    const conferma = confirm(
+        "Sei sicuro di voler restituire questo libro?"
+    );
+
+    if (!conferma) {
+        return;
+    }
+    try {
+
+        const idPrestito =
+            CONTEXT.materiale.prestito_utente.id_prestito;
+
+        const risultato =
+            await PrestitiApi.restituisci(idPrestito);
+
+        await caricaMateriale();
+
+        MessageView.mostraSuccesso(
+            risultato.messaggio
+        );
+
+    } catch (err) {
+
+        MessageView.mostraErrore(err.message);
+    }
+}
 
 function registraEventi() {
 
-    document
+    //gestione controllo del bottone di richiesta prestito/restituzione
+    /*document
         .getElementById("btnPrestito")
         .addEventListener(
             "click",
             () => apriModalPrestito(CONTEXT.materiale)
+        );
+        */
+    document
+        .getElementById("btnPrestito")
+        .addEventListener(
+            "click",
+            gestisciAzionePrestito
         );
 
     document
@@ -367,6 +425,7 @@ async function inizializzaPagina() {
         const protectedMode = CONTEXT.mode === 'new'
             || CONTEXT.mode === 'edit';
         const user = await Auth.initPage(protectedMode, true);
+        CONTEXT.user = user; //gestione controllo del bottone di richiesta prestito/restituzione
 
         if (protectedMode && user?.ruolo !== 'BIBLIOTECARIO') {
             MessageView.mostraErrore(
@@ -399,7 +458,7 @@ async function inizializzaPagina() {
         CopieModal.inizializza();
 
         registraEventi();
-        
+
     } catch (err) {
 
         console.error(err);

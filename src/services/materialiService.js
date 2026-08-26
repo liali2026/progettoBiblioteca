@@ -12,8 +12,15 @@ async function search(filters) {
     return materialiModel.search(filters);
 }
 
-async function findById(id) {
+/*async function findById(id) {
     const materiale = await materialiModel.findById(id);
+    if (!materiale) {
+        throw new Error('Materiale non trovato');
+    }
+    return materiale;
+}*/
+async function findById(id, idUtente) {
+    const materiale = await materialiModel.findById(id, idUtente);
     if (!materiale) {
         throw new Error('Materiale non trovato');
     }
