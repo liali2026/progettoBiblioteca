@@ -60,7 +60,7 @@ async function inizializzaPagina() {
         titolo: isAdmin ? "Prestiti e prenotazioni" : "I miei prestiti e prenotazioni",
         testo: isAdmin
             ? "Consulta tutti i prestiti e prenotazioni."
-            : "Visualizza i prestiti e prenotazioni attivi e quelli già conclusi.",
+            : "Visualizza i prestiti e prenotazioni.",
         href: "/pages/prestiti.html",
         bottone: isAdmin
             ? "Visualizza prestiti e prenotazioni"
