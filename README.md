@@ -4,7 +4,7 @@
     NOTA: 
     Gli utenti possono essere creati dal sito, tramite form di registrazione, ma solo un database administrator può settare il ruolo di BIBLIOTECARIO ad un utente. 
     Per semplicità, negli script di installazione è prevista la creazione di almeno un utente con ruolo BIBLIOTECARIO, con le seguenti credenziali:
-     username = annalisa.liguori@tiscali.it
+     username = john.doe@gmail.com
      password = Progett02026!
     
 2. eseguire unzip del file progettoBiblioteca.zip e copiare le cartelle in una installazione standard di Node.js. 
