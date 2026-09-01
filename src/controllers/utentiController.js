@@ -32,6 +32,12 @@ async function login(req, res) {
     res.json(req.session.user);
 }
 
+/*ogni volta che un utente esegue login o registrazione
+  si rigenera la sessione, così da evitare di riutilizzare
+  un codice sessione eventualmente rimasto nel browser 
+  prima del login/registrazione.
+  Funzione necessaria per poterla richiamare con un await
+*/
 function regenerateSession(req) {
     return new Promise((resolve, reject) => {
         req.session.regenerate(error =>
