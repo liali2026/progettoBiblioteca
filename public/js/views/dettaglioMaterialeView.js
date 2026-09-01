@@ -99,6 +99,12 @@ function aggiornaCopertina(materiale) {
     const img =
         document.getElementById("copertina");
 
+    // gestione del caso in cui, qualcuno abbia rimosso il file dalla cartella uploads/covers
+    img.onerror = () => {
+        img.onerror = null;
+        img.src = "/images/book-placeholder.png";
+    };
+
     img.src = materiale.copertina
         ? `/covers/${materiale.copertina}`
         : "/images/book-placeholder.png";

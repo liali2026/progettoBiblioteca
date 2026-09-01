@@ -22,9 +22,9 @@
    - un proprio account Google e una password app di 16 caratteri per la gestione del mailer
    NOTA: le porte di ascolto per l'application server e per il database server sono rispettivamente la 3000 e la 3306
 
-3. lanciare l'istanza di Node.js
-   lanciare l'instanza del DB 
+3. lanciare l'instanza del DB 
+   lanciare l'istanza di Node.js
    accedere all'applicazione alla pagina localhost:3000
-   Usare l'utente con ruolo BIBLIOTECARIO fornito negli script del DB oppure registrare un nuovo utente
+   Usare l'utente con ruolo BIBLIOTECARIO fornito negli script del DB oppure registrare un nuovo utente e aggiornarne il ruolo coerentemente
 
-Per maggiori dettagli si consulti il manuale "Progetto Biblioteca Liguori.pdf" allegato al progetto.
+Per maggiori dettagli si consulti il manuale "Progetto Biblioteca AL.pdf" allegato al progetto.
