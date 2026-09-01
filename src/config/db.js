@@ -2,10 +2,10 @@ const mysql = require('mysql2/promise');
 const config = require('./env');
 
 const pool = mysql.createPool({
-    ...config.db,
+    ...config.db,   //recupero tutti i parametri di connessione al DB, oggetto db
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0   //nessun limite al numero di richieste di connessione da mettere in coda
 });
 
 async function withConnection(callback) {
