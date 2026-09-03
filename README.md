@@ -17,7 +17,7 @@
    npm install node-cron
    npm install nodemailer
 
-3. configurare correttamente il file .ENV impostando:
+3. rinomina .env.example in .env e configuralo correttamente impostando:
    - la password di connessione al proprio database Mysql
    - un proprio account Google e una password app di 16 caratteri per la gestione del mailer
    - il secret message per il calcolo dell'hash dell'id di sessione
