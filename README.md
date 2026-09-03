@@ -21,6 +21,7 @@
    - la password di connessione al proprio database Mysql
    - un proprio account Google e una password app di 16 caratteri per la gestione del mailer
    - il secret message per il calcolo dell'hash dell'id di sessione
+   
    NOTA: le porte di ascolto per l'application server e per il database server sono rispettivamente la 3000 e la 3306
 
 3. lanciare l'instanza del DB 
